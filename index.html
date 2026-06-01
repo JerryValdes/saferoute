@@ -257,260 +257,269 @@
 </div>
 
 <script>
-// ── Zone definitions ─────────────────────────────────────────────────────────
-// score / level start as hardcoded estimates; overwritten when live data loads
-const ZONES = [
-  // ── Safe ──────────────────────────────────────────────────────────────────
-  {
-    name: 'French Quarter', level: 'safe', score: 4.5, crimeCount: null,
-    desc: "The heart of New Orleans tourism — packed with restaurants, jazz clubs, and centuries-old Creole architecture. Bourbon Street gets rowdy late at night, but the area is heavily patrolled and tourist-friendly overall.",
+// ── Zone definitions (keyed by official GeoJSON neighborhood name) ────────────
+const ZONE_DEFS = {
+  // ── Safe ────────────────────────────────────────────────────────────────────
+  'French Quarter':{ level:'safe', score:4.5,
+    desc:"The heart of New Orleans tourism — packed with restaurants, jazz clubs, and centuries-old Creole architecture. Bourbon Street gets rowdy late at night, but the area is heavily patrolled and tourist-friendly overall.",
+    tips:[{icon:'✅',text:'Great for daytime and evening exploration'},{icon:'🎷',text:'Catch live jazz on Frenchmen Street, just outside the Quarter'},{icon:'⚠️',text:'Guard your belongings on crowded Bourbon St after midnight'},{icon:'🏨',text:'Well-lit and lively 24/7 — an excellent base for tourists'}]},
+  'Central Business District':{ level:'safe', score:4.3,
+    desc:"Major hotels, the National WWII Museum, and the Convention Center. Heavily policed and very safe for visitors day and night.",
+    tips:[{icon:'✅',text:'Very safe — major hotels and attractions are all here'},{icon:'🏛️',text:'National WWII Museum is one of the best in the country'},{icon:'🎨',text:'Warehouse District galleries open late on first Saturdays'},{icon:'🚶',text:'Easily walkable from the French Quarter'}]},
+  'Garden District':{ level:'safe', score:4.7,
+    desc:"One of the most beautiful residential neighborhoods in the South. Grand antebellum mansions, ancient live oaks, and quiet tree-lined streets make it ideal for walking tours.",
+    tips:[{icon:'✅',text:'Very safe for solo daytime strolls'},{icon:'🏛️',text:'Lafayette Cemetery No. 1 — free admission and very atmospheric'},{icon:'🍽️',text:'Magazine Street has excellent restaurants and boutiques'},{icon:'🚋',text:'Ride the historic St. Charles streetcar to arrive in style'}]},
+  'Uptown':{ level:'safe', score:4.2,
+    desc:"Elegant corridor home to Tulane and Loyola universities, Audubon Park and Zoo, and the St. Charles streetcar. One of the city's most comfortable areas for tourists.",
+    tips:[{icon:'✅',text:'Very safe — popular with students, families, and visitors'},{icon:'🦒',text:'Audubon Zoo and Park are great for all ages'},{icon:'🍺',text:'Maple Street and Oak Street have excellent local bars and cafes'},{icon:'🚋',text:"The St. Charles streetcar runs the full length — don't skip it"}]},
+  'Lakeview':{ level:'safe', score:4.1,
+    desc:"Affluent, quiet neighborhood on Lake Pontchartrain's southern shore. Rebuilt strongly after Katrina and consistently one of the city's safest areas. Close to City Park.",
+    tips:[{icon:'✅',text:'One of the safest neighborhoods in the city'},{icon:'🏞️',text:'City Park entry nearby — beautiful paths and sculpture garden'},{icon:'🚴',text:'The lakefront seawall is ideal for cycling or a sunset walk'},{icon:'🍴',text:'Harrison Ave has a solid strip of restaurants'}]},
+  'Audubon':{ level:'safe', score:4.3,
+    desc:"Surrounds Audubon Park and Zoo along the St. Charles streetcar route. Very safe, family-friendly, and full of beautiful oak-lined streets.",
+    tips:[{icon:'✅',text:'Very safe residential area surrounding a beloved park'},{icon:'🦒',text:'Audubon Zoo is right here — great for families'},{icon:'🚋',text:'Streetcar stops throughout — easy to get around'},{icon:'🌳',text:'Audubon Park is perfect for a morning run or picnic'}]},
+  'Lakeshore - Lake Vista':{ level:'safe', score:4.0,
+    desc:"Affluent lakefront neighborhood with beautiful park and the Lake Pontchartrain seawall. Very safe and popular with families.",
+    tips:[{icon:'✅',text:'Very safe lakefront neighborhood'},{icon:'🌊',text:'Seawall great for walking and watching sunsets'},{icon:'🏡',text:'Quiet residential — few tourist amenities'},{icon:'🚗',text:'Car or rideshare recommended — limited transit'}]},
+  'Lake Terrace & Oaks':{ level:'safe', score:3.9,
+    desc:"Quiet upscale residential neighborhood near Lake Pontchartrain. Very safe but primarily residential with few tourist attractions.",
+    tips:[{icon:'✅',text:'Very safe residential neighborhood'},{icon:'🌊',text:'Close to the lakefront for walks and recreation'},{icon:'🚗',text:'Car recommended — limited public transit'},{icon:'🍴',text:'Head to Lakeview or West End for restaurants'}]},
+  'City Park':{ level:'safe', score:4.2,
+    desc:"One of the largest urban parks in the US — home to the New Orleans Museum of Art, Botanical Garden, and miles of trails. Very safe for daytime recreation.",
+    tips:[{icon:'✅',text:'Safe and beautiful — a must-visit for all tourists'},{icon:'🎨',text:'NOMA is world-class and free on Wednesdays'},{icon:'🌿',text:'Botanical Garden and Sculpture Garden are excellent'},{icon:'🚴',text:'Rent a bike inside the park for the best experience'}]},
+  'Touro':{ level:'safe', score:4.0,
+    desc:"Quiet, upscale residential neighborhood between the Garden District and Mid-City. Very safe with beautiful architecture along Prytania and St. Charles.",
+    tips:[{icon:'✅',text:'Safe and pleasant for daytime walks'},{icon:'🚋',text:'St. Charles streetcar runs along the eastern edge'},{icon:'🏥',text:'Touro Infirmary is a neighborhood landmark'},{icon:'🏡',text:'Primarily residential — Magazine St for dining'}]},
+  'Lower Garden District':{ level:'safe', score:3.8,
+    desc:"Transitional neighborhood between the CBD and Garden District with historic homes, galleries, and new restaurants. Generally safe along Magazine and St. Charles.",
+    tips:[{icon:'✅',text:'Safe along Magazine St and St. Charles Ave corridors'},{icon:'🛍️',text:'Magazine Street has great antique shops and boutiques'},{icon:'⚠️',text:'Some blocks toward O.C. Haley Blvd need more caution'},{icon:'🚶',text:'Short walk from the CBD and Garden District'}]},
+  'East Riverside':{ level:'safe', score:3.8,
+    desc:"Quiet residential neighborhood between the Garden District and the river. Generally safe with pretty streets.",
+    tips:[{icon:'✅',text:'Safe residential area'},{icon:'🌳',text:'Beautiful quiet streets great for a walk'},{icon:'🚋',text:'Close to the St. Charles streetcar line'},{icon:'🍽️',text:'Magazine Street is a short walk for food and shopping'}]},
+  'Marlyville - Fontainbleau':{ level:'safe', score:3.8,
+    desc:"Stable, quiet residential neighborhood near Tulane and Loyola universities. Very safe with a college-town atmosphere.",
+    tips:[{icon:'✅',text:'Safe neighborhood popular with the university community'},{icon:'🎓',text:'Tulane and Loyola campuses are right next door'},{icon:'🍺',text:'Maple Street nearby has good bars and restaurants'},{icon:'🚋',text:'St. Charles streetcar provides easy access to downtown'}]},
+  'U.S. Naval Base':{ level:'safe', score:5.0,
+    desc:"Naval Support Activity New Orleans military installation. Access is restricted to authorized personnel only — not open to the public.",
+    tips:[{icon:'🚫',text:'Restricted access — authorized personnel only'},{icon:'🪖',text:'Civilian entry is not permitted'},{icon:'🗺️',text:'Algiers Point nearby is open to the public'}]},
+  // ── Caution ──────────────────────────────────────────────────────────────────
+  'Marigny':{ level:'caution', score:3.4,
+    desc:"Just downriver from the French Quarter — colorful, artsy, with one of the city's best live music scenes. Frenchmen Street is the authentic local alternative to Bourbon Street.",
+    tips:[{icon:'🎶',text:'Frenchmen Street at night is the best live music strip in the city'},{icon:'🏠',text:'Beautiful Creole cottages and shotgun houses throughout'},{icon:'⚠️',text:'Stick to main streets — some side blocks get dark and quiet'},{icon:'🎭',text:'Great Mardi Gras activity and lively parade viewing'}]},
+  'Bywater':{ level:'caution', score:3.1,
+    desc:"Rapidly gentrifying waterfront neighborhood with galleries, cafes, and creative businesses. Generally safe by day; stay alert at night on quieter blocks.",
+    tips:[{icon:'🎨',text:'Excellent street art and galleries — bring a camera'},{icon:'☕',text:"Some of the city's best independent coffee shops are here"},{icon:'⚠️',text:'Busy on weekends; midweek nights on side streets need more caution'},{icon:'🚴',text:'Flat and very bikeable — great way to explore'}]},
+  'Treme - Lafitte':{ level:'caution', score:3.0,
+    desc:"America's oldest African-American neighborhood and the birthplace of jazz. Deeply cultural but with elevated crime rates. Stick to main roads and consider a guided tour.",
+    tips:[{icon:'🎺',text:'Second line parades and jazz funerals are unmissable'},{icon:'🏛️',text:'Congo Square in Armstrong Park is safe and deeply historic'},{icon:'⚠️',text:'Stay on well-lit main roads; avoid side streets at night'},{icon:'👥',text:'Best explored with a group or an organized cultural tour'}]},
+  'Tulane - Gravier':{ level:'caution', score:2.9,
+    desc:"The medical and university corridor between the CBD and Mid-City. Busy and relatively safe during the day, quieter and less safe after dark.",
+    tips:[{icon:'🏥',text:'Major hospitals and Tulane Medical Center are here'},{icon:'⚠️',text:'Safe during business hours; caution warranted after dark'},{icon:'🚶',text:'Stay on Tulane Ave and Canal St — avoid quiet side streets at night'},{icon:'🚗',text:'Rideshare strongly recommended for late evening travel'}]},
+  'Mid-City':{ level:'caution', score:3.2,
+    desc:"Diverse residential area home to City Park, one of the largest urban parks in the US. Fine for daytime visits; use caution after dark in less-trafficked areas.",
+    tips:[{icon:'🌿',text:'City Park is safe, beautiful, and great for families'},{icon:'🎨',text:'New Orleans Museum of Art is worth a half-day visit'},{icon:'🌙',text:'Avoid walking alone on quiet residential streets at night'},{icon:'🚗',text:'Use rideshare after dark rather than walking'}]},
+  'Broadmoor':{ level:'caution', score:2.8,
+    desc:"Centrally located residential neighborhood still rebuilding after Katrina. Crime rates remain elevated. Limited tourist attractions.",
+    tips:[{icon:'⚠️',text:'Residential area — stay on main roads if passing through'},{icon:'🌙',text:'Not recommended for walking around after dark'},{icon:'🏫',text:'A.L. Davis Park is a community resilience landmark'},{icon:'🚗',text:'Rideshare is the best option here'}]},
+  'Irish Channel':{ level:'caution', score:3.0,
+    desc:"Historic working-class neighborhood between the Garden District and the river, gentrifying with new bars and restaurants. Quality varies by block.",
+    tips:[{icon:'🍺',text:"Parasol's Bar is a beloved neighborhood institution"},{icon:'🎉',text:'Excellent Mardi Gras parade viewing on Magazine and Tchoupitoulas'},{icon:'⚠️',text:'Stick to the well-lit commercial streets — some blocks are rough'},{icon:'🚶',text:'Short walk or bike ride from the Garden District'}]},
+  'East Carrollton':{ level:'caution', score:3.3,
+    desc:"Where the St. Charles streetcar bends toward the lake. The Riverbend area around Maple and Oak streets is lively and safe; straying further needs caution.",
+    tips:[{icon:'✅',text:'Riverbend / Maple Street area is safe and fun'},{icon:'🍔',text:"Oak Street has excellent bars and some of the city's best food"},{icon:'⚠️',text:'Away from the commercial strips, use caution after dark'},{icon:'🚋',text:'Ride the streetcar back downtown — no car needed'}]},
+  'Algiers Point':{ level:'caution', score:3.1,
+    desc:"Charming historic neighborhood directly across the Mississippi from downtown. Take the free ferry from Canal Street for sweeping skyline views.",
+    tips:[{icon:'⛴️',text:'Free ferry runs regularly from Canal St — check the schedule'},{icon:'🌆',text:'Best views of the New Orleans skyline are from here'},{icon:'⚠️',text:'Other parts of Algiers need more caution — stick to the Point'},{icon:'🕐',text:'Last ferry is late evening — plan accordingly'}]},
+  'Gentilly Terrace':{ level:'caution', score:3.0,
+    desc:"Post-Katrina rebuilding neighborhood northeast of Mid-City. Active community with Dillard University nearby. Use caution especially after dark.",
+    tips:[{icon:'⚠️',text:'Recovery ongoing — neighborhood character varies by block'},{icon:'🌙',text:'Avoid wandering unfamiliar streets after dark'},{icon:'🚗',text:'Rideshare recommended over walking'},{icon:'🏛️',text:'Dillard University campus is nearby and generally safe'}]},
+  'Gentilly Woods':{ level:'caution', score:3.0,
+    desc:"Residential neighborhood in the Gentilly area still rebuilding post-Katrina. Some blocks are well-kept; others are more isolated. Use caution.",
+    tips:[{icon:'⚠️',text:'Uneven recovery — exercise caution throughout'},{icon:'🌙',text:'Not recommended for walking at night'},{icon:'🚗',text:'Car or rideshare strongly recommended'},{icon:'🏡',text:'Primarily residential with few tourist amenities'}]},
+  'Bayou St. John':{ level:'caution', score:3.3,
+    desc:"Scenic neighborhood built around the historic Bayou St. John waterway. Popular with locals for kayaking and picnics. Generally safe during the day.",
+    tips:[{icon:'🚣',text:'Kayaking on Bayou St. John is a local favorite'},{icon:'🌿',text:'Moss Street is great for a relaxed walk along the water'},{icon:'⚠️',text:"Some blocks need caution at night"},{icon:'🎉',text:'Great spot for Mardi Gras Indian celebrations in spring'}]},
+  'Fairgrounds':{ level:'caution', score:3.0,
+    desc:"Home to the historic Fairgrounds Race Course and the Jazz & Heritage Festival. Generally OK during events, but quieter times can be less safe.",
+    tips:[{icon:'🎵',text:'Jazz Fest takes place here every spring — a bucket-list event'},{icon:'⚠️',text:'Busier and safer during events; quiet periods need more caution'},{icon:'🚗',text:'Rideshare recommended for evening visits'},{icon:'🏇',text:'Horse racing season runs fall through spring'}]},
+  'Freret':{ level:'caution', score:3.2,
+    desc:"Rapidly revitalizing neighborhood along Freret Street, known for good restaurants and a growing local business scene. Generally safe along the main corridor.",
+    tips:[{icon:'🍴',text:"Freret Street has some of the best new restaurants in the city"},{icon:'✅',text:'Main corridor is increasingly safe and lively'},{icon:'⚠️',text:'Side streets away from Freret St need more caution'},{icon:'🚗',text:'Rideshare recommended for late nights'}]},
+  'Black Pearl':{ level:'caution', score:3.2,
+    desc:"Quiet residential neighborhood between Uptown and the river. Peaceful and generally safe during the day.",
+    tips:[{icon:'✅',text:'Quiet and safe for daytime walks'},{icon:'🌳',text:'Some of the prettiest streets in the city near Audubon Park'},{icon:'⚠️',text:'Be aware at night on quieter blocks'},{icon:'🏡',text:'Primarily residential — few restaurants or shops here'}]},
+  'West End':{ level:'caution', score:3.0,
+    desc:"Lakefront neighborhood with boat marinas and seafood restaurants. The lakefront itself is scenic; some areas away from the water need more caution.",
+    tips:[{icon:'🐟',text:'Great seafood restaurants along the lakefront'},{icon:'⛵',text:'Marinas and boat launches popular with locals'},{icon:'⚠️',text:'Stick to the lakefront area — some inland blocks need caution'},{icon:'🌅',text:'Excellent spot for sunset views over Lake Pontchartrain'}]},
+  'West Riverside':{ level:'caution', score:2.9,
+    desc:"Small riverside neighborhood between Black Pearl and the river. Quiet and generally OK during the day.",
+    tips:[{icon:'⚠️',text:'Stick to main streets and exercise caution at night'},{icon:'🚗',text:'Rideshare recommended after dark'},{icon:'🏡',text:'Primarily residential — few tourist amenities'},{icon:'🌊',text:'River levee walks offer nice views'}]},
+  'Milan':{ level:'caution', score:3.0,
+    desc:"Residential neighborhood in Uptown with historic homes. Generally safe near St. Charles; some variation further from the main corridors.",
+    tips:[{icon:'✅',text:'Generally safe near St. Charles Ave'},{icon:'⚠️',text:'Exercise caution further from the main thoroughfares'},{icon:'🚋',text:'St. Charles streetcar provides easy transit'},{icon:'🍽️',text:'Freret Street has good nearby dining options'}]},
+  'Leonidas':{ level:'caution', score:2.9,
+    desc:"Residential neighborhood in Uptown/Carrollton. Some areas are fine during the day; use caution after dark and on quieter blocks.",
+    tips:[{icon:'⚠️',text:'Exercise caution, especially after dark'},{icon:'🚗',text:'Rideshare recommended for evening travel'},{icon:'🏡',text:'Residential area with few tourist destinations'},{icon:'🛒',text:'Carrollton Ave has some shops and services'}]},
+  'Navarre':{ level:'caution', score:3.0,
+    desc:"Residential neighborhood in the Carrollton area. Stable and generally quiet during the day; use reasonable caution.",
+    tips:[{icon:'✅',text:'Generally quiet and stable neighborhood'},{icon:'⚠️',text:'Use caution after dark on unfamiliar streets'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🍴',text:'Oak Street and Carrollton Ave have nearby dining options'}]},
+  'Pontchartrain Park':{ level:'caution', score:3.0,
+    desc:"Historically significant African-American neighborhood near the lakefront — the first subdivision built for Black homeowners in New Orleans. Active community.",
+    tips:[{icon:'🏛️',text:'First Black middle-class suburb in NOLA — historically important'},{icon:'⚠️',text:'Use caution on quieter streets, especially at night'},{icon:'🚗',text:'Car recommended — limited public transit'},{icon:'🏞️',text:'Lincoln Beach is a nearby historic site'}]},
+  'Dillard':{ level:'caution', score:2.8,
+    desc:"Residential neighborhood in Gentilly centered around Dillard University. The campus area is generally safe; surrounding blocks need more caution.",
+    tips:[{icon:'🏛️',text:'Dillard University is a vibrant HBCU campus'},{icon:'⚠️',text:'Stick to the campus and main roads'},{icon:'🌙',text:'Use caution after dark away from the university'},{icon:'🚗',text:'Rideshare recommended for evening travel'}]},
+  'Fillmore':{ level:'caution', score:2.9,
+    desc:"Residential neighborhood in Gentilly in various stages of post-Katrina recovery. Use caution.",
+    tips:[{icon:'⚠️',text:'Neighborhood varies significantly by block'},{icon:'🌙',text:'Not recommended for walking after dark'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🏡',text:'Primarily residential — limited tourist amenities'}]},
+  'St.  Anthony':{ level:'caution', score:2.8,
+    desc:"Residential neighborhood in the Gentilly area. Use caution when visiting.",
+    tips:[{icon:'⚠️',text:'Exercise caution throughout this area'},{icon:'🚗',text:'Rideshare recommended over walking'},{icon:'🌙',text:'Not recommended for exploring after dark'},{icon:'🏡',text:'Primarily residential with few tourist amenities'}]},
+  'Iberville':{ level:'caution', score:2.7,
+    desc:"Site of the former Iberville housing project, now being redeveloped as mixed-income housing near the French Quarter. Still transitioning. Use caution.",
+    tips:[{icon:'⚠️',text:'Area is transitioning — exercise caution'},{icon:'🏗️',text:'Major redevelopment ongoing — character changing rapidly'},{icon:'🚗',text:'Rideshare recommended over walking at night'},{icon:'🗺️',text:'French Quarter and CBD are a short walk away'}]},
+  'St. Thomas Dev':{ level:'caution', score:2.7,
+    desc:"Site of the former St. Thomas housing development, now redeveloped as River Garden. An improving area near the Irish Channel.",
+    tips:[{icon:'⚠️',text:'Area still transitioning — exercise caution'},{icon:'🏗️',text:'Significant redevelopment as River Garden mixed-income community'},{icon:'🚗',text:'Rideshare recommended'},{icon:'🗺️',text:'Irish Channel and Garden District are nearby'}]},
+  'Lakewood':{ level:'caution', score:2.9,
+    desc:"Residential neighborhood in Gentilly. Use caution when visiting.",
+    tips:[{icon:'⚠️',text:'Exercise caution throughout'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🌙',text:'Avoid unfamiliar streets at night'},{icon:'🏡',text:'Primarily residential — limited tourist amenities'}]},
+  'Milneburg':{ level:'caution', score:3.0,
+    desc:"Lakeside neighborhood in New Orleans East with some recreational areas along the lakefront. Use caution.",
+    tips:[{icon:'🌊',text:'Lakefront areas offer some recreational opportunities'},{icon:'⚠️',text:'Exercise caution — some blocks have higher crime'},{icon:'🚗',text:'Car strongly recommended — limited transit'},{icon:'🌙',text:'Not recommended after dark'}]},
+  'Behrman':{ level:'caution', score:3.0,
+    desc:"Residential neighborhood in Algiers on the West Bank. Generally stable. Stick to main streets.",
+    tips:[{icon:'⚠️',text:'Exercise caution on quieter blocks'},{icon:'🚗',text:'Car recommended — limited transit'},{icon:'🌙',text:'Use caution after dark'},{icon:'⛴️',text:'Ferry to downtown New Orleans runs from Algiers Point'}]},
+  'Tall Timbers - Brechtel':{ level:'caution', score:3.0,
+    desc:"Residential neighborhood in Algiers with Brechtel Park, a large public park. Generally safe near the park.",
+    tips:[{icon:'🌳',text:'Brechtel Park is a large green space popular with families'},{icon:'✅',text:'Park areas are generally safe during the day'},{icon:'⚠️',text:'Use caution on residential streets away from the park'},{icon:'🚗',text:'Car recommended'}]},
+  'Whitney':{ level:'caution', score:3.0,
+    desc:"Residential neighborhood in Algiers. Generally quiet. Use normal precautions.",
+    tips:[{icon:'⚠️',text:'Exercise normal caution on quieter streets'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🌙',text:'Use caution after dark'},{icon:'⛴️',text:'Algiers Point ferry is a short drive away'}]},
+  'Old Aurora':{ level:'caution', score:3.0,
+    desc:"Residential neighborhood in Algiers. Generally quiet suburban area.",
+    tips:[{icon:'⚠️',text:'Exercise normal caution'},{icon:'🚗',text:'Car essential — limited public transit'},{icon:'🌙',text:'Use caution after dark'},{icon:'🏡',text:'Primarily residential with few tourist amenities'}]},
+  'New Aurora - English Turn':{ level:'caution', score:3.0,
+    desc:"Newer residential area in Algiers with the gated English Turn golf community. Generally safe in the planned areas.",
+    tips:[{icon:'⛳',text:'English Turn Golf Club is here'},{icon:'✅',text:'Gated community areas are very safe'},{icon:'🚗',text:'Car essential — no public transit'},{icon:'⚠️',text:'Use normal caution outside the gated areas'}]},
+  'Lake Catherine':{ level:'caution', score:2.8,
+    desc:"Remote lakeside and wetland area in far eastern New Orleans. Used mainly for fishing and outdoor recreation. Limited infrastructure.",
+    tips:[{icon:'🎣',text:'Popular fishing destination on Lake Catherine'},{icon:'⚠️',text:'Very remote — limited emergency services'},{icon:'🚗',text:'Car essential — no public transit'},{icon:'🌿',text:'Wetland scenery is beautiful but infrastructure is minimal'}]},
+  'Holy Cross':{ level:'caution', score:2.2,
+    desc:"Historic neighborhood in the Lower Ninth Ward area with some recent revitalization. Still transitioning with elevated crime. Use caution.",
+    tips:[{icon:'⚠️',text:'Slowly gentrifying but still has elevated crime'},{icon:'🏛️',text:'Has beautiful pre-Katrina historic homes'},{icon:'🚗',text:'Car strongly recommended over walking'},{icon:'🌙',text:'Not recommended after dark without local knowledge'}]},
+  'St. Roch':{ level:'avoid', score:2.1,
+    desc:"Neighborhood with historically high crime rates. Some small-scale revitalization underway but not recommended for independent tourist visits.",
+    tips:[{icon:'🚫',text:'High crime — not recommended for tourists'},{icon:'⚠️',text:'Exercise extreme caution if passing through'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'🗺️',text:'Marigny and Bywater nearby are much safer alternatives'}]},
+  'St. Claude':{ level:'avoid', score:2.2,
+    desc:"Neighborhood along St. Claude Ave with some new development but still elevated crime. Not recommended for tourists to wander independently.",
+    tips:[{icon:'⚠️',text:'Use significant caution throughout this area'},{icon:'🌙',text:'Strongly avoid after dark'},{icon:'🚗',text:'Rideshare strongly recommended over walking'},{icon:'🗺️',text:'Marigny is a safer nearby alternative'}]},
+  // ── Avoid ────────────────────────────────────────────────────────────────────
+  'Central City':{ level:'avoid', score:1.8,
+    desc:"One of the city's highest violent-crime areas with few tourist attractions. Strongly recommended that visitors avoid this neighborhood entirely.",
+    tips:[{icon:'🚫',text:'Not recommended for tourists at any time of day'},{icon:'🚗',text:'If passing through, remain in your vehicle and do not stop'},{icon:'📞',text:'Emergency: 911 | NOPD non-emergency: (504) 821-2222'},{icon:'🗺️',text:'The Garden District nearby is far safer and more rewarding'}]},
+  'Seventh Ward':{ level:'avoid', score:2.0,
+    desc:"Historically significant neighborhood with deep cultural roots, currently experiencing high levels of violent crime. Not recommended for independent tourist visits.",
+    tips:[{icon:'🚫',text:'High violent crime — not suitable for independent tourist visits'},{icon:'⚠️',text:'Incidents can and do occur at any hour'},{icon:'🎭',text:'Cultural events here are best attended with local residents'},{icon:'🗺️',text:'Nearby Frenchmen Street is a much safer alternative'}]},
+  'Hollygrove':{ level:'avoid', score:1.6,
+    desc:"Northwest New Orleans neighborhood with persistently high rates of violent crime. Not a tourist destination.",
+    tips:[{icon:'🚫',text:'High violent crime rates — avoid entirely'},{icon:'🚗',text:'Do not stop or exit your vehicle if driving through'},{icon:'📞',text:'Emergency: 911'},{icon:'🗺️',text:"Carrollton's Riverbend area nearby is a far better option"}]},
+  'Gert Town':{ level:'avoid', score:1.7,
+    desc:"Neighborhood in northwest New Orleans with high violent crime rates. Not recommended for tourists.",
+    tips:[{icon:'🚫',text:'High crime — tourists should avoid this area'},{icon:'🚗',text:'Do not stop or exit your vehicle if passing through'},{icon:'📞',text:'Emergency: 911'},{icon:'🗺️',text:'Carrollton and Uptown are safer nearby alternatives'}]},
+  'Lower Ninth Ward':{ level:'avoid', score:1.5,
+    desc:"Made internationally known by Hurricane Katrina's 2005 flood, the Lower Ninth Ward continues to face both poverty and elevated violent crime. Historically significant but not safe for independent visitors.",
+    tips:[{icon:'🚫',text:'High violent crime — not safe for independent visits'},{icon:'📚',text:'Make It Right Foundation homes are a visible Katrina legacy'},{icon:'🎓',text:'Guided Katrina tours provide context and support local residents'},{icon:'🚗',text:'Any visit should be by car with a knowledgeable local guide'}]},
+  'B. W. Cooper':{ level:'avoid', score:1.5,
+    desc:"Public housing development with very high violent crime rates. Not safe for tourists under any circumstances.",
+    tips:[{icon:'🚫',text:'Extremely high crime — avoid completely'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'},{icon:'🗺️',text:'CBD and Garden District are safe nearby alternatives'}]},
+  'Florida Area':{ level:'avoid', score:1.6,
+    desc:"Neighborhood in the Desire area with very high violent crime rates. Not recommended for tourists.",
+    tips:[{icon:'🚫',text:'Very high violent crime — tourists should avoid'},{icon:'🚗',text:'Do not stop if passing through'},{icon:'📞',text:'Emergency: 911'},{icon:'🌙',text:'Avoid at all times, especially after dark'}]},
+  'Florida Dev':{ level:'avoid', score:1.5,
+    desc:"Public housing development area with very high crime rates. Not recommended for tourists.",
+    tips:[{icon:'🚫',text:'Avoid completely'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Desire Area':{ level:'avoid', score:1.5,
+    desc:"Former Desire housing project area with very high violent crime rates. Not safe for tourists.",
+    tips:[{icon:'🚫',text:'Very high crime — tourists should avoid completely'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Desire Dev':{ level:'avoid', score:1.5,
+    desc:"Development area with very high crime rates. Not safe for tourists.",
+    tips:[{icon:'🚫',text:'Avoid completely'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Dixon':{ level:'avoid', score:1.7,
+    desc:"Neighborhood with persistently high violent crime rates. Not recommended for tourists.",
+    tips:[{icon:'🚫',text:'High violent crime — tourists should avoid'},{icon:'🚗',text:'Do not stop if driving through'},{icon:'📞',text:'Emergency: 911'}]},
+  'St. Bernard Area':{ level:'avoid', score:1.6,
+    desc:"Neighborhood with high violent crime rates. Not recommended for tourists.",
+    tips:[{icon:'🚫',text:'High crime — avoid this area'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Read Blvd East':{ level:'avoid', score:1.8,
+    desc:"New Orleans East neighborhood with high violent crime rates and limited Katrina recovery. Not recommended for tourists.",
+    tips:[{icon:'🚫',text:'High crime — tourists should avoid'},{icon:'🚗',text:'If in the area, stay in your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Read Blvd West':{ level:'avoid', score:1.8,
+    desc:"New Orleans East neighborhood with high violent crime rates. Not recommended for tourists.",
+    tips:[{icon:'🚫',text:'High crime — avoid'},{icon:'🚗',text:'Stay in your vehicle if passing through'},{icon:'📞',text:'Emergency: 911'}]},
+  'Village De Lest':{ level:'avoid', score:1.8,
+    desc:"New Orleans East neighborhood with high violent crime rates and poor Katrina recovery. Not recommended for tourists.",
+    tips:[{icon:'🚫',text:'High crime — tourists should avoid'},{icon:'🚗',text:'Stay in your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Viavant':{ level:'avoid', score:1.8,
+    desc:"New Orleans East neighborhood with elevated crime and poor infrastructure. Not recommended for tourists.",
+    tips:[{icon:'🚫',text:'Elevated crime — avoid'},{icon:'🚗',text:'Car only — do not walk here'},{icon:'📞',text:'Emergency: 911'}]},
+  'Pines Village':{ level:'avoid', score:1.7,
+    desc:"New Orleans East neighborhood with high crime rates and limited post-Katrina recovery. Not recommended for tourists.",
+    tips:[{icon:'🚫',text:'High crime — tourists should avoid'},{icon:'🚗',text:'Stay in your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Plum Orchard':{ level:'avoid', score:1.7,
+    desc:"New Orleans East neighborhood with high crime rates. Not recommended for tourists.",
+    tips:[{icon:'🚫',text:'High crime — avoid'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Little Woods':{ level:'avoid', score:1.8,
+    desc:"New Orleans East neighborhood with high violent crime rates. Not recommended for tourists.",
+    tips:[{icon:'🚫',text:'High crime — tourists should avoid'},{icon:'🚗',text:'Car only — do not walk here'},{icon:'📞',text:'Emergency: 911'}]},
+  'West Lake Forest':{ level:'avoid', score:1.8,
+    desc:"New Orleans East neighborhood with high crime rates and limited amenities. Not recommended for tourists.",
+    tips:[{icon:'🚫',text:'High crime — avoid'},{icon:'🚗',text:'Car only'},{icon:'📞',text:'Emergency: 911'}]},
+  'Mcdonogh':{ level:'avoid', score:1.7,
+    desc:"Neighborhood with high crime rates in Algiers. Not recommended for tourists.",
+    tips:[{icon:'🚫',text:'High crime — avoid'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'},{icon:'⛴️',text:'Algiers Point is nearby and much safer'}]},
+  'Fischer Dev':{ level:'avoid', score:1.5,
+    desc:"Public housing development in Algiers with very high crime rates. Not safe for tourists.",
+    tips:[{icon:'🚫',text:'Very high crime — avoid completely'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+};
+
+// ── Default for any neighborhood not in ZONE_DEFS ───────────────────────────
+function defaultDef(name) {
+  return {
+    level: 'caution', score: 3.0,
+    desc: `${name} is a New Orleans neighborhood. Safety score is calculated from live NOPD data.`,
     tips: [
-      { icon: '✅', text: 'Great for daytime and evening exploration' },
-      { icon: '🎷', text: 'Catch live jazz on Frenchmen Street, just outside the Quarter' },
-      { icon: '⚠️', text: 'Guard your belongings on crowded Bourbon St after midnight' },
-      { icon: '🏨', text: 'Well-lit and lively 24/7 — an excellent base for tourists' }
-    ],
-    coords: [[29.9583,-90.0707],[29.9651,-90.0668],[29.9618,-90.0568],[29.9553,-90.0630]]
-  },
-  {
-    name: 'CBD & Warehouse District', level: 'safe', score: 4.3, crimeCount: null,
-    desc: "The Central Business District and adjacent Warehouse Arts District are home to major hotels, the National WWII Museum, and the Convention Center. Well-patrolled and safe for visitors day and night.",
-    tips: [
-      { icon: '✅', text: 'Major hotels and attractions — very safe for tourists' },
-      { icon: '🏛️', text: 'National WWII Museum is one of the best in the country' },
-      { icon: '🎨', text: 'Warehouse District galleries open late on first Saturdays' },
-      { icon: '🚶', text: 'Easily walkable from the French Quarter' }
-    ],
-    coords: [[29.9553,-90.0630],[29.9553,-90.0910],[29.9360,-90.0910],[29.9360,-90.0630]]
-  },
-  {
-    name: 'Garden District', level: 'safe', score: 4.7, crimeCount: null,
-    desc: "One of the most beautiful residential neighborhoods in the South. Grand antebellum mansions, ancient live oaks, and quiet tree-lined streets make it ideal for walking tours.",
-    tips: [
-      { icon: '✅', text: 'Very safe for solo daytime strolls' },
-      { icon: '🏛️', text: 'Lafayette Cemetery No. 1 — free admission and very atmospheric' },
-      { icon: '🍽️', text: 'Magazine Street has excellent restaurants and boutiques' },
-      { icon: '🚋', text: 'Ride the historic St. Charles streetcar to arrive in style' }
-    ],
-    coords: [[29.9345,-90.0905],[29.9345,-90.1012],[29.9245,-90.1012],[29.9245,-90.0905]]
-  },
-  {
-    name: 'Uptown', level: 'safe', score: 4.2, crimeCount: null,
-    desc: "Uptown covers the elegant corridor from the Garden District to Audubon Park, home to Tulane and Loyola universities and the famous St. Charles streetcar. One of the city's most comfortable areas for tourists.",
-    tips: [
-      { icon: '✅', text: 'Very safe — popular with students, families, and visitors' },
-      { icon: '🦒', text: 'Audubon Zoo and Park are great for all ages' },
-      { icon: '🍺', text: 'Maple Street and Oak Street have excellent local bars and cafes' },
-      { icon: '🚋', text: 'The St. Charles streetcar runs the full length — don\'t skip it' }
-    ],
-    coords: [[29.9345,-90.1012],[29.9345,-90.1480],[29.9060,-90.1480],[29.9060,-90.1012]]
-  },
-  {
-    name: 'Lakeview', level: 'safe', score: 4.1, crimeCount: null,
-    desc: "An affluent, quiet neighborhood on Lake Pontchartrain's southern shore. Rebuilt strongly after Katrina and consistently one of the city's safest areas. Close to City Park and the lakefront trail.",
-    tips: [
-      { icon: '✅', text: 'One of the safest neighborhoods in the city' },
-      { icon: '🏞️', text: 'City Park entry nearby — beautiful paths and sculpture garden' },
-      { icon: '🚴', text: 'The lakefront seawall is ideal for cycling or a sunset walk' },
-      { icon: '🍴', text: 'Harrison Ave has a solid strip of restaurants' }
-    ],
-    coords: [[30.0120,-90.1420],[30.0120,-90.1050],[29.9960,-90.1050],[29.9960,-90.1420]]
-  },
-  // ── Caution ───────────────────────────────────────────────────────────────
-  {
-    name: 'Faubourg Marigny', level: 'caution', score: 3.4, crimeCount: null,
-    desc: "Just downriver from the French Quarter, the Marigny is a colorful, artsy neighborhood with one of the city's best live music scenes. Frenchmen Street is the authentic local alternative to Bourbon Street.",
-    tips: [
-      { icon: '🎶', text: 'Frenchmen Street at night is the best live music strip in the city' },
-      { icon: '🏠', text: 'Beautiful Creole cottages and shotgun houses throughout' },
-      { icon: '⚠️', text: 'Stick to the main streets — some side blocks get dark and quiet' },
-      { icon: '🎭', text: 'Great Mardi Gras activity and a lively parade viewing area' }
-    ],
-    coords: [[29.9651,-90.0570],[29.9651,-90.0450],[29.9480,-90.0450],[29.9480,-90.0570]]
-  },
-  {
-    name: 'Bywater', level: 'caution', score: 3.1, crimeCount: null,
-    desc: "A rapidly gentrifying waterfront neighborhood with galleries, cafes, and creative businesses. Popular with artists and young locals. Generally safe by day; stay alert at night on quieter blocks.",
-    tips: [
-      { icon: '🎨', text: 'Excellent street art and galleries — bring a camera' },
-      { icon: '☕', text: 'Some of the city\'s best independent coffee shops are here' },
-      { icon: '⚠️', text: 'Busy on weekends; midweek nights on side streets need more caution' },
-      { icon: '🚴', text: 'Flat and very bikeable — great way to explore' }
-    ],
-    coords: [[29.9651,-90.0450],[29.9651,-90.0300],[29.9460,-90.0300],[29.9460,-90.0450]]
-  },
-  {
-    name: 'Tremé', level: 'caution', score: 3.0, crimeCount: null,
-    desc: "America's oldest African-American neighborhood and the birthplace of jazz. Deeply cultural but with elevated crime rates. Stick to main roads and consider a guided tour for the best experience.",
-    tips: [
-      { icon: '🎺', text: 'Second line parades and jazz funerals are unmissable' },
-      { icon: '🏛️', text: 'Congo Square in Armstrong Park is safe and deeply historic' },
-      { icon: '⚠️', text: 'Stay on well-lit main roads; avoid side streets at night' },
-      { icon: '👥', text: 'Best explored with a group or an organized cultural tour' }
-    ],
-    coords: [[29.9651,-90.0785],[29.9651,-90.0668],[29.9583,-90.0668],[29.9583,-90.0785]]
-  },
-  {
-    name: 'Tulane-Gravier', level: 'caution', score: 2.9, crimeCount: null,
-    desc: "The medical and university corridor between the CBD and Mid-City. Busy during the day with hospital workers and students, but quieter and less safe at night. Stick to the main corridors.",
-    tips: [
-      { icon: '🏥', text: 'Major hospitals and Tulane Medical Center are here' },
-      { icon: '⚠️', text: 'Safe during business hours; caution warranted after dark' },
-      { icon: '🚶', text: 'Stay on Tulane Ave and Canal St — avoid quiet side streets at night' },
-      { icon: '🚗', text: 'Rideshare strongly recommended for late evening travel' }
-    ],
-    coords: [[29.9680,-90.0785],[29.9680,-90.0990],[29.9553,-90.0990],[29.9553,-90.0785]]
-  },
-  {
-    name: 'Mid-City', level: 'caution', score: 3.2, crimeCount: null,
-    desc: "A diverse residential area home to the stunning City Park — one of the largest urban parks in the US. Perfectly fine for daytime visits; use caution after dark in less-trafficked areas.",
-    tips: [
-      { icon: '🌿', text: 'City Park is safe, beautiful, and great for families' },
-      { icon: '🎨', text: 'New Orleans Museum of Art is worth a half-day visit' },
-      { icon: '🌙', text: 'Avoid walking alone on quiet residential streets at night' },
-      { icon: '🚗', text: 'Use rideshare after dark rather than walking' }
-    ],
-    coords: [[29.9840,-90.1025],[29.9840,-90.0820],[29.9680,-90.0820],[29.9680,-90.1025]]
-  },
-  {
-    name: 'Broadmoor', level: 'caution', score: 2.8, crimeCount: null,
-    desc: "A centrally located residential neighborhood that has worked hard to rebuild after Katrina. Crime rates remain elevated. Limited tourist attractions; mostly a through-route between other areas.",
-    tips: [
-      { icon: '⚠️', text: 'Residential area — stay on main roads if passing through' },
-      { icon: '🌙', text: 'Not recommended for walking around after dark' },
-      { icon: '🏫', text: 'A.L. Davis Park and Broadmoor Arts & Wellness Center are community anchors' },
-      { icon: '🚗', text: 'Rideshare is the best option here' }
-    ],
-    coords: [[29.9600,-90.0990],[29.9600,-90.1280],[29.9455,-90.1280],[29.9455,-90.0990]]
-  },
-  {
-    name: 'Gentilly', level: 'caution', score: 3.0, crimeCount: null,
-    desc: "A diverse residential neighborhood northeast of Mid-City still recovering from Katrina. Home to Dillard University and Pontchartrain Park. Active community, but use caution especially after dark.",
-    tips: [
-      { icon: '🏛️', text: 'Dillard University campus is safe and worth a visit' },
-      { icon: '⚠️', text: 'Recovery is uneven — some blocks are well-kept, others are not' },
-      { icon: '🌙', text: 'Avoid wandering unfamiliar streets after dark' },
-      { icon: '🚗', text: 'Drive or rideshare — limited pedestrian infrastructure' }
-    ],
-    coords: [[30.0060,-90.0820],[30.0060,-90.0460],[29.9840,-90.0460],[29.9840,-90.0820]]
-  },
-  {
-    name: 'Irish Channel', level: 'caution', score: 3.0, crimeCount: null,
-    desc: "A historic working-class neighborhood between the Garden District and the Mississippi River. Has gentrified significantly with new bars and restaurants. Quality varies by block.",
-    tips: [
-      { icon: '🍺', text: 'Parasol\'s Bar is a beloved neighborhood institution' },
-      { icon: '🎉', text: 'Excellent Mardi Gras parade viewing on Magazine and Tchoupitoulas' },
-      { icon: '⚠️', text: 'Stick to the well-lit commercial streets — some blocks are rough' },
-      { icon: '🚶', text: 'Short walk or bike ride from the Garden District' }
-    ],
-    coords: [[29.9245,-90.0750],[29.9245,-90.1012],[29.9060,-90.1012],[29.9060,-90.0750]]
-  },
-  {
-    name: 'Carrollton', level: 'caution', score: 3.3, crimeCount: null,
-    desc: "Where the St. Charles streetcar bends toward the lake. The Riverbend area around Maple and Oak streets is lively and safe; the further you stray from these corridors, the more caution is needed.",
-    tips: [
-      { icon: '✅', text: 'Riverbend / Maple Street area is safe and fun' },
-      { icon: '🍔', text: 'Oak Street has excellent bars and some of the city\'s best food' },
-      { icon: '⚠️', text: 'Away from the commercial strips, use caution after dark' },
-      { icon: '🚋', text: 'Ride the streetcar back downtown — no car needed' }
-    ],
-    coords: [[29.9680,-90.1280],[29.9680,-90.1550],[29.9345,-90.1550],[29.9345,-90.1280]]
-  },
-  {
-    name: 'Algiers', level: 'caution', score: 3.1, crimeCount: null,
-    desc: "Directly across the Mississippi from downtown via a free ferry. Algiers Point is charming and walkable with sweeping skyline views. Other parts of Algiers require considerably more caution.",
-    tips: [
-      { icon: '⛴️', text: 'Free Algiers Point ferry departs from Canal St regularly' },
-      { icon: '🌆', text: 'Best views of the New Orleans skyline are from the Point' },
-      { icon: '⚠️', text: 'Stick to Algiers Point — other parts of Algiers have higher crime' },
-      { icon: '🕐', text: 'Check ferry times before heading over — last ferry is late evening' }
-    ],
-    coords: [[29.9450,-90.0730],[29.9450,-90.0100],[29.8950,-90.0100],[29.8950,-90.0730]]
-  },
-  // ── Avoid ──────────────────────────────────────────────────────────────────
-  {
-    name: 'Central City', level: 'avoid', score: 1.8, crimeCount: null,
-    desc: "One of the city's highest violent-crime areas with few tourist attractions. It is strongly recommended that visitors avoid this neighborhood entirely, day or night.",
-    tips: [
-      { icon: '🚫', text: 'Not recommended for tourists at any time of day' },
-      { icon: '🚗', text: 'If passing through, remain in your vehicle and do not stop' },
-      { icon: '📞', text: 'Emergency: 911 | NOPD non-emergency: (504) 821-2222' },
-      { icon: '🗺️', text: 'The Garden District nearby is far safer and more rewarding' }
-    ],
-    coords: [[29.9455,-90.1000],[29.9455,-90.1170],[29.9330,-90.1170],[29.9330,-90.1000]]
-  },
-  {
-    name: 'Seventh Ward', level: 'avoid', score: 2.0, crimeCount: null,
-    desc: "A historically significant neighborhood with deep cultural roots, currently experiencing high levels of violent crime. Visitors are strongly advised to avoid this area without a trusted local guide.",
-    tips: [
-      { icon: '🚫', text: 'High violent crime — not suitable for independent tourist visits' },
-      { icon: '⚠️', text: 'Incidents can and do occur at any hour' },
-      { icon: '🎭', text: 'Local cultural events are best attended alongside residents you know' },
-      { icon: '🗺️', text: 'Nearby Frenchmen Street (French Quarter edge) is a much safer option' }
-    ],
-    coords: [[29.9720,-90.0660],[29.9720,-90.0460],[29.9600,-90.0460],[29.9600,-90.0660]]
-  },
-  {
-    name: 'Hollygrove', level: 'avoid', score: 1.6, crimeCount: null,
-    desc: "A low-income neighborhood in northwest New Orleans with persistently high rates of violent crime. Not a tourist destination. Visitors are advised not to enter this area.",
-    tips: [
-      { icon: '🚫', text: 'High violent crime rates — avoid entirely' },
-      { icon: '🚗', text: 'Do not stop or exit your vehicle if driving through' },
-      { icon: '📞', text: 'Emergency: 911 | NOPD: (504) 821-2222' },
-      { icon: '🗺️', text: 'Carrollton\'s Riverbend area (nearby) is a far better option' }
-    ],
-    coords: [[29.9750,-90.1420],[29.9750,-90.1220],[29.9550,-90.1220],[29.9550,-90.1420]]
-  },
-  {
-    name: 'Lower Ninth Ward', level: 'avoid', score: 1.5, crimeCount: null,
-    desc: "Made internationally known by Hurricane Katrina's devastating 2005 flood, the Lower Ninth Ward continues to face both poverty and elevated violent crime. Historically significant but not a safe area for independent tourist visits.",
-    tips: [
-      { icon: '🚫', text: 'High violent crime — not safe for independent visits' },
-      { icon: '📚', text: 'Make It Right Foundation homes are a visible Katrina legacy' },
-      { icon: '🎓', text: 'Guided Katrina tours provide context and support local residents' },
-      { icon: '🚗', text: 'Any visit should be by car with a knowledgeable local guide' }
-    ],
-    coords: [[29.9700,-90.0250],[29.9700,-89.9800],[29.9380,-89.9800],[29.9380,-90.0250]]
-  },
-  {
-    name: 'New Orleans East', level: 'avoid', score: 1.7, crimeCount: null,
-    desc: "A large residential area east of the Industrial Canal with high violent crime rates and limited tourist infrastructure. Katrina recovery has been slow and uneven. Not recommended for visitors.",
-    tips: [
-      { icon: '🚫', text: 'High crime area — tourists should avoid' },
-      { icon: '🍜', text: 'Notable Vietnamese restaurant community on Chef Menteur Hwy — daytime only' },
-      { icon: '⚠️', text: 'If visiting a restaurant, go directly and do not explore on foot' },
-      { icon: '🚗', text: 'Drive directly to your destination and return immediately' }
-    ],
-    coords: [[30.0500,-90.0250],[30.0500,-89.9300],[29.9700,-89.9300],[29.9700,-90.0250]]
-  }
-];
+      { icon: '⚠️', text: 'Check the current safety score above before exploring' },
+      { icon: '🚗', text: 'Rideshare is recommended after dark in unfamiliar areas' },
+    ]
+  };
+}
 
 // ── Map styles ───────────────────────────────────────────────────────────────
 const STYLES = {
-  safe:    { color: '#16a34a', fillColor: '#22c55e', fillOpacity: .28, weight: 2 },
-  caution: { color: '#b45309', fillColor: '#eab308', fillOpacity: .32, weight: 2 },
-  avoid:   { color: '#b91c1c', fillColor: '#ef4444', fillOpacity: .32, weight: 2 }
+  safe:    { color:'#16a34a', fillColor:'#22c55e', fillOpacity:.28, weight:1.5 },
+  caution: { color:'#b45309', fillColor:'#eab308', fillOpacity:.32, weight:1.5 },
+  avoid:   { color:'#b91c1c', fillColor:'#ef4444', fillOpacity:.32, weight:1.5 }
 };
-const HOVER_OPACITY = { safe: .48, caution: .52, avoid: .52 };
-const LEVEL_LABELS  = { safe: 'Safe', caution: 'Use Caution', avoid: 'Avoid' };
+const HOVER_OPACITY = { safe:.48, caution:.52, avoid:.52 };
+const LEVEL_LABELS  = { safe:'Safe', caution:'Use Caution', avoid:'Avoid' };
 
-// ── Crime severity weights ────────────────────────────────────────────────────
-// Offense strings are matched with .includes() so partial matches work
+// ── Crime severity weights ───────────────────────────────────────────────────
 const CRIME_WEIGHTS = [
-  { match: 'MURDER',            weight: 5 },
-  { match: 'RAPE',              weight: 5 },
-  { match: 'ARMED ROBBERY',     weight: 4 },
-  { match: 'CARJACKING',        weight: 4 },
-  { match: 'AGGRAVATED ASSAULT',weight: 4 },
-  { match: 'AGGRAVATED BATTERY',weight: 4 },
-  { match: 'ROBBERY',           weight: 3 },
-  { match: 'SIMPLE BATTERY',    weight: 3 },
-  { match: 'SIMPLE ASSAULT',    weight: 3 },
-  { match: 'BURGLARY',          weight: 2 },
-  { match: 'AUTO THEFT',        weight: 2 },
-  { match: 'ARSON',             weight: 2 },
-  { match: 'THEFT',             weight: 1 },
-  { match: 'PICKPOCKET',        weight: 1 },
+  { match:'MURDER',             weight:5 },
+  { match:'RAPE',               weight:5 },
+  { match:'ARMED ROBBERY',      weight:4 },
+  { match:'CARJACKING',         weight:4 },
+  { match:'AGGRAVATED ASSAULT', weight:4 },
+  { match:'AGGRAVATED BATTERY', weight:4 },
+  { match:'ROBBERY',            weight:3 },
+  { match:'SIMPLE BATTERY',     weight:3 },
+  { match:'SIMPLE ASSAULT',     weight:3 },
+  { match:'BURGLARY',           weight:2 },
+  { match:'AUTO THEFT',         weight:2 },
+  { match:'ARSON',              weight:2 },
+  { match:'THEFT',              weight:1 },
+  { match:'PICKPOCKET',         weight:1 },
 ];
 
 function crimeWeight(type) {
@@ -519,35 +528,27 @@ function crimeWeight(type) {
   for (const { match, weight } of CRIME_WEIGHTS) {
     if (t.includes(match)) return weight;
   }
-  return 0; // ignore medical, traffic, noise, checks etc.
+  return 0;
 }
 
-// ── Geo utils ────────────────────────────────────────────────────────────────
-// Ray-casting point-in-polygon. coords = [[lat, lng], ...]
-function pointInPolygon(testLat, testLng, coords) {
-  let inside = false;
-  const n = coords.length;
-  for (let i = 0, j = n - 1; i < n; j = i++) {
-    const [lat1, lng1] = coords[i];
-    const [lat2, lng2] = coords[j];
-    if ((lat1 > testLat) !== (lat2 > testLat)) {
-      const xCross = (lng2 - lng1) * (testLat - lat1) / (lat2 - lat1) + lng1;
-      if (testLng < xCross) inside = !inside;
+// ── GeoJSON-aware point-in-polygon ───────────────────────────────────────────
+// GeoJSON MultiPolygon coordinates are [[[lng, lat], ...], ...]
+function pointInGeoJSON(testLat, testLng, geometry) {
+  for (const polygon of geometry.coordinates) {
+    const ring = polygon[0]; // exterior ring
+    let inside = false;
+    const n = ring.length;
+    for (let i = 0, j = n - 1; i < n; j = i++) {
+      const [lng1, lat1] = ring[i];
+      const [lng2, lat2] = ring[j];
+      if ((lat1 > testLat) !== (lat2 > testLat)) {
+        const lngCross = (lng2 - lng1) * (testLat - lat1) / (lat2 - lat1) + lng1;
+        if (testLng < lngCross) inside = !inside;
+      }
     }
+    if (inside) return true;
   }
-  return inside;
-}
-
-// Shoelace formula — returns area in sq degrees (used for density normalisation)
-function polygonArea(coords) {
-  let area = 0;
-  const n = coords.length;
-  for (let i = 0; i < n; i++) {
-    const j = (i + 1) % n;
-    area += coords[i][1] * coords[j][0]; // lng_i * lat_j
-    area -= coords[j][1] * coords[i][0]; // lng_j * lat_i
-  }
-  return Math.abs(area) / 2;
+  return false;
 }
 
 // ── Score computation ────────────────────────────────────────────────────────
@@ -556,7 +557,6 @@ function computeScores(crimes) {
   ZONES.forEach(z => { weighted[z.name] = 0; rawCount[z.name] = 0; });
 
   crimes.forEach(c => {
-    // 2026 dataset uses GeoJSON Point: location.coordinates = [lng, lat]
     let lat, lng;
     if (c.location?.coordinates?.length === 2) {
       lng = c.location.coordinates[0];
@@ -568,23 +568,17 @@ function computeScores(crimes) {
     if (!lat || !lng || isNaN(lat) || isNaN(lng)) return;
 
     const w = crimeWeight(c.typetext ?? c.offensetype ?? c.type_text ?? c.signal);
+    if (w === 0) return;
 
     ZONES.forEach(zone => {
-      if (pointInPolygon(lat, lng, zone.coords)) {
+      if (pointInGeoJSON(lat, lng, zone.geometry)) {
         weighted[zone.name] += w;
         rawCount[zone.name] += 1;
       }
     });
   });
 
-  // Score from raw weighted count — no area normalisation.
-  // Tourists care about how many incidents happen in the area they're walking,
-  // not incidents-per-sq-degree. Calibrated to NOLA 90-day actuals:
-  //   weighted ≈ 140 (Garden District) → score 3.5 (safe boundary)
-  //   weighted ≈ 550 (Seventh Ward)    → score 2.5 (avoid boundary)
-  const BASELINE = 37; // weighted count that anchors score = 5
-  const K        = 2.5;
-
+  const BASELINE = 37, K = 2.5;
   const result = {};
   ZONES.forEach(z => {
     const w = Math.max(weighted[z.name], 1);
@@ -592,66 +586,66 @@ function computeScores(crimes) {
     const level = score >= 3.5 ? 'safe' : score >= 2.5 ? 'caution' : 'avoid';
     result[z.name] = { score: Math.round(score * 10) / 10, count: rawCount[z.name], level };
   });
-
-  console.log('SafeRoute weighted counts:', { ...weighted });
-  console.log('SafeRoute scores:', Object.fromEntries(Object.entries(result).map(([k,v]) => [k, v.score])));
   return result;
 }
 
 // ── LocalStorage cache (6 hours) ─────────────────────────────────────────────
-const CACHE_KEY = 'saferoute_nola_v3';
-const CACHE_TTL = 6 * 60 * 60 * 1000;
+const CACHE_KEY  = 'saferoute_crimes_v3';
+const GEO_KEY    = 'saferoute_geojson_v1';
+const CACHE_TTL  = 6  * 60 * 60 * 1000;
+const GEO_TTL    = 7  * 24 * 60 * 60 * 1000; // GeoJSON rarely changes
 
-function getCached() {
+function getCached(key, ttl) {
   try {
-    const raw = localStorage.getItem(CACHE_KEY);
+    const raw = localStorage.getItem(key);
     if (!raw) return null;
     const { data, ts } = JSON.parse(raw);
-    return Date.now() - ts < CACHE_TTL ? data : null;
+    return Date.now() - ts < ttl ? data : null;
   } catch { return null; }
 }
 
-function setCached(data) {
-  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: Date.now() })); }
-  catch { /* quota exceeded — skip caching */ }
+function setCached(key, data) {
+  try { localStorage.setItem(key, JSON.stringify({ data, ts: Date.now() })); }
+  catch { }
 }
 
-// ── NOLA Open Data fetch ──────────────────────────────────────────────────────
-// Dataset: NOPD Calls for Service (year-split; update ID when year rolls over)
-// Browse datasets: https://data.nola.gov/browse?category=Public+Safety
-// 2026: es9j-6y5d | 2025: 4xwx-sfte | 2024: 2zcj-b6ts
+// ── NOLA crime data fetch ─────────────────────────────────────────────────────
 const NOLA_DATASET = 'es9j-6y5d';
-
-// Bounding box covering all 20 neighborhoods from Algiers to New Orleans East.
-const BBOX = { n: 30.06, w: -90.16, s: 29.87, e: -89.92 };
+const BBOX = { n:30.06, w:-90.16, s:29.87, e:-89.92 };
 
 async function fetchCrimes() {
-  const cached = getCached();
-  if (cached) { console.log('SafeRoute: using cached crime data'); return cached; }
-
+  const cached = getCached(CACHE_KEY, CACHE_TTL);
+  if (cached) return cached;
   const from = new Date();
   from.setDate(from.getDate() - 90);
   const fromStr = from.toISOString().slice(0, 10);
-
   const url = new URL(`https://data.nola.gov/resource/${NOLA_DATASET}.json`);
   url.searchParams.set('$limit', '50000');
   url.searchParams.set('$where',
-    `timecreate >= '${fromStr}T00:00:00' AND within_box(location, ${BBOX.n}, ${BBOX.w}, ${BBOX.s}, ${BBOX.e})`
-  );
-
-  console.log('SafeRoute: fetching', url.toString());
+    `timecreate >= '${fromStr}T00:00:00' AND within_box(location, ${BBOX.n}, ${BBOX.w}, ${BBOX.s}, ${BBOX.e})`);
   const res = await fetch(url.toString());
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
   const data = await res.json();
-  if (!Array.isArray(data)) throw new Error(data.message ?? 'Unexpected response format');
-  if (data.length === 0) throw new Error('API returned 0 records — date filter or dataset ID may need updating');
-
-  setCached(data);
+  if (!Array.isArray(data) || data.length === 0) throw new Error('No crime data returned');
+  setCached(CACHE_KEY, data);
   return data;
 }
 
-// ── Status indicator ─────────────────────────────────────────────────────────
+// ── GeoJSON fetch ─────────────────────────────────────────────────────────────
+const GEOJSON_URL = 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/new-orleans.geojson';
+
+async function fetchGeoJSON() {
+  const cached = getCached(GEO_KEY, GEO_TTL);
+  if (cached) return cached;
+  const res = await fetch(GEOJSON_URL);
+  if (!res.ok) throw new Error(`GeoJSON fetch failed: HTTP ${res.status}`);
+  const data = await res.json();
+  if (!data.features?.length) throw new Error('Empty GeoJSON');
+  setCached(GEO_KEY, data);
+  return data;
+}
+
+// ── Status indicator ──────────────────────────────────────────────────────────
 function setStatus(state, detail) {
   const pill = document.getElementById('status-pill');
   const dot  = pill.querySelector('.s-dot');
@@ -659,7 +653,7 @@ function setStatus(state, detail) {
   dot.className = 's-dot';
   if (state === 'loading') {
     dot.classList.add('s-dot-loading');
-    txt.textContent = 'Loading crime data…';
+    txt.textContent = 'Loading…';
   } else if (state === 'live') {
     dot.classList.add('s-dot-live');
     txt.textContent = `Live · ${Number(detail).toLocaleString()} incidents · 90 days`;
@@ -669,57 +663,85 @@ function setStatus(state, detail) {
   }
 }
 
-// ── Map setup ────────────────────────────────────────────────────────────────
-const map = L.map('map', { center: [29.9700, -90.0600], zoom: 11 });
-
+// ── Map setup ─────────────────────────────────────────────────────────────────
+const map = L.map('map', { center:[29.9700,-90.0600], zoom:11 });
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-  attribution: '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com">CARTO</a>',
-  maxZoom: 19
+  attribution:'© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com">CARTO</a>',
+  maxZoom:19
 }).addTo(map);
-
-// ── Zone layers ──────────────────────────────────────────────────────────────
-const polyLayers = {};   // name → Leaflet polygon (so we can call setStyle later)
-let activeZoneName = null;
-
-ZONES.forEach(zone => {
-  const s = STYLES[zone.level];
-  const poly = L.polygon(zone.coords, { ...s }).addTo(map);
-  polyLayers[zone.name] = poly;
-
-  // Floating label (neutral border so it doesn't need to update with level changes)
-  L.marker(poly.getBounds().getCenter(), {
-    icon: L.divIcon({
-      className: '',
-      iconSize: [0, 0],
-      html: `<div style="
-        transform:translate(-50%,-50%);
-        background:#fff;
-        border:1.5px solid #475569;
-        color:#1e293b;
-        font-size:11px;
-        font-weight:600;
-        font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-        padding:3px 8px;
-        border-radius:4px;
-        white-space:nowrap;
-        box-shadow:0 1px 6px rgba(0,0,0,.18);
-        pointer-events:none;
-      ">${zone.name}</div>`
-    })
-  }).addTo(map);
-
-  poly.on('mouseover', function () {
-    this.setStyle({ fillOpacity: HOVER_OPACITY[zone.level], weight: 3 });
-  });
-  poly.on('mouseout', function () {
-    this.setStyle({ fillOpacity: STYLES[zone.level].fillOpacity, weight: 2 });
-  });
-  poly.on('click', e => { L.DomEvent.stopPropagation(e); showZone(zone); });
-});
-
 map.on('click', resetPanel);
 
-// ── Sidebar helpers ───────────────────────────────────────────────────────────
+// ── Zone state ────────────────────────────────────────────────────────────────
+let ZONES = [];
+const polyLayers = {};
+let activeZoneName = null;
+
+// ── Build and draw zones from GeoJSON ─────────────────────────────────────────
+function buildAndDrawZones(geoJSON) {
+  ZONES = geoJSON.features.map(feature => {
+    const name = feature.properties.name;
+    // Normalize extra spaces in name for lookup
+    const key  = name.replace(/\s+/g, ' ');
+    const def  = ZONE_DEFS[name] || ZONE_DEFS[key] || defaultDef(name);
+    return { name, ...def, crimeCount: null, geometry: feature.geometry };
+  });
+
+  ZONES.forEach(zone => {
+    const s = STYLES[zone.level];
+    const geoLayer = L.geoJSON(
+      { type:'Feature', geometry: zone.geometry },
+      { style: () => ({ ...s }) }
+    ).addTo(map);
+
+    polyLayers[zone.name] = geoLayer;
+
+    // Label — only visible at zoom >= 12
+    const center = geoLayer.getBounds().getCenter();
+    L.marker(center, {
+      icon: L.divIcon({
+        className: 'zone-label',
+        iconSize: [0, 0],
+        html: `<div style="
+          transform:translate(-50%,-50%);
+          background:#fff;
+          border:1px solid #475569;
+          color:#1e293b;
+          font-size:10px;
+          font-weight:600;
+          font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+          padding:2px 6px;
+          border-radius:3px;
+          white-space:nowrap;
+          box-shadow:0 1px 4px rgba(0,0,0,.15);
+          pointer-events:none;
+        ">${zone.name}</div>`
+      })
+    }).addTo(map);
+
+    geoLayer.on('mouseover', () => {
+      geoLayer.setStyle({ fillOpacity: HOVER_OPACITY[zone.level], weight: 2.5 });
+    });
+    geoLayer.on('mouseout', () => {
+      geoLayer.setStyle({ ...STYLES[zone.level] });
+    });
+    geoLayer.on('click', e => {
+      L.DomEvent.stopPropagation(e);
+      showZone(zone);
+    });
+  });
+
+  // Show/hide labels based on zoom
+  function updateLabels() {
+    const show = map.getZoom() >= 12;
+    document.querySelectorAll('.zone-label').forEach(el => {
+      el.style.display = show ? '' : 'none';
+    });
+  }
+  map.on('zoomend', updateLabels);
+  updateLabels();
+}
+
+// ── Sidebar ───────────────────────────────────────────────────────────────────
 const PLACEHOLDER = `
   <div class="placeholder">
     <div class="ph-icon">🗺️</div>
@@ -739,30 +761,18 @@ function starsHtml(score) {
 
 function showZone(zone) {
   activeZoneName = zone.name;
-
   const crimeBox = zone.crimeCount !== null ? `
     <div class="crime-box">
       <div class="crime-box-title">Live Crime Data · Last 90 Days</div>
-      <div class="crime-row">
-        <span>Reported incidents</span>
-        <span class="crime-val">${zone.crimeCount.toLocaleString()}</span>
-      </div>
-      <div class="crime-row">
-        <span>Safety score</span>
-        <span class="crime-val">${zone.score} / 5</span>
-      </div>
-      <div class="crime-row">
-        <span>Source</span>
-        <span class="crime-val">NOLA Open Data</span>
-      </div>
+      <div class="crime-row"><span>Reported incidents</span><span class="crime-val">${zone.crimeCount.toLocaleString()}</span></div>
+      <div class="crime-row"><span>Safety score</span><span class="crime-val">${zone.score} / 5</span></div>
+      <div class="crime-row"><span>Source</span><span class="crime-val">NOLA Open Data</span></div>
     </div>` : '';
 
   document.getElementById('panel').innerHTML = `
     <div>
       <div class="zone-name">${zone.name}</div>
-      <span class="badge badge-${zone.level}">
-        <span class="badge-dot"></span>${LEVEL_LABELS[zone.level]}
-      </span>
+      <span class="badge badge-${zone.level}"><span class="badge-dot"></span>${LEVEL_LABELS[zone.level]}</span>
       <div class="score-row">
         <span class="stars">${starsHtml(zone.score)}</span>
         <span class="score-num">Safety ${zone.score} / 5</span>
@@ -771,46 +781,43 @@ function showZone(zone) {
       <div class="desc">${zone.desc}</div>
       ${crimeBox}
       <div class="tips-heading">Tourist Tips</div>
-      ${zone.tips.map(t =>
-        `<div class="tip"><span class="tip-icon">${t.icon}</span><span>${t.text}</span></div>`
-      ).join('')}
+      ${zone.tips.map(t => `<div class="tip"><span class="tip-icon">${t.icon}</span><span>${t.text}</span></div>`).join('')}
     </div>`;
 
   if (window.innerWidth <= 700) {
-    document.getElementById('sidebar').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('sidebar').scrollIntoView({ behavior:'smooth', block:'start' });
   }
 }
 
-// ── Apply live scores to zones + map ─────────────────────────────────────────
+// ── Apply live scores ─────────────────────────────────────────────────────────
 function applyScores(scoreMap) {
   ZONES.forEach(zone => {
-    const { score, count, level } = scoreMap[zone.name];
-    zone.score = score;
-    zone.level = level;
-    zone.crimeCount = count;
-    polyLayers[zone.name].setStyle(STYLES[level]);
+    const s = scoreMap[zone.name];
+    if (!s) return;
+    zone.score  = s.score;
+    zone.level  = s.level;
+    zone.crimeCount = s.count;
+    polyLayers[zone.name]?.setStyle(STYLES[s.level]);
   });
-  // Refresh the sidebar if a zone is currently open
-  if (activeZoneName) {
-    showZone(ZONES.find(z => z.name === activeZoneName));
-  }
+  if (activeZoneName) showZone(ZONES.find(z => z.name === activeZoneName));
 }
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
 async function init() {
   setStatus('loading');
+  resetPanel();
   try {
-    const crimes = await fetchCrimes();
+    const [geoJSON, crimes] = await Promise.all([fetchGeoJSON(), fetchCrimes()]);
+    buildAndDrawZones(geoJSON);
     const scoreMap = computeScores(crimes);
     applyScores(scoreMap);
     setStatus('live', crimes.length);
   } catch (err) {
-    console.warn('SafeRoute: live data unavailable, using sample scores —', err.message);
+    console.error('SafeRoute:', err);
     setStatus('fallback');
   }
 }
 
-resetPanel();
 init();
 </script>
 </body>
