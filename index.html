@@ -1053,8 +1053,8 @@ const CITIES = {
     center: [47.6062, -122.3321], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/seattle.geojson',
     crimeEndpoint: 'https://data.seattle.gov/resource/tazs-3rd5.json',
-    dateField: 'offense_date', typeFields: ['offense_category', 'offense_sub_category'],
-    bbox: [47.74, -122.46, 47.49, -122.22], bboxField: null,
+    dateField: 'report_date_time', typeFields: ['offense_category', 'offense_sub_category'],
+    bbox: [47.74, -122.46, 47.49, -122.22], bboxField: null, noBbox: true,
     baseline: 40, dataSource: 'Seattle Open Data', zoneDefs: SEATTLE_ZONE_DEFS,
   },
   'los-angeles': {
@@ -1063,7 +1063,7 @@ const CITIES = {
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/los-angeles.geojson',
     crimeEndpoint: 'https://data.lacity.org/resource/2nrs-mtv8.json',
     dateField: 'date_occ', typeFields: ['crm_cd_desc'],
-    bbox: [34.34, -118.67, 33.70, -118.15], bboxField: null,
+    bbox: [34.34, -118.67, 33.70, -118.15], bboxField: null, noBbox: true, noDateFilter: true,
     latField: 'lat', lngField: 'lon',
     baseline: 60, dataSource: 'LA Open Data', zoneDefs: LA_ZONE_DEFS,
   },
@@ -1072,7 +1072,7 @@ const CITIES = {
     center: [42.3601, -71.0589], zoom: 13,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/boston.geojson',
     crimeEndpoint: 'https://data.boston.gov/datastore/odata3.0/b973d8cb-eeb2-4e7e-99da-c92938efc9c0',
-    apiType: 'odata',
+    apiType: 'odata', noDateFilter: true,
     dateField: 'OCCURRED_ON_DATE', typeFields: ['OFFENSE_DESCRIPTION'],
     bbox: [42.40, -71.19, 42.23, -70.99], bboxField: null,
     latField: 'Lat', lngField: 'Long',
@@ -1082,8 +1082,8 @@ const CITIES = {
     label: 'Washington, DC',
     center: [38.9072, -77.0369], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/washington.geojson',
-    crimeEndpoint: 'https://maps2.dcgis.dc.gov/dcgis/rest/services/FEEDS/MPD/MapServer/11/query',
-    apiType: 'arcgis',
+    crimeEndpoint: 'https://maps2.dcgis.dc.gov/dcgis/rest/services/FEEDS/MPD/MapServer/7/query',
+    apiType: 'arcgis', noDateFilter: true,
     dateField: 'REPORT_DAT', typeFields: ['OFFENSE'],
     bbox: [38.99, -77.13, 38.79, -76.91], bboxField: null,
     latField: 'LATITUDE', lngField: 'LONGITUDE',
@@ -1095,7 +1095,7 @@ const CITIES = {
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/philadelphia.geojson',
     crimeEndpoint: 'https://data.phila.gov/resource/sspu-uyfa.json',
     dateField: 'dispatch_date_time', typeFields: ['text_general_code'],
-    bbox: [40.14, -75.28, 39.87, -74.96], bboxField: null,
+    bbox: [40.14, -75.28, 39.87, -74.96], bboxField: null, noBbox: true, noDateFilter: true,
     latField: 'point_y', lngField: 'point_x',
     baseline: 55, dataSource: 'Philly Open Data', zoneDefs: PHILLY_ZONE_DEFS,
   },
@@ -1269,13 +1269,18 @@ async function fetchCrimes(cityId, city) {
   if (apiType === 'socrata') {
     const url = new URL(city.crimeEndpoint);
     url.searchParams.set('$limit', '50000');
-    let where = `${city.dateField} >= '${fromStr}T00:00:00'`;
-    if (city.bboxField) {
-      where += ` AND within_box(${city.bboxField}, ${n}, ${w}, ${s}, ${e})`;
+    if (city.noDateFilter) {
+      // Dataset is stale or $where unsupported — fetch most recent records
+      url.searchParams.set('$order', `${city.dateField} DESC`);
     } else {
-      where += ` AND ${latF} >= ${s} AND ${latF} <= ${n} AND ${lngF} >= ${w} AND ${lngF} <= ${e}`;
+      let where = `${city.dateField} >= '${fromStr}T00:00:00'`;
+      if (city.bboxField) {
+        where += ` AND within_box(${city.bboxField}, ${n}, ${w}, ${s}, ${e})`;
+      } else if (!city.noBbox) {
+        where += ` AND ${latF} >= ${s} AND ${latF} <= ${n} AND ${lngF} >= ${w} AND ${lngF} <= ${e}`;
+      }
+      url.searchParams.set('$where', where);
     }
-    url.searchParams.set('$where', where);
     const res = await fetch(url.toString());
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     data = await res.json();
@@ -1284,8 +1289,12 @@ async function fetchCrimes(cityId, city) {
     const url = new URL(city.crimeEndpoint);
     url.searchParams.set('$top', '50000');
     url.searchParams.set('$format', 'json');
-    url.searchParams.set('$filter',
-      `${city.dateField} ge '${fromStr}T00:00:00Z' and ${latF} ge ${s} and ${latF} le ${n} and ${lngF} ge ${w} and ${lngF} le ${e}`);
+    if (!city.noDateFilter) {
+      url.searchParams.set('$filter',
+        `${city.dateField} ge '${fromStr}T00:00:00Z' and ${latF} ge ${s} and ${latF} le ${n} and ${lngF} ge ${w} and ${lngF} le ${e}`);
+    } else {
+      url.searchParams.set('$orderby', `${city.dateField} desc`);
+    }
     const res = await fetch(url.toString());
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
@@ -1293,15 +1302,16 @@ async function fetchCrimes(cityId, city) {
 
   } else if (apiType === 'arcgis') {
     const url = new URL(city.crimeEndpoint);
-    url.searchParams.set('where',
-      `${city.dateField} >= '${fromStr} 00:00:00' AND ${latF} >= ${s} AND ${latF} <= ${n} AND ${lngF} >= ${w} AND ${lngF} <= ${e}`);
+    const arcWhere = city.noDateFilter ? '1=1'
+      : `${city.dateField} >= DATE '${fromStr}'`;
+    url.searchParams.set('where', arcWhere);
     url.searchParams.set('outFields', `${city.typeFields[0]},${latF},${lngF}`);
     url.searchParams.set('resultRecordCount', '50000');
+    url.searchParams.set('orderByFields', `${city.dateField} DESC`);
     url.searchParams.set('f', 'json');
     const res = await fetch(url.toString());
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
-    // Flatten ArcGIS features to plain objects with standard lat/lng keys
     data = (json.features || []).map(f => ({
       ...f.attributes,
       latitude: f.attributes[latF],
@@ -1352,7 +1362,7 @@ function setStatus(state, detail) {
     txt.textContent = 'Loading…';
   } else if (state === 'live') {
     dot.classList.add('s-dot-live');
-    txt.textContent = `Live · ${Number(detail).toLocaleString()} incidents · 90 days`;
+    txt.textContent = `Live · ${Number(detail).toLocaleString()} incidents`;
   } else {
     dot.classList.add('s-dot-fallback');
     txt.textContent = 'Sample data (API unavailable)';
