@@ -261,6 +261,58 @@
       line-height: 1.55; color: var(--muted);
     }
 
+    /* ─── Info button ─── */
+    #info-btn {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.2);
+      background: rgba(255,255,255,.08);
+      color: #94a3b8;
+      font-size: 12px; font-weight: 700;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-left: 8px;
+      line-height: 1;
+    }
+    #info-btn:hover { background: rgba(255,255,255,.16); color: #e2e8f0; }
+
+    /* ─── Methodology modal ─── */
+    #info-modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.55);
+      display: none;
+      align-items: center; justify-content: center;
+      z-index: 9999; padding: 16px;
+    }
+    #info-modal-overlay.open { display: flex; }
+    #info-modal {
+      background: #fff; border-radius: 12px;
+      padding: 28px 30px;
+      max-width: 560px; width: 100%;
+      max-height: 88vh; overflow-y: auto;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    }
+    #info-modal-close {
+      position: absolute; top: 12px; right: 14px;
+      background: none; border: none;
+      font-size: 22px; line-height: 1;
+      color: var(--muted); cursor: pointer;
+      padding: 4px 8px; border-radius: 4px;
+    }
+    #info-modal-close:hover { background: var(--border); }
+    .modal-title   { font-size: 19px; font-weight: 700; margin-bottom: 6px; }
+    .modal-lead    { font-size: 13.5px; color: var(--muted); margin-bottom: 18px; line-height: 1.65; }
+    .modal-h       { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; color: var(--muted); margin: 20px 0 8px; }
+    .modal-body    { font-size: 13px; line-height: 1.75; color: #334155; margin-bottom: 8px; }
+    .modal-list    { font-size: 13px; line-height: 2; color: #334155; padding-left: 18px; margin-bottom: 8px; }
+    .modal-table   { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-bottom: 4px; }
+    .modal-table th { text-align: left; padding: 6px 10px; background: var(--bg); font-weight: 600; border-bottom: 1px solid var(--border); }
+    .modal-table td { padding: 5px 10px; border-bottom: 1px solid var(--border); color: #334155; }
+    .modal-table tr:last-child td { border-bottom: none; }
+    .modal-code    { background: var(--bg); border: 1px solid var(--border); padding: 1px 5px; border-radius: 3px; font-size: 11.5px; font-family: 'SF Mono','Consolas',monospace; }
+    .modal-disc    { font-size: 11px; color: var(--muted); margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); line-height: 1.65; }
+
     /* ─── Mobile ─── */
     @media (max-width: 700px) {
       body { overflow: auto; }
@@ -271,6 +323,10 @@
       #panel { overflow: visible; padding: 16px; }
       .placeholder { min-height: 110px; }
       #status-pill { display: none; }
+      .city-picker svg { display: none; }
+      #city-select { font-size: 14px; padding: 6px 28px 6px 10px; border-radius: 8px; }
+      #info-btn { width: 30px; height: 30px; font-size: 14px; }
+      #info-modal { padding: 22px 18px; }
     }
   </style>
 </head>
@@ -293,6 +349,8 @@
       <option value="san-francisco">San Francisco, CA</option>
       <option value="new-york">Manhattan, NY</option>
       <option value="brooklyn">Brooklyn, NY</option>
+      <option value="queens">Queens, NY</option>
+      <option value="bronx">The Bronx, NY</option>
       <option value="seattle">Seattle, WA</option>
       <option value="los-angeles">Los Angeles, CA</option>
       <option value="boston">Boston, MA</option>
@@ -300,6 +358,7 @@
       <option value="philadelphia">Philadelphia, PA</option>
     </select>
   </div>
+  <button id="info-btn" aria-label="About SafeRoute">?</button>
 </div>
 
 <div id="main">
@@ -315,6 +374,45 @@
       </div>
       <p class="method-note">Scores (1–5) from 90 days of live police data, weighted by crime severity. Higher = safer.</p>
     </div>
+  </div>
+</div>
+
+<div id="info-modal-overlay">
+  <div id="info-modal">
+    <button id="info-modal-close" onclick="closeInfoModal()" aria-label="Close">&times;</button>
+    <div class="modal-title">About SafeRoute</div>
+    <p class="modal-lead">SafeRoute shows live, neighborhood-level safety scores powered by official open police data. Use it as one input alongside your own research and judgment.</p>
+
+    <div class="modal-h">How scores work</div>
+    <p class="modal-body">Each crime report is weighted by severity, then aggregated per neighborhood:</p>
+    <ul class="modal-list">
+      <li><strong>Weight 5:</strong> Homicide, rape, sexual assault</li>
+      <li><strong>Weight 4:</strong> Armed robbery, aggravated assault, carjacking</li>
+      <li><strong>Weight 3:</strong> Robbery, assault, battery</li>
+      <li><strong>Weight 2:</strong> Burglary, motor vehicle theft, arson</li>
+      <li><strong>Weight 1:</strong> Theft, larceny</li>
+    </ul>
+    <p class="modal-body">The weighted sum is converted to a 1–5 score using a log scale calibrated per city: <span class="modal-code">score = 5 − 2.5 × log₁₀(weighted / baseline)</span>, clamped to 1–5. Neighborhoods scoring ≥ 3.5 are <strong style="color:#16a34a">Safe</strong>, 2.5–3.5 are <strong style="color:#b45309">Use Caution</strong>, below 2.5 are <strong style="color:#b91c1c">Avoid</strong>.</p>
+
+    <div class="modal-h">Data sources &amp; update frequency</div>
+    <p class="modal-body">Crime scores refresh from live APIs every 6 hours and cover the most recent 90 days of reported incidents. Neighborhood boundaries are cached for 7 days.</p>
+    <table class="modal-table">
+      <tr><th>City</th><th>Source</th></tr>
+      <tr><td>New Orleans</td><td>NOLA Open Data (Socrata)</td></tr>
+      <tr><td>Chicago</td><td>Chicago Data Portal (Socrata)</td></tr>
+      <tr><td>San Francisco</td><td>SF Open Data (Socrata)</td></tr>
+      <tr><td>Manhattan, Brooklyn, Queens, Bronx</td><td>NYC Open Data (Socrata)</td></tr>
+      <tr><td>Seattle</td><td>Seattle Open Data (Socrata)</td></tr>
+      <tr><td>Los Angeles</td><td>LA Open Data (Socrata)</td></tr>
+      <tr><td>Boston</td><td>Boston Open Data (CKAN OData)</td></tr>
+      <tr><td>Washington, DC</td><td>DC GIS / MPD (ArcGIS REST)</td></tr>
+      <tr><td>Philadelphia</td><td>OpenDataPhilly (Socrata)</td></tr>
+    </table>
+
+    <div class="modal-h">About the descriptions</div>
+    <p class="modal-body">Hand-written neighborhood descriptions are editorial assessments for tourists, informed by crime data, published travel guides, and general knowledge. They may not reflect very recent changes in neighborhood character. Always check current local advisories.</p>
+
+    <p class="modal-disc">SafeRoute is provided for informational purposes only. Crime statistics describe historical patterns, not guarantees of future safety. Always exercise personal judgment when traveling.</p>
   </div>
 </div>
 
@@ -985,6 +1083,133 @@ const PHILLY_ZONE_DEFS = {
   'Newbold':{ level:'safe', score:3.8, desc:"Gentrifying South Philadelphia neighborhood adjacent to Point Breeze. Improving rapidly.", tips:[{icon:'✅',text:'Generally safe and improving'},{icon:'🍽️',text:'Growing restaurant scene'},{icon:'⚠️',text:'Use caution on quieter blocks after dark'},{icon:'🗺️',text:'Passyunk Square is a short walk'}]},
 };
 
+// ── Queens zone definitions ───────────────────────────────────────────────────
+const QUEENS_ZONE_DEFS = {
+  // Safe
+  'Astoria':{ level:'safe', score:4.2, desc:"One of NYC's most vibrant outer-borough neighborhoods — a Greek and Middle Eastern food paradise, plus the Museum of the Moving Image. Very well-connected to Manhattan.", tips:[{icon:'✅',text:'Very safe and very livable'},{icon:'🎬',text:'Museum of the Moving Image is excellent — great for film and pop culture'},{icon:'🍢',text:'Steinway Street has some of the best Middle Eastern bakeries in the US'},{icon:'🚇',text:'N/W trains to midtown Manhattan in under 15 minutes'}]},
+  'Ditmars Steinway':{ level:'safe', score:4.3, desc:"Upper Astoria — quiet, tree-lined streets and the northernmost tip of Queens. Safe, suburban-feeling, and very close to LaGuardia Airport.", tips:[{icon:'✅',text:'Very safe residential neighborhood'},{icon:'✈️',text:'Close to LaGuardia Airport — convenient for early flights'},{icon:'🍽️',text:'Ditmars Blvd has good Greek and Italian restaurants'},{icon:'🚇',text:'N/W trains connect to Manhattan quickly'}]},
+  'Long Island City':{ level:'safe', score:4.1, desc:"Queens' fastest-growing neighborhood — luxury towers, Gantry Plaza State Park with stunning Manhattan skyline views, and the PS1 contemporary art museum.", tips:[{icon:'✅',text:'Very safe and rapidly improving'},{icon:'🌆',text:'Gantry Plaza State Park offers the best Manhattan skyline views from Queens'},{icon:'🎨',text:'MoMA PS1 is a world-class contemporary art institution'},{icon:'🚇',text:'7, E, M, G trains — Manhattan in 5–10 minutes'}]},
+  'Sunnyside':{ level:'safe', score:3.9, desc:"Affordable, diverse, and very walkable — Sunnyside Gardens is a historic planned community and the Irish, Korean, and Romanian communities all thrive here.", tips:[{icon:'✅',text:'Very safe and underrated'},{icon:'🏡',text:'Sunnyside Gardens is a charming 1920s planned community'},{icon:'🍽️',text:'Excellent and affordable diverse dining on Queens Blvd and Skillman'},{icon:'🚇',text:'7 train provides fast access to Manhattan'}]},
+  'Woodside':{ level:'safe', score:3.7, desc:"Multicultural neighborhood with a large Filipino, Irish, and Thai community — Roosevelt Ave has some of the best and most affordable food in NYC.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🍜',text:"Roosevelt Ave is one of NYC's great multicultural food streets"},{icon:'🇵🇭',text:'Best Filipino food in the city along Roosevelt Ave'},{icon:'🚇',text:'7 train and Long Island Railroad at Woodside station'}]},
+  'Forest Hills':{ level:'safe', score:4.2, desc:"Upscale Queens neighborhood with beautiful Tudor-style architecture around the USTA tennis club — very safe and easy to explore.", tips:[{icon:'✅',text:'Very safe — one of Queens\' most desirable neighborhoods'},{icon:'🎾',text:'West Side Tennis Club and Forest Hills Stadium host major concerts'},{icon:'🛍️',text:'Austin Street has boutiques, restaurants, and coffee shops'},{icon:'🚇',text:'E/M/F trains or Long Island Railroad from Forest Hills station'}]},
+  'Rego Park':{ level:'safe', score:3.8, desc:"Dense, safe neighborhood with excellent shopping and an international mix of residents — the Museum of Art and Design is nearby.", tips:[{icon:'✅',text:'Generally very safe'},{icon:'🛒',text:'Rego Center has a large mall with excellent food court options'},{icon:'🍽️',text:'Excellent Central Asian and Russian Jewish restaurants'},{icon:'🚇',text:'M/R trains on Queens Blvd'}]},
+  'Kew Gardens':{ level:'safe', score:3.9, desc:"Quiet, leafy, predominantly residential neighborhood with a pleasant village center and easy access to the subway.", tips:[{icon:'✅',text:'Very safe residential neighborhood'},{icon:'🌳',text:'Beautiful tree-lined streets with Tudor Revival and Art Deco buildings'},{icon:'🎬',text:'Kew Gardens Cinema is a beloved independent theater'},{icon:'🚇',text:'E/F trains at Union Tpke-Kew Gardens'}]},
+  'Kew Gardens Hills':{ level:'safe', score:3.8, desc:"Quiet residential neighborhood adjacent to Kew Gardens. Generally safe and suburban in character.", tips:[{icon:'✅',text:'Very safe and quiet'},{icon:'🍽️',text:'Main Street has good kosher restaurants and cafes'},{icon:'🏡',text:'Pleasant residential neighborhood'},{icon:'🚌',text:'Bus connection to subway'}]},
+  'Jamaica Estates':{ level:'safe', score:4.0, desc:"One of Queens\' most affluent neighborhoods — large homes, curved tree-lined streets, and very safe. Donald Trump was born here.", tips:[{icon:'✅',text:'Very safe upscale neighborhood'},{icon:'🏡',text:'Beautiful large homes on curved, suburban-feeling streets'},{icon:'🛒',text:'Jamaica Ave has shopping nearby'},{icon:'🚌',text:'QM1 express bus to midtown Manhattan'}]},
+  'Holliswood':{ level:'safe', score:4.0, desc:"Quiet, very safe residential neighborhood in southeastern Queens. Suburban-feeling with excellent housing stock.", tips:[{icon:'✅',text:'Very safe residential neighborhood'},{icon:'🌳',text:'Beautifully tree-lined streets'},{icon:'🏡',text:'Large, well-maintained homes throughout'},{icon:'🚌',text:'Bus connections to Jamaica for subway access'}]},
+  'Jamaica Hills':{ level:'safe', score:3.8, desc:"Quiet residential neighborhood above Jamaica. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌳',text:'Hillier terrain makes for a different feel than flat Queens'},{icon:'🏡',text:'Mix of single and multi-family homes'},{icon:'🚌',text:'Bus connections to Jamaica'}]},
+  'Floral Park':{ level:'safe', score:4.1, desc:"Quiet, affluent residential neighborhood on the Nassau County border. One of Queens\' safest areas.", tips:[{icon:'✅',text:'Very safe — near the Nassau County border'},{icon:'🌸',text:'Known for beautiful gardens and flowering trees in spring'},{icon:'🏡',text:'Predominantly single-family homes'},{icon:'🚇',text:'Long Island Railroad at Floral Park'}]},
+  'Glen Oaks':{ level:'safe', score:4.2, desc:"Very safe, suburban-feeling Queens neighborhood near the Nassau border. Quiet and residential.", tips:[{icon:'✅',text:'Very safe residential neighborhood'},{icon:'🏡',text:'Large apartment complexes and single-family homes'},{icon:'🌳',text:'Suburban feel within city limits'},{icon:'🚌',text:'Q46 bus connects to subway'}]},
+  'Bellerose':{ level:'safe', score:4.1, desc:"Safe residential neighborhood on the Nassau County border — quiet and suburban.", tips:[{icon:'✅',text:'Very safe'},{icon:'🏡',text:'Quiet residential streets'},{icon:'🌳',text:'Near Belmont Park racetrack in Nassau County'},{icon:'🚇',text:'Long Island Railroad at Bellerose'}]},
+  'Douglaston':{ level:'safe', score:4.4, desc:"One of Queens\' most beautiful and exclusive neighborhoods — Victorian homes on waterfront property along Little Neck Bay. Very safe and very quiet.", tips:[{icon:'✅',text:'Very safe — one of NYC\'s most peaceful neighborhoods'},{icon:'🌊',text:'Little Neck Bay waterfront access with beautiful views'},{icon:'🏡',text:'Victorian and Tudor Revival homes throughout'},{icon:'🚇',text:'Long Island Railroad at Douglaston station'}]},
+  'Little Neck':{ level:'safe', score:4.3, desc:"Quiet, residential neighborhood adjacent to Douglaston and Great Neck (Nassau). Safe and suburban.", tips:[{icon:'✅',text:'Very safe and very quiet'},{icon:'🍽️',text:'Northern Blvd has Korean restaurants and local cafes'},{icon:'🌊',text:'Close to Little Neck Bay waterfront'},{icon:'🚇',text:'Long Island Railroad at Little Neck'}]},
+  'Whitestone':{ level:'safe', score:4.2, desc:"Beautiful waterfront neighborhood overlooking the East River and the Whitestone Bridge. Very safe and very quiet.", tips:[{icon:'✅',text:'Very safe waterfront neighborhood'},{icon:'🌉',text:'Whitestone Bridge views are spectacular from the waterfront'},{icon:'🌊',text:'Francis Lewis Park has great access to the water'},{icon:'🚌',text:'Q15 bus — car recommended for more flexibility'}]},
+  'Bay Terrace':{ level:'safe', score:4.1, desc:"Quiet, suburban residential neighborhood in northeastern Queens overlooking the bay. Very safe.", tips:[{icon:'✅',text:'Very safe residential neighborhood'},{icon:'🌊',text:'Bay views and waterfront access'},{icon:'🏡',text:'Primarily low-rise residential'},{icon:'🚌',text:'Car or bus recommended'}]},
+  'College Point':{ level:'safe', score:3.8, desc:"Working-class residential neighborhood on a peninsula in northern Queens. Generally safe and historically an Italian-American community.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌊',text:'Waterfront views of the Sound and Flushing Bay'},{icon:'🍕',text:'Old-school Italian-American delis and restaurants'},{icon:'🚌',text:'Bus connection to Flushing'}]},
+  'Bayside':{ level:'safe', score:4.1, desc:"Quiet, suburban Queens neighborhood with good restaurants along Bell Blvd and waterfront views of Little Neck Bay. Very safe.", tips:[{icon:'✅',text:'Very safe — one of Queens\' most popular residential neighborhoods'},{icon:'🍽️',text:'Bell Blvd has excellent Korean BBQ and seafood restaurants'},{icon:'🌊',text:'Little Neck Bay waterfront is accessible from the neighborhood'},{icon:'🚇',text:'Long Island Railroad at Bayside station'}]},
+  'Glendale':{ level:'safe', score:3.8, desc:"Working-class residential neighborhood adjacent to Forest Park. Generally safe and quiet.", tips:[{icon:'✅',text:'Generally safe residential area'},{icon:'🌳',text:'Forest Park is right next door — 538 acres of forest trails'},{icon:'🍺',text:'A few old-school neighborhood bars on Myrtle Ave'},{icon:'🚌',text:'Bus connections to the subway'}]},
+  'Middle Village':{ level:'safe', score:3.9, desc:"Quiet, predominantly Italian-American residential neighborhood in central Queens. Generally very safe.", tips:[{icon:'✅',text:'Very safe residential neighborhood'},{icon:'🌳',text:'Adjacent to Forest Park with hiking trails'},{icon:'🏡',text:'Charming brick homes throughout'},{icon:'🚌',text:'M train (elevated) and local buses'}]},
+  'Fresh Meadows':{ level:'safe', score:3.8, desc:"Safe, suburban-feeling residential neighborhood with shopping along Fresh Meadow Lane. Generally quiet.", tips:[{icon:'✅',text:'Generally very safe'},{icon:'🛒',text:'Fresh Meadow shopping center for everyday needs'},{icon:'🏡',text:'Predominantly low-rise residential'},{icon:'🚌',text:'Bus connections to subway'}]},
+  'Howard Beach':{ level:'safe', score:3.7, desc:"Italian-American waterfront community adjacent to JFK Airport — very safe with a tight-knit community feel.", tips:[{icon:'✅',text:'Generally very safe residential neighborhood'},{icon:'🍕',text:'Some of the best old-school Italian food in Queens'},{icon:'✈️',text:'Convenient for JFK Airport — AirTrain connection nearby'},{icon:'🚇',text:'A train from Howard Beach/JFK Airport station'}]},
+  'Belle Harbor':{ level:'safe', score:4.2, desc:"Affluent beachside neighborhood on the Rockaway Peninsula with beautiful ocean beaches. Very safe.", tips:[{icon:'✅',text:'Very safe — one of the Rockaway\'s most upscale communities'},{icon:'🏖️',text:'Rockaway Beach is a short walk — excellent Atlantic Ocean surf'},{icon:'🏡',text:'Beautiful single-family homes lining the beach block'},{icon:'🚌',text:'Seasonal ferry from lower Manhattan (summer only)'}]},
+  'Neponsit':{ level:'safe', score:4.4, desc:"Exclusive residential neighborhood on the Rockaway Peninsula — very quiet and very safe.", tips:[{icon:'✅',text:'Very safe — one of NYC\'s most exclusive outer-borough enclaves'},{icon:'🌊',text:'Private beach access with beautiful ocean views'},{icon:'🏡',text:'Large single-family homes'},{icon:'🚌',text:'Bus along the Rockaway Peninsula'}]},
+  'Breezy Point':{ level:'safe', score:4.5, desc:"Gated co-op community at the very tip of the Rockaway Peninsula — private beaches and extremely safe. Only accessible to residents and guests.", tips:[{icon:'✅',text:'Extremely safe — gated community'},{icon:'🌊',text:'Private beach access along the Atlantic'},{icon:'🏡',text:'Predominantly Irish-American tight-knit community'},{icon:'🚌',text:'Bus from Rockaway Park — or ferry in summer'}]},
+  'Alley Pond Park':{ level:'safe', score:4.5, desc:"Large natural park in northeastern Queens with freshwater and saltwater wetlands. Great for hiking and birdwatching.", tips:[{icon:'✅',text:'Safe public park'},{icon:'🌿',text:'One of NYC\'s largest wetland ecosystems inside city limits'},{icon:'🦅',text:'Excellent birdwatching along the trails'},{icon:'🌳',text:'Contains one of the oldest living things in NYC — an ancient tulip tree'}]},
+  'Cunningham Park':{ level:'safe', score:4.5, desc:"Large park in central Queens with tennis courts, ballfields, and a disc golf course. Safe and well-maintained.", tips:[{icon:'✅',text:'Safe recreational park'},{icon:'🎾',text:'Extensive tennis courts available'},{icon:'🌳',text:'Forested paths connect to Alley Pond Park'},{icon:'🚴',text:'Good cycling paths throughout'}]},
+  'Forest Park':{ level:'safe', score:4.4, desc:"500-acre forest park between Woodhaven and Richmond Hill — excellent hiking trails and a bandshell for summer concerts.", tips:[{icon:'✅',text:'Safe recreational park'},{icon:'🌳',text:'Forested trails are well-maintained and popular with walkers and cyclists'},{icon:'🎵',text:'The bandshell hosts free summer concerts'},{icon:'🐿️',text:'Lots of wildlife — look for red-tailed hawks and foxes'}]},
+  'Flushing Meadows Corona Park':{ level:'safe', score:4.0, desc:"Queens\' flagship park — home of the US Open tennis, Citi Field (Mets), the Unisphere, and the New York Hall of Science.", tips:[{icon:'✅',text:'Safe, major attraction'},{icon:'⚾',text:'Citi Field is home to the NY Mets — great for a baseball game'},{icon:'🎾',text:'USTA Billie Jean King National Tennis Center — US Open every August'},{icon:'🌐',text:'The Unisphere is a free iconic photo op'}]},
+  'John F. Kennedy International Airport':{ level:'safe', score:4.5, desc:"JFK International Airport — one of the world's busiest airports. AirTrain connects to the subway.", tips:[{icon:'✅',text:'Safe airport environment'},{icon:'🚇',text:'AirTrain JFK connects to E, J, and Long Island Railroad lines'},{icon:'⏰',text:'Allow 75–90 minutes to midtown Manhattan via transit'},{icon:'🏨',text:'Many hotels cluster around the airport for layovers'}]},
+  'LaGuardia Airport':{ level:'safe', score:4.5, desc:"LaGuardia Airport — convenient for domestic flights. No direct subway — take the Q70 SBS bus to the 7/E/M/F/R trains.", tips:[{icon:'✅',text:'Safe airport environment'},{icon:'🚌',text:'Q70 SBS bus to Jackson Heights-Roosevelt Ave or Woodside (free with MetroCard)'},{icon:'⏰',text:'About 45 minutes to midtown by bus and subway'},{icon:'🏗️',text:'New, modern Terminal B is one of the best in the US'}]},
+  // Caution
+  'Flushing':{ level:'caution', score:3.4, desc:"The most authentic Chinatown outside of China — also home to a major Korean community. The food is extraordinary and diverse, but crime is elevated in some areas. Absolutely worth visiting.", tips:[{icon:'🥟',text:'Main Street Flushing has the most diverse and best Chinese food in the US'},{icon:'🫖',text:'Golden Shopping Mall basement has legendary hand-pulled noodles and dumplings'},{icon:'⚠️',text:'Watch for pickpockets in crowded areas — busy but generally manageable'},{icon:'🚇',text:'7 train terminates at Main St Flushing — 25 minutes from Midtown'}]},
+  'Jackson Heights':{ level:'caution', score:3.2, desc:"One of the most ethnically diverse neighborhoods in the world — South Asian, Latin American, Tibetan, and more. Roosevelt Ave is lined with incredible food. Use caution on quieter blocks.", tips:[{icon:'🍛',text:"74th Street is the best stretch of South Asian food outside of India"},{icon:'🌮',text:'Exceptional and affordable Colombian, Mexican, and Ecuadorian food'},{icon:'⚠️',text:'Elevated crime in some areas — stick to busy commercial streets'},{icon:'🚇',text:'7, E, F, M, R trains at 74th St-Broadway-Jackson Hts'}]},
+  'Corona':{ level:'caution', score:2.8, desc:"Dense, predominantly Mexican and Latin American neighborhood. Lemon Ice King of Corona is legendary. Use caution.", tips:[{icon:'🍋',text:'Lemon Ice King of Corona has served Italian ices since 1944 — unmissable'},{icon:'⚠️',text:'Elevated crime — stick to main streets during the day'},{icon:'🎾',text:'US Open tennis at Flushing Meadows is nearby'},{icon:'🌙',text:'Use caution after dark'}]},
+  'Elmhurst':{ level:'caution', score:3.0, desc:"One of the most ethnically diverse zip codes in the US — excellent food from every cuisine imaginable. Some elevated crime.", tips:[{icon:'🌍',text:'Every imaginable cuisine represented — a true world food destination'},{icon:'🛒',text:'Elmhurst food markets have extraordinary variety'},{icon:'⚠️',text:'Crime varies by block — stick to busy commercial streets'},{icon:'🚇',text:'7, E, F, M, R trains'}]},
+  'East Elmhurst':{ level:'caution', score:3.0, desc:"Residential neighborhood adjacent to LaGuardia Airport. Generally quiet with some elevated crime.", tips:[{icon:'✈️',text:'Very close to LaGuardia Airport'},{icon:'⚠️',text:'Exercise caution on quieter residential streets'},{icon:'🚌',text:'Bus connections to subway'},{icon:'🌙',text:'Use caution after dark'}]},
+  'Jamaica':{ level:'caution', score:2.7, desc:"Major transit hub in southeastern Queens — AirTrain, LIRR, and multiple subways converge here. Elevated crime in some areas but the transit center itself is very safe.", tips:[{icon:'✈️',text:'AirTrain JFK terminal is here — safe and convenient'},{icon:'🚇',text:'E, J, Z subway and Long Island Railroad all stop here'},{icon:'⚠️',text:'Crime elevated away from the transit hub — stay near the station complex'},{icon:'🌙',text:'Not recommended for wandering after dark'}]},
+  'Richmond Hill':{ level:'caution', score:3.0, desc:"Predominantly Indo-Caribbean (Guyanese and Trinidadian) neighborhood — great roti shops and Trinidadian food. Some elevated crime.", tips:[{icon:'🍛',text:'Liberty Ave has excellent and affordable Guyanese and Trinidadian food'},{icon:'⚠️',text:'Exercise caution, especially away from main streets'},{icon:'🚇',text:'A train and local buses'},{icon:'🌙',text:'Use caution after dark'}]},
+  'Woodhaven':{ level:'caution', score:2.9, desc:"Working-class Queens neighborhood along Jamaica Ave. Some elevated crime; Forest Park is a safe green space nearby.", tips:[{icon:'🌳',text:'Forest Park to the north offers excellent hiking trails'},{icon:'⚠️',text:'Elevated crime in some areas — stick to main streets'},{icon:'🚇',text:'J/Z trains on Jamaica Ave'},{icon:'🌙',text:'Use caution after dark'}]},
+  'Ozone Park':{ level:'caution', score:2.9, desc:"Working-class Queens neighborhood. Some elevated crime; the area around Aqueduct Racetrack is OK.", tips:[{icon:'🐎',text:'Resorts World Casino NYC at the Aqueduct Racetrack is here'},{icon:'⚠️',text:'Exercise caution on residential blocks'},{icon:'🚇',text:'A train at Ozone Park-Lefferts Blvd'},{icon:'🌙',text:'Use caution after dark'}]},
+  'South Ozone Park':{ level:'caution', score:2.8, desc:"Residential neighborhood near JFK Airport and Aqueduct Racetrack. Some elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution throughout'},{icon:'🚇',text:'A train at Aqueduct/North Conduit Ave'},{icon:'✈️',text:'Close to JFK Airport'},{icon:'🌙',text:'Not recommended for walking after dark'}]},
+  'Maspeth':{ level:'caution', score:3.1, desc:"Working-class, predominantly Polish and Italian neighborhood. Generally safe along Grand Ave but some elevated crime.", tips:[{icon:'🍕',text:'Excellent old-school Italian pizza and delis along Grand Ave'},{icon:'🥟',text:'Good Polish delis and restaurants'},{icon:'⚠️',text:'Industrial areas can be quiet — stick to commercial strips'},{icon:'🚌',text:'Bus connections to subway'}]},
+  'Ridgewood':{ level:'caution', score:3.3, desc:"Transitional neighborhood on the Queens/Brooklyn border — gentrifying with new bars and restaurants, but some elevated crime.", tips:[{icon:'⚠️',text:'Generally improving but exercise caution on quieter blocks'},{icon:'🍺',text:'Growing bar and restaurant scene along Wyckoff Ave'},{icon:'🏡',text:'Beautiful row houses with unique yellow brick architecture'},{icon:'🚇',text:'M train along Myrtle Ave'}]},
+  'Broad Channel':{ level:'caution', score:3.0, desc:"Tiny island community in Jamaica Bay accessible by causeway. A unique fishing village character within NYC city limits.", tips:[{icon:'🎣',text:'Jamaica Bay fishing is excellent here'},{icon:'🐦',text:'Jamaica Bay Wildlife Refuge is accessible — great birdwatching'},{icon:'⚠️',text:'Use caution and be aware of flooding risks during storms'},{icon:'🚇',text:'A train stops on the island'}]},
+  'Hollis':{ level:'caution', score:2.7, desc:"Southeast Queens residential neighborhood. Elevated crime — limited tourist amenities.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution throughout'},{icon:'🌙',text:'Not recommended for walking after dark'},{icon:'🚌',text:'Bus connections to Jamaica subway hub'},{icon:'🏡',text:'Primarily residential'}]},
+  'Queens Village':{ level:'caution', score:2.8, desc:"Working-class southeastern Queens residential neighborhood. Some elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution'},{icon:'🚌',text:'Bus connections to subway'},{icon:'🌙',text:'Use caution after dark'},{icon:'🏡',text:'Primarily residential'}]},
+  'St. Albans':{ level:'caution', score:2.7, desc:"Southeastern Queens residential neighborhood. Elevated crime — limited tourist amenities.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🏛️',text:"Addisleigh Park sub-neighborhood is a historic African-American landmark community (Lena Horne, Count Basie lived here)"},{icon:'🚌',text:'Bus connections to Jamaica'},{icon:'🌙',text:'Not recommended for walking after dark'}]},
+  'Laurelton':{ level:'caution', score:2.7, desc:"Southeastern Queens residential neighborhood with elevated crime. Limited tourist amenities.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚌',text:'Bus connections to subway'},{icon:'🌙',text:'Not recommended after dark'},{icon:'🏡',text:'Primarily residential'}]},
+  'Cambria Heights':{ level:'caution', score:2.8, desc:"Residential neighborhood in southeastern Queens. Some elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution'},{icon:'🌙',text:'Use caution after dark'},{icon:'🚌',text:'Bus connections'},{icon:'🏡',text:'Primarily residential'}]},
+  'Springfield Gardens':{ level:'caution', score:2.7, desc:"Residential neighborhood near JFK Airport. Elevated crime in some areas.", tips:[{icon:'✈️',text:'Close to JFK Airport'},{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚌',text:'Bus to AirTrain JFK'},{icon:'🌙',text:'Not recommended for walking after dark'}]},
+  'Briarwood':{ level:'caution', score:3.0, desc:"Dense residential neighborhood adjacent to Jamaica. Some elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution, especially at night'},{icon:'🚇',text:'E/F trains at Jamaica-179 St (terminal station)'},{icon:'🏡',text:'Dense apartment buildings throughout'},{icon:'🌙',text:'Use caution after dark'}]},
+  'Arverne':{ level:'caution', score:2.7, desc:"Rockaway Peninsula neighborhood with ocean beaches and a significant public housing presence. Some elevated crime.", tips:[{icon:'🏖️',text:'Beautiful Atlantic Ocean beach access'},{icon:'⚠️',text:'Elevated crime — be aware of your surroundings'},{icon:'🚇',text:'A train to Beach 67 St/Arverne'},{icon:'🌙',text:'Not recommended for wandering after dark'}]},
+  'Edgemere':{ level:'avoid', score:2.2, desc:"Rockaway Peninsula neighborhood with high crime rates. Not recommended for independent tourist visits.", tips:[{icon:'🚫',text:'High crime — avoid wandering independently'},{icon:'🏖️',text:'The beach itself is public and fine — just be very aware of your surroundings'},{icon:'🚇',text:'A train to Beach 44 St or Beach 60 St'},{icon:'📞',text:'Emergency: 911'}]},
+  'Far Rockaway':{ level:'avoid', score:2.0, desc:"Eastern tip of the Rockaway Peninsula with persistently high violent crime rates. Not recommended for independent tourist visits.", tips:[{icon:'🚫',text:'High violent crime — not recommended for tourists'},{icon:'🚗',text:'If visiting the beach, stay on the Boardwalk and be aware'},{icon:'🚇',text:'A/S trains to Far Rockaway'},{icon:'📞',text:'Emergency: 911'}]},
+  'Rockaway Beach':{ level:'caution', score:2.9, desc:"The main stretch of Rockaway Beach — popular surfing destination and NYC's best beach. Generally OK during summer beach season; more caution warranted off-season.", tips:[{icon:'🏄',text:'Rockaway is NYC\'s best surf beach — real breaks in summer'},{icon:'🌊',text:'Fort Tilden (northern end) has the most beautiful and wild beach'},{icon:'⚠️',text:'Exercise caution away from the beach and boardwalk areas'},{icon:'🚇',text:'A train to Beach 90 St or seasonal ferry from lower Manhattan'}]},
+  'Rockaway Park':{ level:'safe', score:3.6, desc:"The western end of the Rockaway Peninsula — safe beachside community with beautiful ocean beaches and a marina.", tips:[{icon:'✅',text:'Generally safe beachside community'},{icon:'🏖️',text:'Excellent beach access and boardwalk'},{icon:'⛵',text:'Rockaway Marine Basin has a marina and fishing'},{icon:'🚇',text:'A train to Rockaway Park-Beach 116 St'}]},
+  'Bayswater':{ level:'caution', score:2.8, desc:"Residential area adjacent to Far Rockaway. Some elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution throughout'},{icon:'🌊',text:'Mott Basin waterfront'},{icon:'🚇',text:'A train nearby'},{icon:'🌙',text:'Use caution after dark'}]},
+};
+
+// ── Bronx zone definitions ────────────────────────────────────────────────────
+const BRONX_ZONE_DEFS = {
+  // Safe
+  'Riverdale':{ level:'safe', score:4.5, desc:"The Bronx's most exclusive neighborhood — stunning Hudson River views, beautiful estate-sized homes, and major institutions like Manhattan College. Feels more like a Westchester suburb than NYC.", tips:[{icon:'✅',text:'Extremely safe — one of the nicest neighborhoods in all of NYC'},{icon:'🌊',text:'Wave Hill public garden has breathtaking Hudson River and Palisades views'},{icon:'🏛️',text:'City Island style seafood restaurants are a short drive away'},{icon:'🚌',text:'Bx10 express bus or Metro-North Hudson Line from Riverdale station'}]},
+  'North Riverdale':{ level:'safe', score:4.4, desc:"Safe, residential extension of Riverdale with beautiful parks and waterfront access. Very quiet.", tips:[{icon:'✅',text:'Very safe residential area'},{icon:'🌊',text:'Spuyten Duyvil waterfront offers stunning views'},{icon:'🌳',text:'Inwood Hill Park is visible across the ship canal'},{icon:'🚂',text:'Metro-North at Spuyten Duyvil or Riverdale station'}]},
+  'Fieldston':{ level:'safe', score:4.6, desc:"Extremely exclusive private residential neighborhood within Riverdale — private roads, large homes, and extraordinary greenery. Private but beautiful from the perimeter.", tips:[{icon:'✅',text:'One of the safest and most exclusive areas in NYC'},{icon:'🌳',text:'Private streets lined with mansion-sized homes'},{icon:'🌊',text:'Hudson River views from the hilltop'},{icon:'🚌',text:'Limited transit — car recommended'}]},
+  'Spuyten Duyvil':{ level:'safe', score:4.3, desc:"Small residential neighborhood on the tip of the Bronx at the confluence of the Hudson and Harlem Ship Canal. Very safe and beautiful.", tips:[{icon:'✅',text:'Very safe and scenic'},{icon:'🌊',text:'Stunning views from the cliff walks above the Hudson'},{icon:'🏛️',text:'Henry Hudson Bridge is nearby — dramatic river crossing'},{icon:'🚂',text:'Metro-North at Spuyten Duyvil station'}]},
+  'City Island':{ level:'safe', score:4.4, desc:"A true anomaly in NYC — a small New England-style fishing village with seafood restaurants, marinas, and a completely unique character. Accessible only by causeway.", tips:[{icon:'✅',text:'Very safe and uniquely charming'},{icon:'🦞',text:'Seafood restaurants line City Island Ave — lobster and clams in the Bronx'},{icon:'⛵',text:'Sailing clubs and marinas throughout — a real boating community'},{icon:'🎨',text:'Small art galleries and antique shops along the main avenue'}]},
+  'Country Club':{ level:'safe', score:4.0, desc:"Quiet waterfront neighborhood in the northeast Bronx overlooking Long Island Sound. Very safe residential area.", tips:[{icon:'✅',text:'Very safe residential neighborhood'},{icon:'🌊',text:'Pelham Bay waterfront access nearby'},{icon:'🏡',text:'Mix of single-family and multi-family homes'},{icon:'🚌',text:'Bx29 bus or car recommended'}]},
+  'Pelham Bay':{ level:'safe', score:3.9, desc:"Residential neighborhood adjacent to Pelham Bay Park — the largest park in NYC. Very safe.", tips:[{icon:'✅',text:'Very safe residential neighborhood'},{icon:'🌳',text:'Pelham Bay Park with 2,772 acres of trails, beaches, and nature'},{icon:'🏖️',text:'Orchard Beach is the Bronx\'s beach — free and well-maintained'},{icon:'🚇',text:'6 train at Pelham Bay Park (last stop)'}]},
+  'Pelham Bay Park':{ level:'safe', score:4.5, desc:"NYC's largest park at 2,772 acres — Orchard Beach, lagoons, forests, and the historic Hunter Island. Free to visit.", tips:[{icon:'✅',text:'Safe public park'},{icon:'🏖️',text:"Orchard Beach is the Bronx's public beach — lively in summer"},{icon:'🌲',text:'Extensive hiking trails through forests and along the water'},{icon:'🦅',text:'Excellent birdwatching throughout the park'}]},
+  'Pelham Gardens':{ level:'safe', score:3.9, desc:"Quiet, generally safe residential neighborhood in the northeast Bronx. Primarily single-family homes.", tips:[{icon:'✅',text:'Generally safe residential area'},{icon:'🏡',text:'Single-family homes throughout'},{icon:'🌳',text:'Close to Pelham Bay Park'},{icon:'🚇',text:'5 train or bus connections'}]},
+  'Eastchester':{ level:'safe', score:4.0, desc:"Generally safe northeastern Bronx residential neighborhood — suburban feel with good community amenities.", tips:[{icon:'✅',text:'Generally safe residential neighborhood'},{icon:'🏡',text:'Mix of houses and apartment buildings'},{icon:'🛒',text:'Eastchester Rd has good shopping and restaurants'},{icon:'🚇',text:'5 train at Baychester Ave'}]},
+  'Baychester':{ level:'safe', score:3.8, desc:"Quiet residential area in the northeastern Bronx. Generally safe.", tips:[{icon:'✅',text:'Generally safe residential area'},{icon:'🛒',text:'Bay Plaza Shopping Center is one of the largest malls in NYC'},{icon:'🚇',text:'5 train at Baychester Ave'},{icon:'🏡',text:'Mix of apartment buildings and homes'}]},
+  'Morris Park':{ level:'safe', score:3.8, desc:"Predominantly Italian-American neighborhood in the central Bronx. Generally safe with a strong community character.", tips:[{icon:'✅',text:'Generally safe residential neighborhood'},{icon:'🍕',text:'Excellent old-school Italian restaurants and delis along Morris Park Ave'},{icon:'🏥',text:'Jacobi and Einstein hospital campuses are nearby'},{icon:'🚇',text:'5 train at Morris Park'}]},
+  'Throgs Neck':{ level:'safe', score:3.8, desc:"Working-class, water-surrounded residential neighborhood at the tip of the Bronx. Generally safe.", tips:[{icon:'✅',text:'Generally safe residential neighborhood'},{icon:'🌊',text:'Surrounded by water on three sides — marina and waterfront views'},{icon:'🌉',text:'Throgs Neck Bridge connects to Queens'},{icon:'🚌',text:'Bx40 bus or car recommended'}]},
+  'Schuylerville':{ level:'safe', score:3.7, desc:"Residential neighborhood adjacent to Throgs Neck. Generally safe and suburban feeling.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌊',text:'Close to Throgs Neck waterfront'},{icon:'🏡',text:'Predominantly residential'},{icon:'🚌',text:'Bus connections to subway'}]},
+  'Westchester Square':{ level:'safe', score:3.6, desc:"Small commercial and residential area in the southeastern Bronx. Generally safe around the main square.", tips:[{icon:'✅',text:'Generally safe around the main commercial area'},{icon:'🛒',text:'Small commercial strip with local shops'},{icon:'⚠️',text:'Use caution on quieter streets after dark'},{icon:'🚇',text:'6 train at Westchester Square-E Tremont Ave'}]},
+  'Wakefield':{ level:'caution', score:3.3, desc:"Residential neighborhood near the Westchester County border. Generally stable, some elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution on quieter streets'},{icon:'🚇',text:'2/5 trains at Nereid Ave or Wakefield-241 St'},{icon:'🏡',text:'Predominantly residential'},{icon:'🌙',text:'Use caution after dark'}]},
+  'Edenwald':{ level:'caution', score:3.0, desc:"Residential neighborhood in the northeast Bronx. Elevated crime in some sections.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🌙',text:'Not recommended for walking after dark'},{icon:'🚇',text:'5 train at Baychester Ave'},{icon:'🏡',text:'Primarily residential'}]},
+  'Williamsbridge':{ level:'caution', score:3.0, desc:"Residential neighborhood in the north Bronx. Some elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution'},{icon:'🚇',text:'2/5 trains at Baychester Ave or Nereid Ave'},{icon:'🌙',text:'Use caution after dark'},{icon:'🏡',text:'Primarily residential'}]},
+  'Olinville':{ level:'caution', score:3.1, desc:"Residential neighborhood in the north Bronx. Generally quiet, some elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution on quieter streets'},{icon:'🚇',text:'5 train at Burke Ave'},{icon:'🏡',text:'Primarily residential'},{icon:'🌙',text:'Use caution after dark'}]},
+  'Co-op City':{ level:'caution', score:3.2, desc:"The world's largest cooperative housing development — 15,000+ apartments in 35 towers. Has its own shopping mall and community. Crime is relatively contained.", tips:[{icon:'⚠️',text:'Generally safe within the complex but exercise normal caution'},{icon:'🛒',text:'Bay Plaza Shopping Center is adjacent — one of NYC\'s largest malls'},{icon:'🏠',text:'35 towers house over 50,000 residents'},{icon:'🚌',text:'Express bus Bx28 and Bx29 or car recommended'}]},
+  'Van Nest':{ level:'caution', score:3.0, desc:"Small working-class residential neighborhood in the central Bronx. Some elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution'},{icon:'🚌',text:'Bus connections'},{icon:'🌙',text:'Use caution after dark'},{icon:'🏡',text:'Primarily residential'}]},
+  'Allerton':{ level:'caution', score:2.9, desc:"Residential neighborhood in the north-central Bronx with elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution throughout'},{icon:'🚇',text:'5 train at Allerton Ave'},{icon:'🌙',text:'Not recommended after dark'},{icon:'🏡',text:'Primarily residential'}]},
+  'Bronxdale':{ level:'caution', score:3.0, desc:"Residential neighborhood adjacent to Bronx Park. Some elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution'},{icon:'🌳',text:'Bronx Park and the Bronx Zoo are nearby'},{icon:'🚇',text:'2/5 trains at Pelham Pkwy'},{icon:'🌙',text:'Use caution after dark'}]},
+  'Parkchester':{ level:'caution', score:3.1, desc:"Large planned residential community in the central Bronx — dense apartment towers with their own shopping and services. Some elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution, especially at night'},{icon:'🛒',text:'Parkchester shopping has good retail options'},{icon:'🚇',text:'6 train at Parkchester and Castle Hill Ave'},{icon:'🌙',text:'Use caution after dark'}]},
+  'Castle Hill':{ level:'caution', score:2.8, desc:"Residential neighborhood in the southeastern Bronx with elevated crime.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚇',text:'6 train at Castle Hill Ave'},{icon:'🌙',text:'Not recommended for walking after dark'},{icon:'🏡',text:'Primarily residential'}]},
+  'Clason Point':{ level:'caution', score:2.8, desc:"Small waterfront neighborhood on the Bronx River. Elevated crime in some areas.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🌊',text:'Clason Point Park has waterfront access'},{icon:'🚌',text:'Bus connections'},{icon:'🌙',text:'Not recommended after dark'}]},
+  'Unionport':{ level:'caution', score:2.8, desc:"Residential neighborhood in the southeastern Bronx. Elevated crime.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution throughout'},{icon:'🚇',text:'6 train nearby'},{icon:'🌙',text:'Not recommended after dark'},{icon:'🏡',text:'Primarily residential'}]},
+  'Fordham':{ level:'caution', score:2.9, desc:"Commercial and residential hub around Fordham University and Fordham Road — NYC's third-busiest shopping street. Good transit, but elevated crime in surrounding areas.", tips:[{icon:'🎓',text:'Fordham University is a beautiful Jesuit university — open grounds'},{icon:'🛒',text:'Fordham Road is one of NYC\'s busiest retail strips — incredible value shopping'},{icon:'⚠️',text:'Elevated crime around the campus and commercial areas — be alert'},{icon:'🚇',text:'4/B/D trains at Fordham Road'}]},
+  'Norwood':{ level:'caution', score:2.9, desc:"Residential neighborhood adjacent to Woodlawn. Elevated crime — not a tourist destination.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🌙',text:'Not recommended after dark'},{icon:'🚇',text:'4 train at Mosholu Pkwy'},{icon:'🏡',text:'Primarily residential'}]},
+  'Belmont':{ level:'caution', score:3.1, desc:"The Bronx's 'Little Italy' — Arthur Ave has some of the most authentic Italian food in NYC, possibly better than what's left in Manhattan's Little Italy. Worth a visit.", tips:[{icon:'🍝',text:'Arthur Ave is a must-visit for Italian food lovers — real delis, pasta, and bread'},{icon:'🧀',text:'Arthur Avenue Retail Market has the best Italian specialty groceries in NYC'},{icon:'✅',text:'Safe for daytime visits along Arthur Ave'},{icon:'⚠️',text:'Use caution on blocks away from Arthur Ave, especially at night'}]},
+  'Kingsbridge':{ level:'caution', score:2.9, desc:"Residential neighborhood in the northwest Bronx. Some elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution'},{icon:'🚇',text:'1 or 4 trains at Kingsbridge Rd or Fordham Rd'},{icon:'🌙',text:'Use caution after dark'},{icon:'🏡',text:'Primarily residential'}]},
+  'University Heights':{ level:'caution', score:2.7, desc:"Residential neighborhood with several university campuses. Elevated crime in surrounding areas.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚇',text:'4 train at 183 St'},{icon:'🌙',text:'Not recommended for walking after dark'},{icon:'🏡',text:'Primarily residential'}]},
+  'Morris Heights':{ level:'avoid', score:2.2, desc:"Residential neighborhood in the west Bronx with high crime rates. Not recommended for independent tourist visits.", tips:[{icon:'🚫',text:'High crime — not recommended for tourists'},{icon:'🚗',text:'Rideshare strongly recommended'},{icon:'📞',text:'Emergency: 911'}]},
+  'Mount Hope':{ level:'avoid', score:2.0, desc:"West Bronx neighborhood with high crime rates. Not recommended for tourists.", tips:[{icon:'🚫',text:'High crime — avoid independently'},{icon:'🚗',text:'Rideshare recommended'},{icon:'📞',text:'Emergency: 911'}]},
+  'Mount Eden':{ level:'avoid', score:2.0, desc:"West Bronx neighborhood with high crime rates. Not recommended for tourists.", tips:[{icon:'🚫',text:'High crime — not recommended'},{icon:'🚗',text:'Rideshare only'},{icon:'📞',text:'Emergency: 911'}]},
+  'Highbridge':{ level:'avoid', score:2.1, desc:"Neighborhood along the Harlem River with high crime rates. Not recommended for independent tourist visits.", tips:[{icon:'🚫',text:'High crime — not recommended for tourists'},{icon:'🌉',text:'High Bridge (the oldest bridge in NYC) is being restored and can be seen from Manhattan'},{icon:'🚗',text:'Rideshare strongly recommended'},{icon:'📞',text:'Emergency: 911'}]},
+  'Concourse':{ level:'caution', score:2.7, desc:"The Grand Concourse — the Bronx's most famous boulevard, lined with Art Deco apartment buildings. Elevated crime but the architecture is historically significant.", tips:[{icon:'🏛️',text:'The Grand Concourse has extraordinary Art Deco architecture — a National Historic District'},{icon:'⚠️',text:'Elevated crime — exercise significant caution'},{icon:'🚗',text:'Drive or rideshare to see the architecture'},{icon:'📞',text:'Emergency: 911 | Non-emergency: 311'}]},
+  'Concourse Village':{ level:'caution', score:2.7, desc:"Residential neighborhood adjacent to the Grand Concourse with elevated crime.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🏛️',text:'Near Yankee Stadium — safe on game days in that immediate area'},{icon:'🚗',text:'Rideshare recommended'},{icon:'🌙',text:'Not recommended for walking after dark'}]},
+  'Tremont':{ level:'avoid', score:2.1, desc:"Central Bronx neighborhood with high crime rates. Not recommended for independent tourist visits.", tips:[{icon:'🚫',text:'High crime — not recommended for tourists'},{icon:'🚗',text:'Rideshare only'},{icon:'📞',text:'Emergency: 911'}]},
+  'West Farms':{ level:'caution', score:2.7, desc:"Residential neighborhood in the central Bronx with elevated crime. The Bronx Zoo is nearby but in a different, safer zone.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🌳',text:'Bronx Zoo entrance is very close — safe destination'},{icon:'🚇',text:'5 train at West Farms Sq-E Tremont Ave'},{icon:'🌙',text:'Use caution after dark'}]},
+  'Bronx Park':{ level:'safe', score:4.2, desc:"Bronx Park is home to both the Bronx Zoo (the largest urban zoo in the US) and the New York Botanical Garden — two world-class attractions.", tips:[{icon:'✅',text:'Safe park area with major attractions'},{icon:'🦁',text:'Bronx Zoo is the largest urban zoo in the US — allow a full day'},{icon:'🌸',text:'New York Botanical Garden is spectacular in spring and summer'},{icon:'🚇',text:'2/5 trains at Pelham Pkwy or the B/D to Botanical Garden'}]},
+  'Crotona Park':{ level:'caution', score:2.5, desc:"Large park in the central Bronx. The park itself has amenities but surrounding neighborhood has elevated crime.", tips:[{icon:'⚠️',text:'Park areas are generally OK during the day — use caution in surrounding neighborhood'},{icon:'🏊',text:'Crotona Pool is a large, free public pool in summer'},{icon:'🚇',text:'2/5 trains at Prospect Ave or East 174 St'},{icon:'🌙',text:'Not recommended after dark'}]},
+  'Van Cortlandt Park':{ level:'safe', score:4.4, desc:"NYC's third-largest park — forests, a lake, golf course, and the oldest public golf course in the US. Safe and excellent for outdoor recreation.", tips:[{icon:'✅',text:'Safe public park'},{icon:'⛳',text:'Van Cortlandt Golf Course is the oldest public golf course in the US'},{icon:'🌲',text:'Extensive hiking and cross-country running trails'},{icon:'🚇',text:'1 train (last stop) at Van Cortlandt Park-242 St'}]},
+  'Woodlawn':{ level:'safe', score:3.8, desc:"Historically Irish-American neighborhood at the northern tip of the Bronx — safe, residential, and home to the beautiful Woodlawn Cemetery.", tips:[{icon:'✅',text:'Generally safe residential neighborhood'},{icon:'⚰️',text:"Woodlawn Cemetery is a National Historic Landmark — Duke Ellington and Miles Davis are buried here"},{icon:'🍺',text:'Several Irish pubs along Katonah Ave'},{icon:'🚇',text:'4 train or Metro-North Harlem Line at Woodlawn'}]},
+  'Longwood':{ level:'avoid', score:2.0, desc:"South Bronx neighborhood with high crime rates. Not recommended for independent tourist visits.", tips:[{icon:'🚫',text:'High crime — not recommended for tourists'},{icon:'🚗',text:'Rideshare only'},{icon:'📞',text:'Emergency: 911'}]},
+  'Morrisania':{ level:'avoid', score:1.9, desc:"South Bronx neighborhood with high crime rates. Not recommended for independent tourist visits.", tips:[{icon:'🚫',text:'High violent crime — not recommended for tourists'},{icon:'🚗',text:'Do not walk here independently'},{icon:'📞',text:'Emergency: 911'}]},
+  'East Morrisania':{ level:'avoid', score:1.9, desc:"South Bronx neighborhood with high crime rates. Not recommended for independent tourist visits.", tips:[{icon:'🚫',text:'High crime — avoid'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Mott Haven':{ level:'caution', score:2.5, desc:"Southernmost Bronx neighborhood undergoing significant investment and gentrification — galleries, restaurants, and the new Bruckner Blvd scene — but still elevated crime. Approach with awareness.", tips:[{icon:'🎨',text:'Growing arts scene and new restaurants along Bruckner Blvd'},{icon:'⚠️',text:'Still elevated crime despite rapid gentrification — be very alert'},{icon:'🚇',text:'6 train at 3rd Ave-138 St'},{icon:'🌙',text:'Not recommended for walking alone after dark'}]},
+  'Port Morris':{ level:'caution', score:2.6, desc:"Industrial waterfront neighborhood transitioning with new venues and creative businesses. Some elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution — isolated industrial streets'},{icon:'🎸',text:'Gramercy Theatre-style music venues and creative spaces'},{icon:'🌊',text:'Waterfront views of the East River and Hell Gate'},{icon:'🚗',text:'Rideshare recommended'}]},
+  'Hunts Point':{ level:'avoid', score:1.7, desc:"South Bronx peninsula with very high crime rates — home to the Hunts Point produce and meat markets. The market area itself has security; surrounding streets are very high risk.", tips:[{icon:'🚫',text:'Very high violent crime — not safe for independent tourist visits'},{icon:'🚗',text:'Do not stop or exit your vehicle on surrounding streets'},{icon:'📞',text:'Emergency: 911'}]},
+  'Melrose':{ level:'avoid', score:1.9, desc:"South Bronx neighborhood with high crime rates. Not recommended for tourists.", tips:[{icon:'🚫',text:'High crime — not recommended for tourists'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Claremont Village':{ level:'avoid', score:1.8, desc:"South Bronx neighborhood with very high crime rates. Not recommended for tourists.", tips:[{icon:'🚫',text:'High crime — avoid completely'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Soundview':{ level:'avoid', score:2.1, desc:"Southeastern Bronx neighborhood with high crime rates. Not recommended for tourists.", tips:[{icon:'🚫',text:'High crime — not recommended for tourists'},{icon:'🚗',text:'Rideshare only'},{icon:'📞',text:'Emergency: 911'}]},
+  'Hart Island':{ level:'safe', score:5.0, desc:"New York City's public burial island — not open to general visitors. Home to the largest publicly funded cemetery in the US.", tips:[{icon:'🚫',text:'Not open to general public — family member access only'},{icon:'⛴️',text:'Limited family visitation by appointment only via DOC'},{icon:'📚',text:'A profound part of NYC history — over 1 million burials since the Civil War'}]},
+  'Rikers Island':{ level:'safe', score:5.0, desc:"New York City's main jail complex — not accessible to the public except for authorized visits.", tips:[{icon:'🚫',text:'Not open to the public — authorized visits only'},{icon:'🏛️',text:'NYC\'s main detention facility, currently slated for closure and redevelopment'}]},
+  'Ferry Point Park':{ level:'safe', score:4.5, desc:"Beautiful park at the foot of the Throgs Neck Bridge featuring a world-class public golf course designed by Jack Nicklaus.", tips:[{icon:'✅',text:'Safe public park and golf course'},{icon:'⛳',text:'Trump Ferry Point Golf Course (now under new management) is a municipal course'},{icon:'🌉',text:'Views of the Throgs Neck Bridge and Long Island Sound'},{icon:'🌿',text:'Beautiful natural waterfront setting'}]},
+};
+
 // ── City configurations ──────────────────────────────────────────────────────
 const CITIES = {
   'new-orleans': {
@@ -1047,6 +1272,24 @@ const CITIES = {
     dateField: 'cmplnt_fr_dt', typeFields: ['ofns_desc', 'pd_desc'],
     bbox: [40.74, -74.04, 40.57, -73.83], bboxField: null,
     baseline: 65, dataSource: 'NYC Open Data', zoneDefs: BROOKLYN_ZONE_DEFS,
+  },
+  'queens': {
+    label: 'Queens, NY',
+    center: [40.7282, -73.7949], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/queens.geojson',
+    crimeEndpoint: 'https://data.cityofnewyork.us/resource/5uac-w243.json',
+    dateField: 'cmplnt_fr_dt', typeFields: ['ofns_desc', 'pd_desc'],
+    bbox: [40.80, -73.97, 40.54, -73.70], bboxField: null,
+    baseline: 60, dataSource: 'NYC Open Data', zoneDefs: QUEENS_ZONE_DEFS,
+  },
+  'bronx': {
+    label: 'The Bronx, NY',
+    center: [40.8448, -73.8648], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/bronx.geojson',
+    crimeEndpoint: 'https://data.cityofnewyork.us/resource/5uac-w243.json',
+    dateField: 'cmplnt_fr_dt', typeFields: ['ofns_desc', 'pd_desc'],
+    bbox: [40.92, -73.94, 40.79, -73.75], bboxField: null,
+    baseline: 55, dataSource: 'NYC Open Data', zoneDefs: BRONX_ZONE_DEFS,
   },
   'seattle': {
     label: 'Seattle, WA',
@@ -1526,6 +1769,7 @@ function switchCity(cityId) {
   map.setView(currentCity.center, currentCity.zoom);
   updateMeta(cityId, currentCity);
   if (window.location.hash.slice(1) !== cityId) window.location.hash = cityId;
+  if (window.innerWidth <= 700) window.scrollTo({ top: 0, behavior: 'smooth' });
   resetPanel();
   init(cityId);
 }
@@ -1565,6 +1809,15 @@ async function init(cityId) {
 }
 
 document.getElementById('city-select').addEventListener('change', e => switchCity(e.target.value));
+
+// ── Methodology modal ──────────────────────────────────────────────────────────
+function openInfoModal()  { document.getElementById('info-modal-overlay').classList.add('open'); }
+function closeInfoModal() { document.getElementById('info-modal-overlay').classList.remove('open'); }
+document.getElementById('info-btn').addEventListener('click', openInfoModal);
+document.getElementById('info-modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('info-modal-overlay')) closeInfoModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeInfoModal(); });
 
 // ── Initial city from URL hash ────────────────────────────────────────────────
 const hashCity = window.location.hash.slice(1);
