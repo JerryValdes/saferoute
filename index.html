@@ -258,7 +258,7 @@
       <option value="new-orleans">New Orleans, LA</option>
       <option value="chicago">Chicago, IL</option>
       <option value="san-francisco">San Francisco, CA</option>
-      <option value="new-york">New York City, NY</option>
+      <option value="new-york">Manhattan, NY</option>
     </select>
   </div>
 </div>
@@ -536,7 +536,7 @@ const CITIES = {
   'san-francisco': {
     label: 'San Francisco, CA',
     center: [37.7749, -122.4194], zoom: 12,
-    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/sf.geojson',
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/san-francisco.geojson',
     crimeEndpoint: 'https://data.sfgov.org/resource/wg3w-h783.json',
     dateField: 'incident_date',
     typeFields: ['incident_category', 'incident_subcategory'],
@@ -547,13 +547,13 @@ const CITIES = {
     zoneDefs: {},
   },
   'new-york': {
-    label: 'New York City, NY',
-    center: [40.7128, -74.0060], zoom: 11,
-    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/new-york-city.geojson',
+    label: 'Manhattan, NY',
+    center: [40.7831, -73.9712], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/manhattan.geojson',
     crimeEndpoint: 'https://data.cityofnewyork.us/resource/5uac-w243.json',
     dateField: 'cmplnt_fr_dt',
     typeFields: ['ofns_desc', 'pd_desc'],
-    bbox: [40.92, -74.26, 40.49, -73.70],
+    bbox: [40.88, -74.02, 40.70, -73.90],
     bboxField: null,
     baseline: 70,
     dataSource: 'NYC Open Data',
