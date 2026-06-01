@@ -313,6 +313,71 @@
     .modal-code    { background: var(--bg); border: 1px solid var(--border); padding: 1px 5px; border-radius: 3px; font-size: 11.5px; font-family: 'SF Mono','Consolas',monospace; }
     .modal-disc    { font-size: 11px; color: var(--muted); margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); line-height: 1.65; }
 
+    /* ─── Search ─── */
+    #search-wrap {
+      padding: 10px 14px 0;
+      position: relative;
+      flex-shrink: 0;
+    }
+    #search-input {
+      width: 100%;
+      padding: 7px 30px 7px 30px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-size: 13px;
+      font-family: inherit;
+      background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 9px center;
+      outline: none;
+      color: var(--text);
+    }
+    #search-input:focus { border-color: #94a3b8; }
+    #search-input::-webkit-search-cancel-button { -webkit-appearance: none; }
+    #search-results {
+      position: absolute; left: 14px; right: 14px;
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 7px; box-shadow: 0 4px 16px rgba(0,0,0,.12);
+      z-index: 500; max-height: 220px; overflow-y: auto;
+      display: none;
+    }
+    #search-results.open { display: block; }
+    .search-item {
+      padding: 9px 13px; font-size: 13px; cursor: pointer;
+      border-bottom: 1px solid var(--border);
+    }
+    .search-item:last-child { border-bottom: none; }
+    .search-item:hover { background: var(--bg); }
+
+    /* ─── Trend indicator ─── */
+    .trend-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11.5px; font-weight: 600;
+      padding: 3px 9px; border-radius: 99px;
+      margin-left: 8px;
+    }
+    .trend-improving { background: #dcfce7; color: #166534; }
+    .trend-worsening { background: #fee2e2; color: #991b1b; }
+    .trend-stable    { background: #f1f5f9; color: #64748b; }
+
+    /* ─── City overview ─── */
+    .ov-panel { padding: 4px 0; }
+    .ov-city  { font-size: 16px; font-weight: 700; margin-bottom: 14px; }
+    .ov-section { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; color: var(--muted); margin-bottom: 7px; }
+    .ov-row {
+      display: flex; align-items: center; gap: 9px;
+      padding: 7px 10px; border-radius: 7px;
+      cursor: pointer; margin-bottom: 3px;
+      transition: background .12s;
+    }
+    .ov-row:hover { background: var(--bg); }
+    .ov-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .ov-safe    { background: var(--safe); }
+    .ov-caution { background: var(--caution); }
+    .ov-avoid   { background: var(--avoid); }
+    .ov-name  { flex: 1; font-size: 13px; color: var(--text); }
+    .ov-score { font-size: 12px; font-weight: 600; color: var(--muted); }
+    .ov-divider { height: 1px; background: var(--border); margin: 10px 0; }
+    .ov-hint  { font-size: 11.5px; color: var(--muted); text-align: center; margin-top: 14px; }
+
     /* ─── Mobile ─── */
     @media (max-width: 700px) {
       body { overflow: auto; }
@@ -357,6 +422,12 @@
       <option value="boston">Boston, MA</option>
       <option value="washington-dc">Washington, DC</option>
       <option value="philadelphia">Philadelphia, PA</option>
+      <option value="miami">Miami, FL</option>
+      <option value="atlanta">Atlanta, GA</option>
+      <option value="denver">Denver, CO</option>
+      <option value="portland">Portland, OR</option>
+      <option value="baltimore">Baltimore, MD</option>
+      <option value="detroit">Detroit, MI</option>
     </select>
   </div>
   <button id="info-btn" aria-label="About SafeRoute">?</button>
@@ -365,6 +436,10 @@
 <div id="main">
   <div id="map"><div id="map-loading"><div class="map-spinner"></div>Loading neighborhoods…</div></div>
   <div id="sidebar">
+    <div id="search-wrap">
+      <input id="search-input" type="search" placeholder="Search neighborhoods…" autocomplete="off">
+      <div id="search-results"></div>
+    </div>
     <div id="panel"></div>
     <div id="legend">
       <div class="leg-title">Safety Level</div>
@@ -408,6 +483,12 @@
       <tr><td>Boston</td><td>Boston Open Data (CKAN OData)</td></tr>
       <tr><td>Washington, DC</td><td>DC GIS / MPD (ArcGIS REST)</td></tr>
       <tr><td>Philadelphia</td><td>OpenDataPhilly (Socrata)</td></tr>
+      <tr><td>Miami</td><td>Miami Open Data (Socrata)</td></tr>
+      <tr><td>Atlanta</td><td>Atlanta PD (ArcGIS REST)</td></tr>
+      <tr><td>Denver</td><td>Denver Open Data (Socrata)</td></tr>
+      <tr><td>Portland</td><td>Portland PD (ArcGIS REST)</td></tr>
+      <tr><td>Baltimore</td><td>Open Baltimore (Socrata)</td></tr>
+      <tr><td>Detroit</td><td>Detroit Open Data (Socrata)</td></tr>
     </table>
 
     <div class="modal-h">About the descriptions</div>
@@ -1271,6 +1352,177 @@ const STATEN_ISLAND_ZONE_DEFS = {
   'Hoffman Island':{ level:'safe', score:5.0, desc:"Small island in New York Harbor — historically a quarantine station, now uninhabited and not publicly accessible.", tips:[{icon:'🚫',text:'Not open to the public'},{icon:'🏛️',text:'Historic quarantine station — can be seen from the St. George ferry area'}]},
 };
 
+// ── Miami zone definitions ───────────────────────────────────────────────────
+const MIAMI_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:4.0, desc:"Miami's business and cultural core — Bayside Marketplace, the Pérez Art Museum Miami, and Bayfront Park. Very active day and night with cruise terminal traffic and a growing residential population.", tips:[{icon:'✅',text:'Generally safe in the main tourist corridors'},{icon:'🎨',text:'Pérez Art Museum Miami (PAMM) is stunning — free every first Saturday'},{icon:'⛵',text:'Bayside Marketplace has boat tours and a lively waterfront'},{icon:'🚌',text:'Metromover (free) connects Downtown to Brickell and Edgewater'}]},
+  'Wynwood':{ level:'safe', score:4.1, desc:"Miami's world-famous arts district — the Wynwood Walls outdoor street art museum transformed a former garment district into the hottest neighborhood in Miami. Galleries, excellent restaurants, and buzzing nightlife.", tips:[{icon:'✅',text:'Very safe and always busy — one of Miami\'s top tourist destinations'},{icon:'🎨',text:'Wynwood Walls is free to walk by and has some of the best street art in the world'},{icon:'🍽️',text:'Excellent restaurants along NW 2nd Ave and 26th Street'},{icon:'🍺',text:'Many craft breweries and rooftop bars throughout'}]},
+  'Upper Eastside':{ level:'safe', score:3.9, desc:"Revitalized neighborhood along Biscayne Blvd north of Downtown — Mid-century modern motels, galleries, and a growing restaurant scene. Generally safe and improving.", tips:[{icon:'✅',text:'Generally safe and gentrifying quickly'},{icon:'🏛️',text:'Miami Modern (MiMo) architecture district along Biscayne Blvd'},{icon:'🍽️',text:'Growing independent restaurant and bar scene'},{icon:'🌊',text:'Bayside parks along the Intracoastal'}]},
+  'North Coconut Grove':{ level:'safe', score:4.1, desc:"The northern, wealthier side of Coconut Grove — tree-canopied streets, upscale restaurants, the Coconut Grove Playhouse, and great access to Peacock Park and the bayfront.", tips:[{icon:'✅',text:'Very safe and very walkable'},{icon:'🌳',text:'Peacock Park has beautiful Biscayne Bay views'},{icon:'🍽️',text:'Grand Ave and Main Hwy have excellent dining'},{icon:'⛵',text:'Coconut Grove Marina is the largest in Florida'}]},
+  'South Coconut Grove':{ level:'safe', score:4.2, desc:"Miami's oldest neighborhood — lush tropical streets, Vizcaya Museum and Gardens, and a true village feel. One of the safest and most charming parts of Miami.", tips:[{icon:'✅',text:'Very safe — beautiful and historic'},{icon:'🏛️',text:'Vizcaya Museum and Gardens is a stunning Italian Renaissance villa on the bay'},{icon:'🌿',text:'Fairchild Tropical Botanic Garden has world-class plant collections'},{icon:'🚣',text:'Kayak rentals available on the Grove waterfront'}]},
+  'Coral Way':{ level:'safe', score:3.9, desc:"Historic coral-tree-lined boulevard connecting Downtown Miami to Coral Gables. Safe residential neighborhood with Cuban-American character.", tips:[{icon:'✅',text:'Generally safe residential neighborhood'},{icon:'🌳',text:'Coral Way itself is a beautiful, tree-canopied historic road'},{icon:'☕',text:'Good Cuban cafes and bakeries throughout'},{icon:'🚌',text:'Bus connections to Downtown and Coral Gables'}]},
+  'Flagami':{ level:'caution', score:3.0, desc:"Established Cuban-American residential neighborhood west of Little Havana. Some elevated crime — limited tourist draw.", tips:[{icon:'⚠️',text:'Exercise caution on quieter streets'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'},{icon:'🏡',text:'Primarily residential — limited tourist amenities'}]},
+  'West Flagler':{ level:'caution', score:2.9, desc:"Working-class residential neighborhood west of Downtown. Some elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution throughout'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Not recommended after dark'},{icon:'🏡',text:'Primarily residential'}]},
+  'Little Havana':{ level:'caution', score:3.2, desc:"The heart of Miami's Cuban-American culture — Calle Ocho (SW 8th Street) is lined with cigars, domino parks, street food, and the famous Calle Ocho Festival. Generally safe along the main commercial strip.", tips:[{icon:'🎵',text:'Calle Ocho Walk of Stars and the famous domino park at Maximo Gomez Park'},{icon:'🥩',text:'Versailles Restaurant is the most famous Cuban restaurant in the US'},{icon:'🎭',text:'Tower Theater hosts indie films and Cuban cultural events'},{icon:'⚠️',text:'Stick to Calle Ocho and main commercial strips; side streets need caution'}]},
+  'Allapattah':{ level:'caution', score:3.0, desc:"Former industrial neighborhood gentrifying rapidly with the Rubell Museum and new galleries. Still elevated crime on residential blocks.", tips:[{icon:'🎨',text:'Rubell Museum is one of the best private contemporary art collections in the US'},{icon:'⚠️',text:'Still eleviated crime away from the main galleries and museum strip'},{icon:'🚗',text:'Rideshare recommended'},{icon:'🌙',text:'Use caution after dark on residential blocks'}]},
+  'Little Haiti':{ level:'avoid', score:2.2, desc:"Historically significant Haitian-American neighborhood with elevated crime. Some gentrification is beginning but the area is not recommended for independent tourist visits.", tips:[{icon:'⚠️',text:'Elevated crime — exercise significant caution'},{icon:'🎨',text:'Little Haiti Cultural Complex has cultural events and art worth seeking out'},{icon:'🚗',text:'Rideshare recommended over walking'},{icon:'🌙',text:'Not recommended after dark for independent visitors'}]},
+  'Model City':{ level:'avoid', score:1.8, desc:"Liberty City — one of Miami's most historically underserved neighborhoods with persistently high violent crime. Not recommended for tourists.", tips:[{icon:'🚫',text:'High violent crime — not recommended for tourists'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Overtown':{ level:'avoid', score:1.9, desc:"Once the 'Harlem of the South,' Overtown is historically significant but has struggled with severe poverty and crime. Not recommended for independent tourist visits.", tips:[{icon:'🚫',text:'High violent crime — not safe for independent visits'},{icon:'🏛️',text:'Historic Lyric Theater is a cultural landmark worth a guided visit'},{icon:'🚗',text:'Rideshare directly to any destination and back'},{icon:'📞',text:'Emergency: 911'}]},
+  'Islands':{ level:'safe', score:4.6, desc:"The barrier islands — Miami Beach, Key Biscayne, and the Venetian Islands. These are some of the most sought-after and safest areas in Miami.", tips:[{icon:'✅',text:'Very safe — tourist corridor'},{icon:'🏖️',text:'South Beach (Miami Beach) has the world-famous Art Deco district and beach'},{icon:'🌊',text:'Key Biscayne has quieter, beautiful beaches away from the crowds'},{icon:'🚌',text:'Miami Beach accessible by Metrobus and the Miami Beach trolley'}]},
+};
+
+// ── Atlanta zone definitions ───────────────────────────────────────────────────
+const ATLANTA_ZONE_DEFS = {
+  'Midtown':{ level:'safe', score:4.3, desc:"Atlanta's cultural heart — the High Museum of Art, the Fox Theatre, Piedmont Park, and a dense restaurant and nightlife scene. Very safe and walkable.", tips:[{icon:'✅',text:'Very safe — one of Atlanta\'s best neighborhoods for visitors'},{icon:'🎨',text:'High Museum of Art is the premier art museum in the Southeast'},{icon:'🎭',text:'Fox Theatre is a stunning 1929 movie palace hosting Broadway shows'},{icon:'🌳',text:'Piedmont Park is Atlanta\'s Central Park — great for walks and events'}]},
+  'Inman Park':{ level:'safe', score:4.4, desc:"Atlanta's first planned suburb — gorgeous Victorian mansions, the Beltline, and a vibrant restaurant scene on Edgewood Ave. Very safe.", tips:[{icon:'✅',text:'Very safe and beautiful'},{icon:'🚶',text:'Atlanta BeltLine Eastside Trail is right here — walk or bike to Ponce City Market'},{icon:'🍽️',text:'Edgewood Ave has excellent restaurants and bars'},{icon:'🌸',text:'Inman Park Festival in spring is one of Atlanta\'s best events'}]},
+  'Old Fourth Ward':{ level:'safe', score:4.1, desc:"MLK's birth neighborhood, now home to Ponce City Market, the BeltLine, and vibrant restaurants. Transformed in recent years.", tips:[{icon:'✅',text:'Generally very safe around Ponce City Market and the BeltLine'},{icon:'🏛️',text:'Martin Luther King Jr. National Historic Site is just east of here'},{icon:'🛒',text:'Ponce City Market is the best food hall and shopping in Atlanta'},{icon:'🚶',text:'BeltLine Eastside Trail runs right through'}]},
+  'Virginia-Highland':{ level:'safe', score:4.5, desc:"Atlanta's most charming walkable neighborhood — Victorian homes, boutiques, and excellent restaurants along Virginia Ave and North Highland. Very safe.", tips:[{icon:'✅',text:'Very safe — a local favorite for good reason'},{icon:'🍽️',text:'Some of Atlanta\'s best restaurants are concentrated here'},{icon:'☕',text:'Great independent cafes throughout'},{icon:'🛍️',text:'Highland Ave has excellent independent boutiques and bookshops'}]},
+  'Poncey-Highland':{ level:'safe', score:4.3, desc:"Eclectic neighborhood adjacent to Virginia-Highland and the BeltLine — diverse restaurants, and a creative community. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🚶',text:'Atlanta BeltLine access nearby'},{icon:'🍽️',text:'Excellent diverse dining along Ponce de Leon Ave'},{icon:'🌳',text:'Freedom Park has a beautiful path along the BeltLine'}]},
+  'Little Five Points':{ level:'safe', score:4.0, desc:"Atlanta's counterculture hub — vintage shops, punk bars, and the famous Variety Playhouse. Safe and eclectic.", tips:[{icon:'✅',text:'Generally very safe — very active area'},{icon:'🎵',text:'Variety Playhouse is one of Atlanta\'s best live music venues'},{icon:'🛍️',text:'Outstanding vintage and record stores throughout'},{icon:'☕',text:'Great independent coffee shops and dive bars'}]},
+  'Cabbagetown':{ level:'safe', score:4.2, desc:"Tiny, charming former mill village with colorful shotgun houses, great street art, and the BeltLine. Very safe.", tips:[{icon:'✅',text:'Very safe and very unique'},{icon:'🎨',text:'Fantastic street murals throughout the neighborhood'},{icon:'🚶',text:'BeltLine Eastside Trail is right here'},{icon:'🍺',text:'Wylie Street has good bars and casual restaurants'}]},
+  'Grant Park':{ level:'safe', score:4.1, desc:"Historic neighborhood surrounding Grant Park and Zoo Atlanta — beautiful Victorian-era homes and a great community feel.", tips:[{icon:'✅',text:'Very safe residential neighborhood'},{icon:'🦁',text:'Zoo Atlanta has pandas, gorillas, and excellent animal exhibits'},{icon:'🌳',text:'Grant Park has a beautiful lake and historic fortifications'},{icon:'🚶',text:'BeltLine South loop passes through'}]},
+  'Candler Park':{ level:'safe', score:4.3, desc:"One of Atlanta's most beloved neighborhoods — Craftsman bungalows, great restaurants, the BeltLine, and a strong community feel. Very safe.", tips:[{icon:'✅',text:'Very safe — excellent quality of life'},{icon:'🍽️',text:'Candler Park Market and restaurants along McLendon Ave'},{icon:'⛳',text:'Candler Park Golf Course is a historic public 9-hole course'},{icon:'🚶',text:'BeltLine Eastside Trail passes right through'}]},
+  'Lake Claire':{ level:'safe', score:4.3, desc:"Bohemian, wooded residential neighborhood adjacent to Candler Park. Extremely safe and community-oriented.", tips:[{icon:'✅',text:'Very safe and peaceful'},{icon:'🌿',text:'Lake Claire Land Trust nature preserve has forested trails'},{icon:'🏡',text:'Beautiful eclectic homes with community garden'},{icon:'🍽️',text:'Candler Park restaurants are a short walk away'}]},
+  'Kirkwood':{ level:'safe', score:4.0, desc:"Revitalized neighborhood with great restaurants along Hosea Williams Drive and the BeltLine. Very safe and improving.", tips:[{icon:'✅',text:'Very safe and rapidly improving'},{icon:'🍽️',text:'Excellent restaurants along Hosea Williams Dr'},{icon:'🚶',text:'BeltLine South loop is nearby'},{icon:'🏡',text:'Beautiful Craftsman bungalows throughout'}]},
+  'East Atlanta':{ level:'safe', score:3.9, desc:"Gritty, independent neighborhood with great bars and restaurants along Flat Shoals and Glenwood Ave. Generally safe.", tips:[{icon:'✅',text:'Generally safe along main commercial strips'},{icon:'🎵',text:'Graveyard Tavern, 529, and other great live music venues'},{icon:'🍺',text:'East Atlanta Village has excellent dive bars and craft spots'},{icon:'⚠️',text:'Stay on main commercial strips — some side streets need caution'}]},
+  'Reynoldstown':{ level:'safe', score:4.0, desc:"Revitalized neighborhood adjacent to Inman Park with the BeltLine running through. Very safe and improving.", tips:[{icon:'✅',text:'Very safe'},{icon:'🚶',text:'BeltLine Eastside Trail'},{icon:'🍽️',text:'Great restaurants along Wylie Street and Memorial Drive'},{icon:'🏡',text:'Historic bungalows and new development side by side'}]},
+  'Glenwood Park':{ level:'safe', score:4.0, desc:"Newer mixed-use development adjacent to the BeltLine. Very safe, walkable, and well-designed.", tips:[{icon:'✅',text:'Very safe planned community'},{icon:'🚶',text:'BeltLine access'},{icon:'🍽️',text:'Good restaurants and amenities on-site'},{icon:'🌳',text:'Beautiful parks and green spaces throughout'}]},
+  'Atlantic Station':{ level:'safe', score:4.2, desc:"Modern mixed-use development in Midtown with retail, restaurants, and frequent events. Very safe.", tips:[{icon:'✅',text:'Very safe — well-patrolled'},{icon:'🛍️',text:'Large retail center with major stores and restaurants'},{icon:'🎬',text:'AMC movie theater and frequent outdoor events'},{icon:'🚶',text:'Free shuttle to MARTA Arts Center station'}]},
+  'Ansley Park':{ level:'safe', score:4.6, desc:"Exclusive early 20th-century neighborhood adjacent to Piedmont Park — stunning Tudor and Colonial Revival homes. Very safe.", tips:[{icon:'✅',text:'Very safe and extraordinarily beautiful'},{icon:'🌳',text:'One of the most beautiful neighborhoods in Atlanta'},{icon:'🏛️',text:'Adjacent to the High Museum and Atlanta Botanical Garden'},{icon:'🌿',text:'Borders Piedmont Park'}]},
+  'Morningside / Lenox Park':{ level:'safe', score:4.5, desc:"Affluent residential neighborhood with beautiful homes and the Morningside Nature Preserve. Very safe.", tips:[{icon:'✅',text:'Very safe and very livable'},{icon:'🌿',text:'Morningside Nature Preserve has great hiking trails'},{icon:'🛒',text:'Excellent local shops and restaurants on Amsterdam Ave'},{icon:'🚗',text:'Car recommended — limited transit'}]},
+  'Druid Hills':{ level:'safe', score:4.4, desc:"Historic Frederick Law Olmsted-designed suburb — Emory University, the CDC, and beautiful parkway homes. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🎓',text:'Emory University\'s beautiful campus is open to visitors'},{icon:'🌳',text:'Olmsted Linear Park is a gorgeous parkway'},{icon:'🏛️',text:'Callanwolde Fine Arts Center hosts events in a beautiful mansion'}]},
+  'Sweet Auburn':{ level:'caution', score:3.0, desc:"The birthplace of the Civil Rights Movement and Martin Luther King Jr. — the MLK Historic Site is essential. Some elevated crime adjacent to the main attractions.", tips:[{icon:'🏛️',text:'MLK National Historic Site is a must-visit — free and very moving'},{icon:'⚠️',text:'Stick to the main tourist corridor around Auburn Ave'},{icon:'🏛️',text:'Ebenezer Baptist Church and the MLK Center are adjacent'},{icon:'🚗',text:'Rideshare recommended for arrival and departure'}]},
+  'Downtown':{ level:'caution', score:3.1, desc:"Atlanta's central business district with Centennial Olympic Park, Georgia Aquarium, and the World of Coca-Cola. Very safe at the major attractions; some elevated crime on surrounding streets.", tips:[{icon:'✅',text:'Very safe at the Centennial Park entertainment district'},{icon:'🐠',text:'Georgia Aquarium is the largest in the Western Hemisphere'},{icon:'🥤',text:'World of Coca-Cola is genuinely fun — great for families'},{icon:'⚠️',text:'Use caution on streets away from the tourist core after dark'}]},
+  'Edgewood':{ level:'caution', score:3.1, desc:"Transitional neighborhood between Inman Park and Sweet Auburn with good restaurants. Some elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution on quieter residential streets'},{icon:'🍽️',text:'Edgewood Ave has increasingly good restaurants'},{icon:'🚶',text:'BeltLine nearby'},{icon:'🌙',text:'Use caution after dark'}]},
+  'Home Park':{ level:'caution', score:3.0, desc:"Neighborhood adjacent to Georgia Tech with a large student population. Safe near campus, some elevated crime further from it.", tips:[{icon:'🎓',text:'Georgia Tech campus is close and safe'},{icon:'⚠️',text:'Exercise caution on blocks away from the campus'},{icon:'🚇',text:'MARTA North Ave station'},{icon:'🌙',text:'Use caution after dark away from main streets'}]},
+  'Georgia Tech':{ level:'safe', score:4.0, desc:"Georgia Tech University campus — clean, patrolled, and a great place to visit for architecture and campus culture.", tips:[{icon:'✅',text:'Very safe on-campus'},{icon:'🎓',text:'Beautiful Tech Tower and classic collegiate architecture'},{icon:'🏈',text:'Bobby Dodd Stadium for college football games'},{icon:'🚇',text:'MARTA North Ave or Midtown stops'}]},
+  'West End':{ level:'caution', score:2.7, desc:"Historic neighborhood with significant African-American history — Spelman and Morehouse colleges are nearby. Some elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution throughout'},{icon:'🎓',text:'Spelman, Morehouse, and Clark Atlanta are all nearby — important HBCUs'},{icon:'🚇',text:'MARTA West End station'},{icon:'🌙',text:'Not recommended for walking after dark'}]},
+  'English Avenue':{ level:'avoid', score:1.7, desc:"West Side neighborhood with very high crime rates. Not recommended for independent tourist visits.", tips:[{icon:'🚫',text:'High violent crime — not recommended for tourists'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Vine City':{ level:'avoid', score:1.8, desc:"Historic neighborhood adjacent to the new Mercedes-Benz Stadium with high crime rates. Not recommended for independent tourist visits.", tips:[{icon:'🚫',text:'High crime — not recommended for tourists'},{icon:'🚗',text:'Rideshare directly to the stadium and back if attending events'},{icon:'📞',text:'Emergency: 911'}]},
+  'The Bluff':{ level:'avoid', score:1.5, desc:"One of Atlanta's most high-crime areas. Not recommended for tourists under any circumstances.", tips:[{icon:'🚫',text:'Extremely high violent crime — avoid completely'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Bankhead':{ level:'avoid', score:1.7, desc:"Northwest Atlanta neighborhood with persistently high crime rates. Not recommended for tourists.", tips:[{icon:'🚫',text:'High crime — not recommended for tourists'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Pittsburgh':{ level:'caution', score:2.8, desc:"South Atlanta neighborhood with elevated crime near the BeltLine. Limited tourist amenities.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚶',text:'BeltLine South loop passes through'},{icon:'🚗',text:'Rideshare recommended'},{icon:'🌙',text:'Not recommended after dark'}]},
+  'Mechanicsville':{ level:'caution', score:2.7, desc:"South Atlanta neighborhood with elevated crime. Limited tourist amenities.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚗',text:'Rideshare recommended'},{icon:'🌙',text:'Not recommended after dark'},{icon:'📞',text:'Emergency: 911'}]},
+  'Peoplestown':{ level:'caution', score:2.8, desc:"South Atlanta neighborhood near the stadium and the BeltLine. Some elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution'},{icon:'🚶',text:'BeltLine South loop nearby'},{icon:'🚗',text:'Rideshare recommended'},{icon:'🌙',text:'Use caution after dark'}]},
+  'Summerhill':{ level:'caution', score:3.0, desc:"South Atlanta neighborhood undergoing significant investment near the stadium. Improving rapidly but still some elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution — improving rapidly'},{icon:'🍽️',text:'New restaurants and development along Georgia Ave'},{icon:'🚗',text:'Rideshare recommended'},{icon:'🌙',text:'Use caution after dark'}]},
+};
+
+// ── Denver zone definitions ───────────────────────────────────────────────────
+const DENVER_ZONE_DEFS = {
+  'Union Station':{ level:'safe', score:4.4, desc:"Denver's beautifully restored 1914 train station is now a destination in itself — the Great Hall bar, Terminal Bar, and excellent restaurants in the adjacent 16th Street Mall area. Very safe.", tips:[{icon:'✅',text:'Very safe — always busy'},{icon:'🍸',text:'The Great Hall inside Union Station is one of the most beautiful bars in Colorado'},{icon:'🚇',text:'Light Rail and Amtrak hub connecting to downtown, airport, and the mountains'},{icon:'🛒',text:'16th Street Mall pedestrian mall is a short walk east'}]},
+  'CBD':{ level:'safe', score:4.1, desc:"Denver's central business district with the Colorado State Capitol, Civic Center Park, and the Denver Art Museum. Very safe during the day.", tips:[{icon:'✅',text:'Very safe during the day'},{icon:'🏛️',text:'Denver Art Museum has one of the best American Indian art collections in the world'},{icon:'⚡',text:'Colorado State Capitol building tours are free'},{icon:'🌙',text:'Downtown area quiets down significantly after business hours'}]},
+  'Civic Center':{ level:'safe', score:4.0, desc:"The government and civic arts hub of Denver — City Park, the Denver Public Library, and the Denver Art Museum are clustered here.", tips:[{icon:'✅',text:'Very safe during the day'},{icon:'🎨',text:'Denver Art Museum and Clyfford Still Museum are world-class'},{icon:'🌿',text:'Civic Center Park hosts excellent food festivals'},{icon:'🌙',text:'Use caution after dark — area empties out'}]},
+  'LoDo':{ level:'safe', score:4.2, desc:"Lower Downtown — Denver's historic warehouse district turned restaurant and bar hub. Coors Field, excellent restaurants, and the best nightlife in the city. Very safe.", tips:[{icon:'✅',text:'Very safe — one of the most active areas in Denver'},{icon:'⚾',text:'Coors Field (Colorado Rockies) is a beautiful ballpark — arrive early for rooftop views'},{icon:'🍺',text:'Denver Beer Company and dozens of other craft breweries in the neighborhood'},{icon:'🚌',text:'16th Street Mall free shuttle runs through LoDo'}]},
+  'Highland':{ level:'safe', score:4.3, desc:"Trendy neighborhood just across the 16th Street Bridge from LoDo — excellent restaurants along 32nd Ave, boutiques, and great Denver skyline views from Confluence Park.", tips:[{icon:'✅',text:'Very safe — one of Denver\'s hottest neighborhoods'},{icon:'🌆',text:'Confluence Park has the best Denver skyline views'},{icon:'🍽️',text:'32nd Ave and Tennyson Street have outstanding restaurants and bars'},{icon:'🚴',text:'Excellent biking along Cherry Creek and South Platte trails'}]},
+  'West Highland':{ level:'safe', score:4.2, desc:"Residential extension of Highland — quieter, beautiful Craftsman homes, and excellent restaurants along Tennyson Street. Very safe.", tips:[{icon:'✅',text:'Very safe and charming'},{icon:'🛍️',text:'Tennyson Street has excellent boutiques, bookshops, and restaurants'},{icon:'🎵',text:'Tennyson Street is Denver\'s arts district'},{icon:'🏡',text:'Beautiful early 20th-century bungalow architecture throughout'}]},
+  'Jefferson Park':{ level:'safe', score:4.0, desc:"Hip neighborhood adjacent to Mile High Stadium with great craft bars and Denver skyline views. Very safe.", tips:[{icon:'✅',text:'Very safe and improving'},{icon:'🏈',text:'Mile High Stadium (Empower Field) is right here — great for Broncos games'},{icon:'🍺',text:'Excellent craft bars along 25th Ave'},{icon:'🌆',text:'Jefferson Park itself has great Downtown and mountain views'}]},
+  'Cheesman Park':{ level:'safe', score:4.2, desc:"Beautiful neighborhood surrounding Cheesman Park — one of Denver's most gorgeous green spaces with mountain views. Very safe residential area.", tips:[{icon:'✅',text:'Very safe and beautiful'},{icon:'🌄',text:'Cheesman Park has stunning Rocky Mountain views on clear days'},{icon:'🌹',text:'Denver Botanic Gardens is at the edge of the neighborhood — world-class'},{icon:'🏡',text:'Beautiful Victorian and Colonial Revival homes throughout'}]},
+  'Congress Park':{ level:'safe', score:4.2, desc:"Family-friendly residential neighborhood adjacent to the Denver Botanic Gardens. Very safe.", tips:[{icon:'✅',text:'Very safe residential neighborhood'},{icon:'🌸',text:'Denver Botanic Gardens — worth a full day visit especially in spring'},{icon:'🏊',text:'Congress Park Pool in summer'},{icon:'🏡',text:'Beautiful Craftsman homes throughout'}]},
+  'Cherry Creek':{ level:'safe', score:4.4, desc:"Denver's upscale shopping and dining district — Cherry Creek Mall, excellent independent restaurants, and the Cherry Creek Trail. Very safe.", tips:[{icon:'✅',text:'Very safe — upscale retail and dining district'},{icon:'🛍️',text:'Cherry Creek Shopping Center and the Cherry Creek North boutique district'},{icon:'🍽️',text:'Some of Denver\'s best restaurants are concentrated here'},{icon:'🚴',text:'Cherry Creek Trail is excellent for biking to downtown'}]},
+  'Washington Park':{ level:'safe', score:4.5, desc:"Denver's most beloved park neighborhood — two lakes, joggers, cyclists, volleyball courts, and beautiful homes surrounding the park. One of Denver's safest areas.", tips:[{icon:'✅',text:'Extremely safe — one of the best urban parks in the country'},{icon:'🌊',text:'Two lakes with boat rentals, swimming (historic bath house), and rowing'},{icon:'🚴',text:'2.6-mile loop around the park for runners and cyclists'},{icon:'🍽️',text:'Old South Pearl Street has excellent restaurants nearby'}]},
+  'Platt Park':{ level:'safe', score:4.3, desc:"Quiet, affluent neighborhood adjacent to Washington Park — South Pearl Street farmers market and excellent dining. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🛒',text:'South Pearl Street Farmers Market on Sundays is excellent'},{icon:'🍽️',text:'South Pearl Street has outstanding independent restaurants'},{icon:'🏡',text:'Beautiful early 20th-century homes throughout'}]},
+  'Sloan Lake':{ level:'safe', score:4.1, desc:"Neighborhood surrounding Sloan's Lake Park — the second-largest park in Denver with a beautiful lake. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌊',text:'Sloan\'s Lake has a 2.6-mile loop and paddleboard rentals'},{icon:'🍺',text:'Edgewater Public Market nearby has good food hall and brewery'},{icon:'🏡',text:'Beautiful residential streets around the lake'}]},
+  'City Park':{ level:'safe', score:4.1, desc:"Surrounding Denver's largest park — the Denver Zoo and Denver Museum of Nature and Science are both here. Very safe.", tips:[{icon:'✅',text:'Very safe park neighborhood'},{icon:'🦒',text:'Denver Zoo is excellent — one of the best in the country'},{icon:'🦕',text:'Denver Museum of Nature and Science has great dinosaur exhibits'},{icon:'🌄',text:'City Park Pavilion has great mountain views over the lake'}]},
+  'Baker':{ level:'safe', score:3.8, desc:"Artsy South Broadway neighborhood with antique stores, restaurants, and the Denver Center for the Performing Arts nearby. Generally safe.", tips:[{icon:'✅',text:'Generally safe along main streets'},{icon:'🎭',text:'South Broadway has great antique stores and art galleries'},{icon:'🍺',text:'Excellent bars along Broadway'},{icon:'⚠️',text:'Some blocks need caution late at night'}]},
+  'Sunnyside':{ level:'safe', score:3.9, desc:"Hip North Denver neighborhood with Tennyson Street restaurants and a growing arts scene. Generally safe.", tips:[{icon:'✅',text:'Generally safe and growing'},{icon:'🎨',text:'Tennyson Street Cultural District has murals and galleries'},{icon:'🍽️',text:'Excellent restaurants and coffee shops on Tennyson'},{icon:'🏡',text:'Beautiful historic homes throughout'}]},
+  'University Park':{ level:'safe', score:4.2, desc:"Quiet residential neighborhood around the University of Denver. Very safe.", tips:[{icon:'✅',text:'Very safe university neighborhood'},{icon:'🎓',text:'University of Denver has a beautiful campus open to visitors'},{icon:'🌳',text:'Observatory Park is a lovely neighborhood green space'},{icon:'🚌',text:'Light Rail University-Denver station'}]},
+  'North Capitol Hill':{ level:'caution', score:3.1, desc:"Transitional neighborhood between Capitol Hill and LoDo. Some elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution on quieter streets'},{icon:'🌙',text:'Use caution after dark'},{icon:'🚌',text:'16th Street Mall and light rail nearby'},{icon:'🏡',text:'Mix of residential and commercial'}]},
+  'Capitol Hill':{ level:'caution', score:2.8, desc:"Dense, eclectic neighborhood around the State Capitol — diverse restaurants and music venues, but elevated property crime and some safety concerns. Popular but requires awareness.", tips:[{icon:'⚠️',text:'Elevated property crime — watch your belongings and vehicle'},{icon:'🎵',text:'Fillmore Auditorium and Ogden Theatre are excellent mid-size venues'},{icon:'⚠️',text:'Colfax Ave around here has persistent street issues'},{icon:'🚌',text:'Light Rail 16th & California stop'}]},
+  'East Colfax':{ level:'caution', score:2.6, desc:"East Colfax has been called America's longest commercial street — it has grit, dive bars, and some excellent food, but also elevated crime and street issues.", tips:[{icon:'⚠️',text:'Exercise significant caution — persistent street activity on Colfax'},{icon:'🌙',text:'Not recommended for walking alone at night'},{icon:'🚌',text:'Light Rail East Colfax corridor'},{icon:'🍽️',text:'Some excellent hidden restaurants exist — do your research before going'}]},
+  'West Colfax':{ level:'caution', score:2.7, desc:"West side of the Colfax corridor. Some elevated crime; improving with new development but still requires caution.", tips:[{icon:'⚠️',text:'Exercise caution'},{icon:'🚌',text:'Light Rail on Colfax'},{icon:'🌙',text:'Use caution after dark'},{icon:'🏡',text:'Transitional neighborhood with new development'}]},
+  'Five Points':{ level:'caution', score:2.9, desc:"Historic heart of Denver's African-American community — the 'Harlem of the West' — now gentrifying with breweries and restaurants. Some elevated crime.", tips:[{icon:'🎵',text:'Rossonian Hotel ballroom is a landmark of Black jazz history'},{icon:'🍺',text:'Growing brewery and restaurant scene'},{icon:'⚠️',text:'Elevated crime in some areas — use caution'},{icon:'🚇',text:'Light Rail 30th & Downing stop'}]},
+  'Lincoln Park':{ level:'caution', score:2.9, desc:"West-side neighborhood adjacent to Mile High Stadium. Elevated crime; safe during Broncos/Rockies games near the stadiums.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🏈',text:'Safe immediately around Mile High Stadium on game days'},{icon:'🚗',text:'Rideshare recommended'},{icon:'🌙',text:'Not recommended for walking after dark'}]},
+  'Sun Valley':{ level:'avoid', score:2.0, desc:"West Denver neighborhood with very high crime rates and significant homelessness. Not recommended for tourists.", tips:[{icon:'🚫',text:'Very high crime — not recommended for tourists'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Globeville':{ level:'avoid', score:2.0, desc:"Industrial neighborhood with high crime rates. Not recommended for tourists.", tips:[{icon:'🚫',text:'High crime — not recommended for tourists'},{icon:'🏭',text:'Industrial area with no tourist amenities'},{icon:'📞',text:'Emergency: 911'}]},
+  'Montbello':{ level:'caution', score:2.8, desc:"Northeast Denver residential neighborhood near DIA. Some elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution'},{icon:'✈️',text:'Convenient for Denver International Airport'},{icon:'🚌',text:'RTD bus connections'},{icon:'🌙',text:'Use caution after dark'}]},
+  'DIA':{ level:'safe', score:4.5, desc:"Denver International Airport — one of the largest airports in the world with good transit and famously bizarre public art.", tips:[{icon:'✅',text:'Safe airport environment'},{icon:'🚇',text:'University of Colorado A Line light rail to Union Station — 37 minutes'},{icon:'🎨',text:'DIA has some truly bizarre and fascinating public art — look for the murals'},{icon:'✈️',text:'Allow extra time — DIA is very large'}]},
+};
+
+// ── Portland zone definitions ─────────────────────────────────────────────────
+const PORTLAND_ZONE_DEFS = {
+  'Pearl District':{ level:'safe', score:4.3, desc:"Portland's most polished neighborhood — converted warehouses now house upscale galleries, restaurants, and Powell's Books (the largest independent bookstore in the world). Very safe.", tips:[{icon:'✅',text:'Very safe and walkable'},{icon:'📚',text:"Powell's Books on Burnside is the world's largest independent bookstore — allow hours"},{icon:'🎨',text:'The Pearl has more galleries per block than almost anywhere in the Northwest'},{icon:'🍽️',text:'Excellent restaurants along NW Glisan and Hoyt streets'}]},
+  'Northwest':{ level:'safe', score:4.2, desc:"The fashionable NW 23rd Ave shopping and restaurant corridor — 'Trendy-Third' — and the adjacent Forest Park trails. Very safe.", tips:[{icon:'✅',text:'Very safe and very walkable'},{icon:'🛍️',text:"NW 23rd Ave has Portland's best boutiques, bakeries, and restaurants"},{icon:'🌲',text:'Forest Park is 5,200 acres of old-growth forest in the city'},{icon:'☕',text:'World Naked Bike Ride, independent shops — very Portland atmosphere'}]},
+  'Irvington':{ level:'safe', score:4.3, desc:"Beautiful historic neighborhood with Victorian and Craftsman homes, tree-lined streets, and excellent neighborhood cafes. Very safe.", tips:[{icon:'✅',text:'Very safe and very beautiful'},{icon:'🏡',text:'Some of Portland\'s finest Victorian homes'},{icon:'☕',text:'Excellent neighborhood cafes along NE Broadway'},{icon:'🌳',text:'Tree-canopied streets are spectacular in fall'}]},
+  'Alameda':{ level:'safe', score:4.4, desc:"Quiet, affluent hilltop neighborhood with stunning views of Mount Hood and the Cascades. Very safe.", tips:[{icon:'✅',text:'Very safe residential neighborhood'},{icon:'🌋',text:'Views of Mount Hood from Alameda Ridge are stunning on clear days'},{icon:'🏡',text:'Beautiful early 20th-century homes'},{icon:'☕',text:'Beaumont Village has good local cafes'}]},
+  'Concordia':{ level:'safe', score:4.0, desc:"Diverse, laid-back Northeast Portland neighborhood with excellent restaurants along Alberta Street. Generally safe.", tips:[{icon:'✅',text:'Generally very safe'},{icon:'🎨',text:'Alberta Arts District — galleries, murals, and the Last Thursday art walk'},{icon:'🍽️',text:'Excellent and diverse restaurants on NE Alberta Street'},{icon:'☕',text:'Great independent coffee shops throughout'}]},
+  'Sellwood-Moreland':{ level:'safe', score:4.3, desc:"Charming antique district in Southeast Portland with excellent brunch spots and easy Willamette River access. Very safe.", tips:[{icon:'✅',text:'Very safe — one of Portland\'s most pleasant neighborhoods'},{icon:'🛋️',text:'Sellwood is the antique capital of Portland — great for browsing'},{icon:'🌊',text:'Oaks Bottom Wildlife Refuge — urban wetland right in the city'},{icon:'☕',text:'Moreland has excellent brunch spots and coffee houses'}]},
+  'Eastmoreland':{ level:'safe', score:4.5, desc:"Beautiful residential neighborhood adjacent to Reed College and the Crystal Springs Rhododendron Garden. Very safe.", tips:[{icon:'✅',text:'Very safe and very beautiful'},{icon:'🌸',text:'Crystal Springs Rhododendron Garden peaks in April and May — stunning'},{icon:'🎓',text:"Reed College campus is one of the country's most intellectually distinctive"},{icon:'🌳',text:'Tree-lined streets with some of Portland\'s finest homes'}]},
+  'Richmond':{ level:'safe', score:4.0, desc:"Classic Southeast Portland neighborhood along Division Street — one of Portland's best food streets. Generally safe.", tips:[{icon:'✅',text:'Generally very safe'},{icon:'🍽️',text:"Division Street is one of the best restaurant strips in Portland"},{icon:'☕',text:'Excellent coffee shops throughout the neighborhood'},{icon:'🏡',text:'Beautiful Craftsman bungalows and Victorian homes'}]},
+  'Hosford-Abernethy':{ level:'safe', score:3.9, desc:"The Buckman neighborhood along SE Morrison and Belmont — antique row, good restaurants, and access to the waterfront. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🛋️',text:'SE Morrison has a great antique row'},{icon:'🍽️',text:'SE Belmont has excellent restaurants'},{icon:'🌊',text:'Close to the Willamette River waterfront'}]},
+  'Mount Tabor':{ level:'safe', score:4.2, desc:"Southeast Portland neighborhood surrounding Mount Tabor Park — a dormant volcano in the middle of the city with stunning city and mountain views. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌋',text:'Mount Tabor is a dormant cinder cone volcano with great views'},{icon:'🌲',text:'The park has old-growth trees and beautiful reservoirs'},{icon:'🍽️',text:'Excellent SE Hawthorne and Division restaurants nearby'}]},
+  'Boise':{ level:'safe', score:3.9, desc:"The Mississippi Ave neighborhood — one of Portland's best examples of a revitalized commercial corridor. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🍻',text:"Mississippi Ave has excellent bars, restaurants, and shops"},{icon:'🎵',text:'Mississippi Studios is a beloved small music venue'},{icon:'🌳',text:'Beautiful residential streets off Mississippi Ave'}]},
+  'Kenton':{ level:'caution', score:3.2, desc:"North Portland neighborhood with a small historic commercial district and improving safety. Some elevated crime.", tips:[{icon:'⚠️',text:'Some elevated crime — exercise caution'},{icon:'🍺',text:'Kenton neighborhood has a few good local bars'},{icon:'🚇',text:'MAX Yellow Line at Kenton/N Denver Ave'},{icon:'🌙',text:'Use caution after dark'}]},
+  'Downtown':{ level:'caution', score:2.9, desc:"Portland's downtown has struggled significantly with street conditions and public safety in recent years. Pioneer Courthouse Square and Powell's are worth visiting, but the area requires awareness and has high visible homelessness.", tips:[{icon:'⚠️',text:'Exercise significant caution — significant street activity and property crime'},{icon:'📚',text:"Powell's Books on W Burnside is worth going for — very safe inside"},{icon:'🌹',text:"Portland Saturday Market under the Burnside Bridge is excellent on weekends"},{icon:'🚇',text:'MAX Light Rail connects downtown to the city efficiently'}]},
+  'Old Town-Chinatown':{ level:'avoid', score:2.0, desc:"Portland's most challenging neighborhood — Old Town has historically high rates of street disorder, drug activity, and crime. Not recommended for tourists to wander independently.", tips:[{icon:'🚫',text:'Not recommended for independent wandering — high street disorder'},{icon:'⚠️',text:'If visiting Powell\'s (nearby), go directly and return directly'},{icon:'🚗',text:'Rideshare strongly recommended over walking in this area'},{icon:'📞',text:'Emergency: 911'}]},
+  'Lents':{ level:'caution', score:2.8, desc:"Southeast Portland neighborhood with some elevated crime. Improving with BeltLine-style connections.", tips:[{icon:'⚠️',text:'Exercise caution'},{icon:'🌙',text:'Use caution after dark'},{icon:'🚌',text:'Bus connections'},{icon:'🏡',text:'Primarily residential'}]},
+  'Powellhurst':{ level:'caution', score:2.7, desc:"Outer Southeast Portland neighborhood with elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution throughout'},{icon:'🌙',text:'Not recommended after dark'},{icon:'🚌',text:'Bus connections'},{icon:'🏡',text:'Primarily residential'}]},
+  'St. Johns':{ level:'safe', score:3.8, desc:"Charming, somewhat isolated neighborhood in North Portland at the foot of the St. Johns Bridge. Generally safe with a good commercial strip.", tips:[{icon:'✅',text:'Generally safe and charming'},{icon:'🌉',text:'St. Johns Bridge is one of the most beautiful bridges in the Pacific Northwest'},{icon:'🛍️',text:"Philadelphia's commercial district has good local shops and restaurants"},{icon:'🌊',text:'Cathedral Park under the bridge is a beautiful green space'}]},
+  'Woodlawn':{ level:'caution', score:3.0, desc:"North Portland neighborhood. Some elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution'},{icon:'🚌',text:'Bus connections'},{icon:'🌙',text:'Use caution after dark'},{icon:'🏡',text:'Primarily residential'}]},
+  'Forest Park':{ level:'safe', score:4.6, desc:"5,200-acre urban forest on the west hills — the largest urban forest reserve in the United States. Excellent trails for hiking.", tips:[{icon:'✅',text:'Safe public park'},{icon:'🌲',text:'The largest urban forest in the US — hundreds of miles of trails'},{icon:'🦅',text:'Excellent birdwatching throughout the forest'},{icon:'🥾',text:'Wildwood Trail runs the full length of the park — 30+ miles total'}]},
+  'Lloyd':{ level:'caution', score:3.0, desc:"Convention Center and Lloyd Center Mall district. Safe around the convention center; some elevated crime elsewhere.", tips:[{icon:'⚠️',text:'Exercise caution away from the main commercial areas'},{icon:'🎤',text:'Oregon Convention Center and Moda Center arena are here'},{icon:'🚇',text:'MAX Red/Blue lines on the Lloyd District'},{icon:'🌙',text:'Use caution after dark away from busy areas'}]},
+};
+
+// ── Baltimore zone definitions ────────────────────────────────────────────────
+const BALTIMORE_ZONE_DEFS = {
+  'Federal Hill':{ level:'safe', score:4.4, desc:"Baltimore's most tourist-friendly neighborhood — the Fort McHenry National Monument, stunning harbor views from Federal Hill Park, and a vibrant bar and restaurant scene on Cross Street. Very safe.", tips:[{icon:'✅',text:'Very safe — excellent for visitors'},{icon:'🏛️',text:"Fort McHenry is where Francis Scott Key wrote 'The Star-Spangled Banner' — free to visit"},{icon:'🌊',text:'Federal Hill Park has the best panoramic views of the Inner Harbor'},{icon:'🍺',text:'Cross Street Market has excellent food stalls and the famous Matsuri crab'}]},
+  'Fells Point':{ level:'safe', score:4.3, desc:"Baltimore's oldest waterfront neighborhood — cobblestone streets, the Broadway Market, and an outstanding bar and restaurant scene. Very safe and lively.", tips:[{icon:'✅',text:'Very safe — heavily visited tourist area'},{icon:'🦀',text:'L.P. Steamers and Nick\'s Fish House are the best Old Bay crab spots in the city'},{icon:'🍺',text:'Thames Street has excellent bars packed on weekends'},{icon:'🛒',text:"Broadway Market has been serving Baltimore since 1786"}]},
+  'Canton':{ level:'safe', score:4.4, desc:"Gentrified waterfront neighborhood east of Fells Point — Canton Square and O'Donnell Square are the hubs. Very safe.", tips:[{icon:'✅',text:'Very safe — very popular with locals and visitors'},{icon:'🦀',text:'Bo Brooks Crab House is a Baltimore tradition'},{icon:'🏃',text:"Canton Waterfront Park has great harbor views and a good jogging path"},{icon:'🍺',text:"O'Donnell Square is surrounded by bars — great for bar-hopping"}]},
+  'Inner Harbor':{ level:'safe', score:4.0, desc:"Baltimore's tourist centerpiece — the National Aquarium, the Maryland Science Center, and historic ships docked at the waterfront. Very safe during the day.", tips:[{icon:'✅',text:'Very safe during the day — busy tourist area'},{icon:'🐠',text:'National Aquarium is world-class — one of the best in the US'},{icon:'⛵',text:'USS Constellation — a Civil War-era Navy ship — is docked at the harbor'},{icon:'🌙',text:'Inner Harbor promenade is safe at night but less lively than Fells Point/Canton'}]},
+  'Mount Vernon':{ level:'safe', score:4.2, desc:"Baltimore's cultural neighborhood — the Walters Art Museum, the Peabody Conservatory, and the Washington Monument (the first Washington Monument in the US). Very safe.", tips:[{icon:'✅',text:'Very safe and very walkable'},{icon:'🎨',text:'Walters Art Museum has outstanding ancient art collections — free admission'},{icon:'🏛️',text:'First Washington Monument (predates DC\'s) is here — free to climb'},{icon:'🎵',text:'Peabody Conservatory hosts frequent free concerts'}]},
+  'Charles Village':{ level:'safe', score:4.1, desc:"Johns Hopkins University neighborhood — safe, walkable, and home to the Baltimore Museum of Art. The university hospital complex is adjacent.", tips:[{icon:'✅',text:'Very safe near the university'},{icon:'🎨',text:"Baltimore Museum of Art has one of the world's best Matisse collections — free admission"},{icon:'🎓',text:'Johns Hopkins University campus is open and beautiful'},{icon:'🍺',text:'The Ave (N Charles Street) has good restaurants and bars'}]},
+  'Hampden':{ level:'safe', score:4.1, desc:"Baltimore's artsy, quirky, hipster neighborhood — The Avenue (36th Street) is lined with independent shops, restaurants, and bars. Very safe.", tips:[{icon:'✅',text:'Very safe and very fun'},{icon:'🛍️',text:"'The Avenue' (36th Street) has outstanding independent shops"},{icon:'🎄',text:"The Miracle on 34th Street Christmas lights display is a Baltimore institution"},{icon:'🍺',text:'Several excellent craft bars and breweries along 36th Street'}]},
+  'Remington':{ level:'safe', score:3.9, desc:"Up-and-coming neighborhood adjacent to Hampden with R. House food hall and growing restaurant scene. Generally safe.", tips:[{icon:'✅',text:'Generally safe and improving'},{icon:'🍽️',text:'R. House food hall is one of Baltimore\'s best dining experiences'},{icon:'🍺',text:"Union Craft Brewing is a Baltimore favorite"},{icon:'⚠️',text:'Some blocks away from the main commercial strip need caution'}]},
+  'Bolton Hill':{ level:'safe', score:4.3, desc:"Beautiful historic district of Federal and Italianate townhouses adjacent to MICA (Maryland Institute College of Art). Very safe.", tips:[{icon:'✅',text:'Very safe and very beautiful'},{icon:'🎓',text:'MICA (Maryland Institute College of Art) has excellent student gallery shows'},{icon:'🏛️',text:'Maryland Historical Society has exceptional collection'},{icon:'🌳',text:'Beautiful tree-lined streets with preserved historic architecture'}]},
+  'Otterbein':{ level:'safe', score:4.3, desc:"Small, beautifully preserved neighborhood of 18th-century rowhouses adjacent to Camden Yards. Very safe.", tips:[{icon:'✅',text:'Very safe and charming'},{icon:'⚾',text:'Camden Yards — one of the most beautiful ballparks in baseball — is right next door'},{icon:'🏛️',text:'18th-century houses are exceptionally well-preserved'},{icon:'🌳',text:"Riverside Park is a quiet green space"}]},
+  'South Baltimore':{ level:'safe', score:4.0, desc:"Neighborhood between Federal Hill and the water — safe residential area with a strong neighborhood feel.", tips:[{icon:'✅',text:'Very safe residential neighborhood'},{icon:'⚾',text:'Walking distance from Camden Yards'},{icon:'🌊',text:'Middle Branch Fitness and Nature Center on the waterfront'},{icon:'🏡',text:'Classic Baltimore rowhouse architecture throughout'}]},
+  'Locust Point':{ level:'safe', score:4.1, desc:"Working-class waterfront neighborhood where Francis Scott Key watched the bombardment of Fort McHenry — safe, residential, and home to Fort McHenry itself.", tips:[{icon:'✅',text:'Very safe'},{icon:'🏛️',text:'Fort McHenry is the main attraction — free national monument'},{icon:'🍺',text:'Latrobe Park has a neighborhood feel'},{icon:'🏡',text:'Classic Baltimore rowhouses and some new development'}]},
+  'Roland Park':{ level:'safe', score:4.6, desc:"One of the first planned suburbs in the US — beautiful early 20th-century architecture, Roland Park Shopping Center, and Roland Park Country School. Very safe.", tips:[{icon:'✅',text:'Extremely safe — one of Baltimore\'s most affluent neighborhoods'},{icon:'🏡',text:'Stunning variety of early 20th-century home styles'},{icon:'🛒',text:'Roland Park Shopping Center is a historic 1896 shopping center'},{icon:'🌳',text:'Beautiful tree-canopied streets throughout'}]},
+  'Guilford':{ level:'safe', score:4.5, desc:"Extremely safe, exclusive neighborhood adjacent to Johns Hopkins — grand Tudor and Georgian homes on private streets. One of Baltimore's safest areas.", tips:[{icon:'✅',text:'Extremely safe — one of the most exclusive neighborhoods in Baltimore'},{icon:'🏛️',text:'Some of the most beautiful early 20th-century homes in the Mid-Atlantic'},{icon:'🌳',text:'Beautiful landscaped properties'},{icon:'🎓',text:'Walking distance from Johns Hopkins'}]},
+  'Patterson Park':{ level:'caution', score:3.1, desc:"Diverse neighborhood surrounding Patterson Park — one of Baltimore's largest parks. Safe around the park; elevated crime on surrounding streets.", tips:[{icon:'🌳',text:'Patterson Park has a beautiful Chinese Pagoda and great walking paths'},{icon:'⚠️',text:'Elevated crime on some surrounding streets — stay near the park'},{icon:'🦀',text:'Some of the most authentic Polish and Hispanic bakeries in Baltimore nearby'},{icon:'🌙',text:'Use caution after dark away from the park'}]},
+  'Waverly':{ level:'caution', score:3.0, desc:"North Baltimore neighborhood with elevated crime in some areas. Memorial Stadium site is here.", tips:[{icon:'⚠️',text:'Exercise caution, especially at night'},{icon:'🛒',text:'32nd Street Farmers Market is one of Baltimore\'s best'},{icon:'🚗',text:'Rideshare recommended at night'},{icon:'🌙',text:'Use caution after dark'}]},
+  'Broadway East':{ level:'avoid', score:1.8, desc:"East Baltimore neighborhood with very high violent crime rates. Not recommended for tourists.", tips:[{icon:'🚫',text:'High violent crime — not recommended for tourists'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Sandtown-Winchester':{ level:'avoid', score:1.6, desc:"West Baltimore neighborhood with very high violent crime rates. Not recommended for tourists.", tips:[{icon:'🚫',text:'Very high violent crime — not recommended for tourists'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Harlem Park':{ level:'avoid', score:1.7, desc:"West Baltimore neighborhood with persistently high violent crime rates. Not recommended for tourists.", tips:[{icon:'🚫',text:'High violent crime — avoid completely'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Cherry Hill':{ level:'avoid', score:1.8, desc:"South Baltimore public housing neighborhood with high crime rates. Not recommended for tourists.", tips:[{icon:'🚫',text:'High crime — not recommended for tourists'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Druid Heights':{ level:'avoid', score:1.8, desc:"West Baltimore neighborhood with high violent crime rates. Not recommended for tourists.", tips:[{icon:'🚫',text:'High violent crime — avoid'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Johnston Square':{ level:'avoid', score:1.8, desc:"East Baltimore neighborhood with high crime rates. Not recommended for tourists.", tips:[{icon:'🚫',text:'High crime — avoid'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Highlandtown':{ level:'caution', score:3.0, desc:"Historic Greek and Hispanic neighborhood east of Canton — authentic Latin food along Eastern Ave and improving. Use caution.", tips:[{icon:'🌮',text:'Eastern Ave has excellent and authentic Mexican and Salvadoran food'},{icon:'⚠️',text:'Exercise caution on quieter streets'},{icon:'🚗',text:'Rideshare recommended at night'},{icon:'🌙',text:'Use caution after dark'}]},
+  'Greektown':{ level:'caution', score:3.0, desc:"Historic Greek neighborhood in southeast Baltimore. Generally OK on main strips; some elevated crime.", tips:[{icon:'🥙',text:'Some excellent Greek restaurants remaining along Eastern Ave'},{icon:'⚠️',text:'Exercise caution on residential streets'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}]},
+  'Little Italy':{ level:'safe', score:4.0, desc:"Historic Italian neighborhood adjacent to the Inner Harbor — authentic Italian restaurants and a close-knit community. Safe.", tips:[{icon:'✅',text:'Safe and charming'},{icon:'🍝',text:'Amicci\'s, Vaccaro\'s, and Sabatino\'s are Little Italy institutions'},{icon:'🇮🇹',text:'Free outdoor movie screenings on summer Friday nights'},{icon:'🌊',text:'Easy walking distance from the Inner Harbor'}]},
+  'Pigtown':{ level:'caution', score:2.9, desc:"Working-class neighborhood (Washington Village) adjacent to Camden Yards. Improving with new development but still some crime.", tips:[{icon:'⚠️',text:'Exercise caution'},{icon:'⚾',text:'Walking distance from Camden Yards'},{icon:'🚗',text:'Rideshare recommended at night'},{icon:'🌙',text:'Use caution after dark'}]},
+  'Reservoir Hill':{ level:'caution', score:2.9, desc:"North-central Baltimore neighborhood adjacent to Druid Hill Park — beautiful Victorian architecture and Druid Lake. Elevated crime.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🌳',text:'Druid Hill Park has the Maryland Zoo and beautiful green space'},{icon:'🚗',text:'Rideshare recommended'},{icon:'🌙',text:'Not recommended for walking after dark'}]},
+  'Station North':{ level:'caution', score:3.0, desc:"Arts and Entertainment District centered on North Charles Street — galleries, indie theaters, and Station North Arts District. Some elevated crime.", tips:[{icon:'🎨',text:'Motor House and other venues make this an arts hub'},{icon:'⚠️',text:'Exercise caution, especially after events end'},{icon:'🎭',text:'Everyman Theatre and other performance spaces'},{icon:'🌙',text:'Use caution walking after dark'}]},
+  'Upton':{ level:'avoid', score:1.7, desc:"West Baltimore neighborhood with high violent crime rates. Not recommended for tourists.", tips:[{icon:'🚫',text:'High violent crime — not recommended for tourists'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+};
+
+// ── Detroit zone definitions ───────────────────────────────────────────────────
+const DETROIT_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:4.2, desc:"Detroit's revived downtown core — Campus Martius Park, the Riverwalk, Comerica Park, and an emerging restaurant and bar scene. Very safe in the main entertainment district.", tips:[{icon:'✅',text:'Very safe — Detroit\'s downtown revival has been remarkable'},{icon:'⚾',text:'Comerica Park (Tigers) and Little Caesars Arena (Lions/Pistons/Wings) are here'},{icon:'🌊',text:'Detroit Riverwalk along the waterfront is free and beautiful'},{icon:'🎨',text:'Detroit Institute of Arts in Midtown is world-class'}]},
+  'Midtown':{ level:'safe', score:4.3, desc:"Detroit's cultural heart — the Detroit Institute of Arts, the Detroit Symphony Orchestra, the Charles H. Wright Museum, and Wayne State University. Very safe and very walkable.", tips:[{icon:'✅',text:'Very safe — one of the best-recovering areas in Detroit'},{icon:'🎨',text:'Detroit Institute of Arts has one of the best collections in the US — Diego Rivera murals are a must'},{icon:'🎵',text:'Detroit Symphony Orchestra Hall is a spectacular venue'},{icon:'🚶',text:'Q-Line streetcar connects Midtown to Downtown along Woodward'}]},
+  'Corktown':{ level:'safe', score:4.1, desc:"Detroit's oldest neighborhood — now one of its trendiest. Michigan Central Station (the iconic ruin) has been beautifully restored by Ford. Excellent restaurants and bars.", tips:[{icon:'✅',text:'Very safe — Detroit\'s hottest neighborhood'},{icon:'🏛️',text:"Michigan Central Station has been restored — Ford's new innovation campus is extraordinary"},{icon:'🍺',text:'Slows Bar-B-Q is a Detroit institution; many excellent bars nearby'},{icon:'🌳',text:'Corktown is very walkable and has great architecture throughout'}]},
+  'New Center':{ level:'safe', score:3.9, desc:"Midtown-adjacent neighborhood with the Fisher Building and the former GM World Headquarters. Safe and architecturally significant.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏛️',text:'Fisher Building is one of the finest examples of Art Deco architecture in the US'},{icon:'🚇',text:'Q-Line extends north to New Center'},{icon:'🎨',text:'Detroit\'s architectural legacy is on full display here'}]},
+  'Indian Village':{ level:'safe', score:4.4, desc:"One of Detroit's most elegant neighborhoods — large historic mansions (Ford, Dodge, and Chrysler all lived here) on beautifully maintained streets. Very safe.", tips:[{icon:'✅',text:'Very safe — historic neighborhood with exceptional architecture'},{icon:'🏛️',text:'Three parallel streets of stunning early 20th-century mansions'},{icon:'🌳',text:'One of the best examples of a preserved historic residential district in the Midwest'},{icon:'🚗',text:'Car recommended — limited transit'}]},
+  'East English Village':{ level:'safe', score:4.0, desc:"Safe, well-maintained residential neighborhood with a strong neighborhood association. Generally very safe.", tips:[{icon:'✅',text:'Very safe residential neighborhood'},{icon:'🏡',text:'Well-maintained English Tudor and Colonial Revival homes'},{icon:'🌳',text:'Beautiful mature tree canopy'},{icon:'🚗',text:'Car recommended'}]},
+  'Lafayette Park':{ level:'safe', score:4.0, desc:"Famous Mies van der Rohe-designed modernist residential community adjacent to downtown — a genuine architectural landmark. Safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏛️',text:'Internationally recognized Mies van der Rohe modernist housing design from 1956'},{icon:'🌳',text:'Beautiful park integrated with the housing development'},{icon:'🚶',text:'Walking distance from Downtown'}]},
+  'Woodbridge':{ level:'safe', score:3.8, desc:"Historic residential neighborhood adjacent to Midtown and Wayne State University. Generally safe with beautiful Victorian homes.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏛️',text:'Beautiful Victorian homes — many are being restored'},{icon:'🎓',text:'Wayne State University is adjacent'},{icon:'🌳',text:'Woodbridge Park is a pleasant neighborhood green space'}]},
+  'Brush Park':{ level:'safe', score:3.7, desc:"Historic neighborhood of Victorian mansions adjacent to Midtown and the new Little Caesars Arena. Some restoration underway.", tips:[{icon:'✅',text:'Generally safe — improving rapidly'},{icon:'🏛️',text:'Some surviving Victorian mansions are being restored after years of abandonment'},{icon:'🏀',text:'Little Caesars Arena is a short walk east'},{icon:'🌳',text:'Restoration happening rapidly — fascinating urban renewal story'}]},
+  'Grandmont-Rosedale':{ level:'safe', score:3.9, desc:"Far northwest Detroit neighborhood of well-maintained bungalows and colonials — one of Detroit's most stable and safe residential areas.", tips:[{icon:'✅',text:'Very safe — strong neighborhood organization'},{icon:'🏡',text:'Well-maintained early 20th-century homes'},{icon:'🌳',text:'Mature street trees throughout'},{icon:'🚗',text:'Car essential'}]},
+  'North Rosedale Park':{ level:'safe', score:4.0, desc:"Quiet, affluent northwest Detroit neighborhood. Very safe.", tips:[{icon:'✅',text:'Very safe residential neighborhood'},{icon:'🏡',text:'Beautiful large homes on park-like lots'},{icon:'🌳',text:'Rosedale Park itself is beautifully maintained'},{icon:'🚗',text:'Car essential'}]},
+  'Palmer Woods':{ level:'safe', score:4.3, desc:"One of Detroit's most exclusive neighborhoods — large wooded lots with 1920s mansions along the Golf Club road. Very safe.", tips:[{icon:'✅',text:'Extremely safe — very exclusive residential enclave'},{icon:'🌳',text:'Large wooded lots with exceptional homes'},{icon:'⛳',text:'Detroit Golf Club (private) is adjacent'},{icon:'🚗',text:'Car essential'}]},
+  'Sherwood Forest':{ level:'safe', score:4.2, desc:"Beautiful historic residential neighborhood with well-maintained homes and a strong community association. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🏡',text:'Beautiful English Tudor and other period revival homes'},{icon:'🌳',text:'Wooded, leafy streets'},{icon:'🚗',text:'Car essential'}]},
+  'University District':{ level:'safe', score:4.1, desc:"Quiet, established northwest Detroit neighborhood with attractive early 20th-century architecture. Very safe.", tips:[{icon:'✅',text:'Very safe residential neighborhood'},{icon:'🏡',text:'Beautiful established homes'},{icon:'🌳',text:'Tree-canopied streets'},{icon:'🚗',text:'Car essential'}]},
+  'Virginia Park':{ level:'safe', score:4.0, desc:"Small, well-maintained residential neighborhood near the University of Detroit Mercy. Generally safe.", tips:[{icon:'✅',text:'Generally very safe'},{icon:'🎓',text:'University of Detroit Mercy campus nearby'},{icon:'🏡',text:'Carefully maintained homes'},{icon:'🚗',text:'Car essential'}]},
+  'Rivertown':{ level:'safe', score:3.9, desc:"Waterfront neighborhood adjacent to the Riverwalk with event spaces and restaurants. Generally safe and scenic.", tips:[{icon:'✅',text:'Generally safe near the waterfront'},{icon:'🌊',text:'Detroit-Windsor Tunnel and Ambassador Bridge views'},{icon:'🎵',text:'Several event venues and clubs'},{icon:'🚶',text:'Riverwalk connects east to Belle Isle Park'}]},
+  'Southwest Detroit':{ level:'caution', score:2.8, desc:"Predominantly Latino neighborhood with excellent Mexican restaurants along Vernor Hwy. Elevated crime but the commercial corridor is worth visiting.", tips:[{icon:'🌮',text:'Vernor Highway is one of the best Mexican food strips in the Midwest'},{icon:'⚠️',text:'Elevated crime — stick to the commercial corridor'},{icon:'🌙',text:'Use caution after dark'},{icon:'🚗',text:'Car recommended'}]},
+  'West Village':{ level:'safe', score:3.9, desc:"Small, revitalized neighborhood east of Indian Village — great independent shops and restaurants on Agnes Street. Generally safe.", tips:[{icon:'✅',text:'Generally safe and improving'},{icon:'☕',text:'Dessert Oasis Coffee Roasters and other great independent shops'},{icon:'🍽️',text:'Good casual dining options'},{icon:'🌳',text:'Beautiful residential streets'}]},
+  'Milwaukee Junction':{ level:'caution', score:3.0, desc:"Industrial area transitioning into creative offices and light manufacturing. Elevated crime.", tips:[{icon:'⚠️',text:'Industrial area — exercise caution'},{icon:'🏭',text:'Early automotive manufacturing history here'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Not recommended after dark'}]},
+  'Brightmoor':{ level:'avoid', score:1.8, desc:"Far northwest Detroit neighborhood with very high crime rates and significant vacancy. Not recommended for tourists.", tips:[{icon:'🚫',text:'High crime — not recommended for tourists'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Eight Mile Wyoming':{ level:'avoid', score:2.0, desc:"Northwest Detroit neighborhood with elevated crime. Not recommended for tourists.", tips:[{icon:'🚫',text:'Elevated crime — not recommended for tourists'},{icon:'🚗',text:'Car only'},{icon:'📞',text:'Emergency: 911'}]},
+  'Jefferies':{ level:'avoid', score:1.8, desc:"West-central Detroit neighborhood with very high crime rates. Not recommended for tourists.", tips:[{icon:'🚫',text:'High crime — avoid'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}]},
+  'Fitzgerald':{ level:'caution', score:2.7, desc:"Northwest Detroit neighborhood that has been the subject of a major city-funded revitalization project. Elevated crime.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🌳',text:'City-funded demolition and greening projects have improved parts of the neighborhood'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Not recommended after dark'}]},
+  'Islandview':{ level:'caution', score:2.8, desc:"East side neighborhood with some revitalization and elevated crime.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🌊',text:'Near the Riverwalk trail'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}]},
+  'Poletown East':{ level:'caution', score:2.7, desc:"East Detroit neighborhood adjacent to the Hamtramck GM plant. Some elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution'},{icon:'🏭',text:'New GM/Stellantis plant is a sign of investment'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}]},
+};
+
 // ── City configurations ──────────────────────────────────────────────────────
 const CITIES = {
   'new-orleans': {
@@ -1412,6 +1664,66 @@ const CITIES = {
     latField: 'point_y', lngField: 'point_x', limit: 5000,
     baseline: 55, dataSource: 'Philly Open Data', zoneDefs: PHILLY_ZONE_DEFS,
   },
+  'miami': {
+    label: 'Miami, FL',
+    center: [25.7617, -80.1918], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/miami.geojson',
+    crimeEndpoint: 'https://opendata.miamigov.com/resource/k9e7-enfw.json',
+    dateField: 'occurred_on', typeFields: ['offense', 'offense_description', 'offense_type'],
+    bbox: [25.85, -80.35, 25.70, -80.12], bboxField: null, noBbox: true, noDateFilter: true,
+    latField: 'lat', lngField: 'lon',
+    baseline: 30, dataSource: 'Miami Open Data', zoneDefs: MIAMI_ZONE_DEFS,
+  },
+  'atlanta': {
+    label: 'Atlanta, GA',
+    center: [33.749, -84.388], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/atlanta.geojson',
+    crimeEndpoint: 'https://services3.arcgis.com/Mt4kiXQpNVOmxXEi/arcgis/rest/services/APD_Crime/FeatureServer/0/query',
+    apiType: 'arcgis', noDateFilter: true,
+    dateField: 'rpt_date', typeFields: ['UC2_Literal'],
+    bbox: [33.89, -84.55, 33.64, -84.29], bboxField: null,
+    latField: 'lat', lngField: 'long',
+    baseline: 45, dataSource: 'Atlanta PD Open Data', zoneDefs: ATLANTA_ZONE_DEFS,
+  },
+  'denver': {
+    label: 'Denver, CO',
+    center: [39.7392, -104.9903], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/denver.geojson',
+    crimeEndpoint: 'https://data.denvergov.org/resource/mnnd-mq2c.json',
+    dateField: 'first_occurrence_date', typeFields: ['offense_category_id', 'offense_type_id'],
+    bbox: [39.91, -105.11, 39.61, -104.60], bboxField: null, noBbox: true, noDateFilter: true,
+    latField: 'geo_lat', lngField: 'geo_lon',
+    baseline: 40, dataSource: 'Denver Open Data', zoneDefs: DENVER_ZONE_DEFS,
+  },
+  'portland': {
+    label: 'Portland, OR',
+    center: [45.5051, -122.6750], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/portland.geojson',
+    crimeEndpoint: 'https://services.arcgis.com/quVN97tn06YNGj9s/arcgis/rest/services/PortlandPoliceDataShare/FeatureServer/0/query',
+    apiType: 'arcgis', noDateFilter: true,
+    dateField: 'OccurDate', typeFields: ['OffenseCategory', 'OffenseType'],
+    bbox: [45.65, -122.84, 45.43, -122.47], bboxField: null,
+    latField: 'OpenDataLat', lngField: 'OpenDataLon',
+    baseline: 35, dataSource: 'Portland PD Open Data', zoneDefs: PORTLAND_ZONE_DEFS,
+  },
+  'baltimore': {
+    label: 'Baltimore, MD',
+    center: [39.2904, -76.6122], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/baltimore.geojson',
+    crimeEndpoint: 'https://data.baltimorecity.gov/resource/wsfq-mvij.json',
+    dateField: 'crimedate', typeFields: ['description'],
+    bbox: [39.37, -76.72, 39.20, -76.53], bboxField: null, noBbox: true, noDateFilter: true,
+    baseline: 50, dataSource: 'Open Baltimore', zoneDefs: BALTIMORE_ZONE_DEFS,
+  },
+  'detroit': {
+    label: 'Detroit, MI',
+    center: [42.3314, -83.0458], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/detroit.geojson',
+    crimeEndpoint: 'https://data.detroitmi.gov/resource/wgv9-drfc.json',
+    dateField: 'report_date', typeFields: ['category', 'offense_description'],
+    bbox: [42.45, -83.29, 42.25, -82.91], bboxField: null, noBbox: true, noDateFilter: true,
+    baseline: 40, dataSource: 'Detroit Open Data', zoneDefs: DETROIT_ZONE_DEFS,
+  },
 };
 
 // ── Default zone for any neighborhood without a hand-written entry ───────────
@@ -1540,7 +1852,7 @@ function computeScores(crimes, city) {
     const w = Math.max(weighted[z.name], 1);
     const score = Math.max(1, Math.min(5, 5 - K * Math.log10(w / BASELINE)));
     const level = score >= 3.5 ? 'safe' : score >= 2.5 ? 'caution' : 'avoid';
-    result[z.name] = { score: Math.round(score * 10) / 10, count: rawCount[z.name], level };
+    result[z.name] = { score: Math.round(score * 10) / 10, count: rawCount[z.name], level, weighted: weighted[z.name] };
   });
   return result;
 }
@@ -1564,14 +1876,17 @@ function setCached(key, data) {
 }
 
 // ── Crime data fetch (Socrata, OData, ArcGIS) ────────────────────────────────
-async function fetchCrimes(cityId, city) {
-  const key = `saferoute_crimes_${cityId}_v2`;
+// period=0 → last 90 days; period=1 → prior 90 days (90-180 days ago, for trend)
+async function fetchCrimes(cityId, city, period = 0) {
+  if (city.noDateFilter && period > 0) return null;
+  const key = `saferoute_crimes_${cityId}_v2_p${period}`;
   const cached = getCached(key, CACHE_TTL);
   if (cached) return cached;
 
-  const from = new Date();
-  from.setDate(from.getDate() - 90);
-  const fromStr = from.toISOString().slice(0, 10);
+  const toDate = new Date(); toDate.setDate(toDate.getDate() - 90 * period);
+  const fromDate = new Date(); fromDate.setDate(fromDate.getDate() - 90 * (period + 1));
+  const fromStr = fromDate.toISOString().slice(0, 10);
+  const toStr   = toDate.toISOString().slice(0, 10);
 
   const [n, w, s, e] = city.bbox;
   const latF = city.latField || 'latitude';
@@ -1583,10 +1898,9 @@ async function fetchCrimes(cityId, city) {
     const url = new URL(city.crimeEndpoint);
     url.searchParams.set('$limit', String(city.limit || 50000));
     if (city.noDateFilter) {
-      // Dataset is stale or $where unsupported — fetch most recent records
       url.searchParams.set('$order', `${city.dateField} DESC`);
     } else {
-      let where = `${city.dateField} >= '${fromStr}T00:00:00'`;
+      let where = `${city.dateField} >= '${fromStr}T00:00:00' AND ${city.dateField} < '${toStr}T00:00:00'`;
       if (city.bboxField) {
         where += ` AND within_box(${city.bboxField}, ${n}, ${w}, ${s}, ${e})`;
       } else if (!city.noBbox) {
@@ -1604,7 +1918,7 @@ async function fetchCrimes(cityId, city) {
     url.searchParams.set('$format', 'json');
     if (!city.noDateFilter) {
       url.searchParams.set('$filter',
-        `${city.dateField} ge '${fromStr}T00:00:00Z' and ${latF} ge ${s} and ${latF} le ${n} and ${lngF} ge ${w} and ${lngF} le ${e}`);
+        `${city.dateField} ge '${fromStr}T00:00:00Z' and ${city.dateField} lt '${toStr}T00:00:00Z' and ${latF} ge ${s} and ${latF} le ${n} and ${lngF} ge ${w} and ${lngF} le ${e}`);
     } else {
       url.searchParams.set('$orderby', `${city.dateField} desc`);
     }
@@ -1616,7 +1930,7 @@ async function fetchCrimes(cityId, city) {
   } else if (apiType === 'arcgis') {
     const url = new URL(city.crimeEndpoint);
     const arcWhere = city.noDateFilter ? '1=1'
-      : `${city.dateField} >= DATE '${fromStr}'`;
+      : `${city.dateField} >= DATE '${fromStr}' AND ${city.dateField} < DATE '${toStr}'`;
     url.searchParams.set('where', arcWhere);
     url.searchParams.set('outFields', `${city.typeFields[0]},${latF},${lngF}`);
     url.searchParams.set('resultRecordCount', '50000');
@@ -1784,13 +2098,20 @@ function starsHtml(score) {
   return '★'.repeat(n) + '☆'.repeat(5 - n);
 }
 
+function trendBadge(trend) {
+  if (!trend || trend === 'stable') return '<span class="trend-badge trend-stable">→ Stable trend</span>';
+  if (trend === 'improving') return '<span class="trend-badge trend-improving">↓ Crime trending down</span>';
+  return '<span class="trend-badge trend-worsening">↑ Crime trending up</span>';
+}
+
 function showZone(zone) {
   activeZoneName = zone.name;
   const crimeBox = zone.crimeCount !== null ? `
     <div class="crime-box">
       <div class="crime-box-title">Live Crime Data · Last 90 Days</div>
       <div class="crime-row"><span>Reported incidents</span><span class="crime-val">${zone.crimeCount.toLocaleString()}</span></div>
-      <div class="crime-row"><span>Safety score</span><span class="crime-val">${zone.score} / 5</span></div>
+      <div class="crime-row"><span>Safety score</span><span class="crime-val">${zone.score} / 5${zone.trend ? ' ' + trendBadge(zone.trend) : ''}</span></div>
+      <div class="crime-row"><span>vs. prior 90 days</span><span class="crime-val">${zone.trend ? (zone.trend === 'improving' ? '↓ Improving' : zone.trend === 'worsening' ? '↑ Increasing' : '→ Stable') : '—'}</span></div>
       <div class="crime-row"><span>Source</span><span class="crime-val">${currentCity.dataSource}</span></div>
     </div>` : '';
 
@@ -1814,14 +2135,48 @@ function showZone(zone) {
   }
 }
 
-// ── Apply live scores ─────────────────────────────────────────────────────────
-function applyScores(scoreMap) {
+// ── City overview panel (shown before any neighborhood selected) ───────────────
+function ovRow(zone) {
+  const safe = zone.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  return `<div class="ov-row" onclick="(function(){const z=ZONES.find(z=>z.name==='${safe}');if(!z)return;const l=polyLayers['${safe}'];if(l)map.fitBounds(l.getBounds(),{padding:[40,40]});showZone(z);})()">
+    <span class="ov-dot ov-${zone.level}"></span>
+    <span class="ov-name">${zone.name}</span>
+    <span class="ov-score">${zone.score}</span>
+  </div>`;
+}
+
+function showCityOverview() {
+  const scored = ZONES.filter(z => z.crimeCount !== null).sort((a, b) => b.score - a.score);
+  if (scored.length < 3) return;
+  const safest   = scored.slice(0, 3);
+  const riskiest = scored.slice(-3).reverse();
+  document.getElementById('panel').innerHTML = `
+    <div class="ov-panel">
+      <div class="ov-city">${currentCity.label}</div>
+      <div class="ov-section">Safest Areas</div>
+      ${safest.map(ovRow).join('')}
+      <div class="ov-divider"></div>
+      <div class="ov-section">Exercise Caution</div>
+      ${riskiest.map(ovRow).join('')}
+      <p class="ov-hint">Tap any neighborhood on the map for details.</p>
+    </div>`;
+}
+
+// ── Apply live scores + trend ─────────────────────────────────────────────────
+function applyScores(scoreMap, priorMap) {
   ZONES.forEach(zone => {
     const s = scoreMap[zone.name];
     if (!s) return;
     zone.score  = s.score;
     zone.level  = s.level;
     zone.crimeCount = s.count;
+    if (priorMap) {
+      const p = priorMap[zone.name];
+      if (p && p.weighted > 0 && s.weighted > 0) {
+        const pct = (s.weighted - p.weighted) / p.weighted;
+        zone.trend = pct > 0.18 ? 'worsening' : pct < -0.18 ? 'improving' : 'stable';
+      }
+    }
     polyLayers[zone.name]?.setStyle(STYLES[s.level]);
   });
   if (activeZoneName) showZone(ZONES.find(z => z.name === activeZoneName));
@@ -1860,15 +2215,18 @@ async function init(cityId) {
   loader.classList.remove('done');
   setStatus('loading');
   try {
-    const [geoJSON, crimes] = await Promise.all([
+    const [geoJSON, crimes, priorCrimes] = await Promise.all([
       fetchGeoJSON(cityId, city),
-      fetchCrimes(cityId, city),
+      fetchCrimes(cityId, city, 0),
+      fetchCrimes(cityId, city, 1).catch(() => null),
     ]);
     if (loadingCityId !== cityId) return;
     buildAndDrawZones(geoJSON, city, cityId);
     const scoreMap = computeScores(crimes, city);
-    applyScores(scoreMap);
+    const priorMap = priorCrimes ? computeScores(priorCrimes, city) : null;
+    applyScores(scoreMap, priorMap);
     setStatus('live', crimes.length);
+    if (!activeZoneName) showCityOverview();
   } catch (err) {
     if (loadingCityId !== cityId) return;
     console.error('SafeRoute:', err);
@@ -1879,6 +2237,41 @@ async function init(cityId) {
 }
 
 document.getElementById('city-select').addEventListener('change', e => switchCity(e.target.value));
+
+// ── Neighborhood search ───────────────────────────────────────────────────────
+const searchInput = document.getElementById('search-input');
+const searchDrop  = document.getElementById('search-results');
+
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.trim().toLowerCase();
+  searchDrop.innerHTML = '';
+  searchDrop.classList.remove('open');
+  if (!q || ZONES.length === 0) return;
+  const hits = ZONES.filter(z => z.name.toLowerCase().includes(q)).slice(0, 8);
+  if (hits.length === 0) return;
+  hits.forEach(z => {
+    const item = document.createElement('div');
+    item.className = 'search-item';
+    item.textContent = z.name;
+    item.addEventListener('click', () => {
+      const layer = polyLayers[z.name];
+      if (layer) map.fitBounds(layer.getBounds(), { padding: [50, 50] });
+      showZone(z);
+      searchInput.value = '';
+      searchDrop.innerHTML = '';
+      searchDrop.classList.remove('open');
+    });
+    searchDrop.appendChild(item);
+  });
+  searchDrop.classList.add('open');
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#search-wrap')) {
+    searchDrop.innerHTML = '';
+    searchDrop.classList.remove('open');
+  }
+});
 
 // ── Methodology modal ──────────────────────────────────────────────────────────
 function openInfoModal()  { document.getElementById('info-modal-overlay').classList.add('open'); }
