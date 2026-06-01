@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeRoute — New Orleans</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --safe:    #22c55e;
+      --caution: #eab308;
+      --avoid:   #ef4444;
+      --dark:    #0f172a;
+      --text:    #1e293b;
+      --muted:   #64748b;
+      --border:  #e2e8f0;
+      --bg:      #f8fafc;
+    }
+
+    html, body { height: 100%; overflow: hidden; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      color: var(--text);
+    }
+
+    /* ─── Header ─── */
+    #header {
+      height: 52px;
+      background: var(--dark);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 14px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 12px rgba(0,0,0,.45);
+      z-index: 1000;
+    }
+
+    .logo { font-size: 20px; font-weight: 800; letter-spacing: -.5px; }
+    .logo em { color: var(--safe); font-style: normal; }
+
+    /* Status pill */
+    #status-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 99px;
+      padding: 3px 10px;
+      font-size: 11.5px;
+      color: #94a3b8;
+      white-space: nowrap;
+    }
+    .s-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .s-dot-loading  { background: #475569; animation: blink 1.2s ease-in-out infinite; }
+    .s-dot-live     { background: var(--safe); }
+    .s-dot-fallback { background: var(--caution); }
+    @keyframes blink { 0%,100%{opacity:.3} 50%{opacity:1} }
+
+    .city-tag {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: #94a3b8;
+      flex-shrink: 0;
+    }
+
+    /* ─── Main ─── */
+    #main { flex: 1; display: flex; overflow: hidden; min-height: 0; }
+    #map  { flex: 1; min-width: 0; }
+
+    /* ─── Sidebar ─── */
+    #sidebar {
+      width: 320px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border-left: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    #panel { flex: 1; overflow-y: auto; padding: 22px 20px; }
+
+    /* ─── Placeholder ─── */
+    .placeholder {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 10px;
+      color: var(--muted);
+      padding: 24px;
+      min-height: 160px;
+    }
+    .ph-icon    { font-size: 44px; opacity: .5; }
+    .placeholder h3 { font-size: 15px; font-weight: 600; color: var(--text); }
+    .placeholder p  { font-size: 13px; line-height: 1.55; max-width: 210px; }
+
+    /* ─── Zone card ─── */
+    .zone-name { font-size: 22px; font-weight: 700; line-height: 1.2; margin-bottom: 9px; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 11px;
+      border-radius: 99px;
+    }
+    .badge-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .badge-safe    { background: #dcfce7; color: #166534; }
+    .badge-safe    .badge-dot { background: var(--safe); }
+    .badge-caution { background: #fef9c3; color: #92400e; }
+    .badge-caution .badge-dot { background: var(--caution); }
+    .badge-avoid   { background: #fee2e2; color: #991b1b; }
+    .badge-avoid   .badge-dot { background: var(--avoid); }
+
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 12px 0 16px;
+    }
+    .stars     { color: #f59e0b; font-size: 17px; line-height: 1; letter-spacing: 1px; }
+    .score-num { font-size: 12px; color: var(--muted); }
+
+    .divider { height: 1px; background: var(--border); margin: 0 0 16px; }
+    .desc { font-size: 13.5px; line-height: 1.7; color: #334155; margin-bottom: 18px; }
+
+    /* ─── Live crime stats box ─── */
+    .crime-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 18px;
+    }
+    .crime-box-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .65px;
+      color: var(--muted);
+      margin-bottom: 9px;
+    }
+    .crime-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12.5px;
+      color: #334155;
+      margin-bottom: 5px;
+    }
+    .crime-row:last-child { margin-bottom: 0; }
+    .crime-val { font-weight: 600; color: var(--text); }
+
+    /* ─── Tips ─── */
+    .tips-heading {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .65px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .tip {
+      display: flex;
+      gap: 9px;
+      align-items: flex-start;
+      margin-bottom: 9px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #334155;
+    }
+    .tip-icon { flex-shrink: 0; font-size: 15px; line-height: 1.55; }
+
+    /* ─── Legend ─── */
+    #legend {
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+      padding: 12px 20px;
+      flex-shrink: 0;
+    }
+    .leg-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .7px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .leg-items { display: flex; gap: 16px; flex-wrap: wrap; }
+    .leg-item  { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; }
+    .leg-swatch { width: 12px; height: 12px; border-radius: 3px; }
+
+    /* ─── Mobile ─── */
+    @media (max-width: 700px) {
+      body { overflow: auto; }
+      html, body { height: auto; }
+      #main { flex-direction: column; overflow: visible; }
+      #map  { height: 56vw; min-height: 260px; max-height: 380px; }
+      #sidebar { width: 100%; border-left: none; border-top: 1px solid var(--border); overflow: visible; }
+      #panel { overflow: visible; padding: 16px; }
+      .placeholder { min-height: 110px; }
+      #status-pill { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="header">
+  <div class="logo">Safe<em>Route</em></div>
+  <div id="status-pill">
+    <div class="s-dot s-dot-loading"></div>
+    <span id="status-text">Loading crime data…</span>
+  </div>
+  <div class="city-tag">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/>
+      <circle cx="12" cy="10" r="3"/>
+    </svg>
+    New Orleans, LA
+  </div>
+</div>
+
+<div id="main">
+  <div id="map"></div>
+  <div id="sidebar">
+    <div id="panel"></div>
+    <div id="legend">
+      <div class="leg-title">Safety Level</div>
+      <div class="leg-items">
+        <div class="leg-item"><div class="leg-swatch" style="background:var(--safe)"></div>Safe</div>
+        <div class="leg-item"><div class="leg-swatch" style="background:var(--caution)"></div>Use Caution</div>
+        <div class="leg-item"><div class="leg-swatch" style="background:var(--avoid)"></div>Avoid</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Zone definitions ─────────────────────────────────────────────────────────
+// score / level start as hardcoded estimates; overwritten when live data loads
+const ZONES = [
+  // ── Safe ──────────────────────────────────────────────────────────────────
+  {
+    name: 'French Quarter', level: 'safe', score: 4.5, crimeCount: null,
+    desc: "The heart of New Orleans tourism — packed with restaurants, jazz clubs, and centuries-old Creole architecture. Bourbon Street gets rowdy late at night, but the area is heavily patrolled and tourist-friendly overall.",
+    tips: [
+      { icon: '✅', text: 'Great for daytime and evening exploration' },
+      { icon: '🎷', text: 'Catch live jazz on Frenchmen Street, just outside the Quarter' },
+      { icon: '⚠️', text: 'Guard your belongings on crowded Bourbon St after midnight' },
+      { icon: '🏨', text: 'Well-lit and lively 24/7 — an excellent base for tourists' }
+    ],
+    coords: [[29.9583,-90.0707],[29.9651,-90.0668],[29.9618,-90.0568],[29.9553,-90.0630]]
+  },
+  {
+    name: 'CBD & Warehouse District', level: 'safe', score: 4.3, crimeCount: null,
+    desc: "The Central Business District and adjacent Warehouse Arts District are home to major hotels, the National WWII Museum, and the Convention Center. Well-patrolled and safe for visitors day and night.",
+    tips: [
+      { icon: '✅', text: 'Major hotels and attractions — very safe for tourists' },
+      { icon: '🏛️', text: 'National WWII Museum is one of the best in the country' },
+      { icon: '🎨', text: 'Warehouse District galleries open late on first Saturdays' },
+      { icon: '🚶', text: 'Easily walkable from the French Quarter' }
+    ],
+    coords: [[29.9553,-90.0630],[29.9553,-90.0910],[29.9360,-90.0910],[29.9360,-90.0630]]
+  },
+  {
+    name: 'Garden District', level: 'safe', score: 4.7, crimeCount: null,
+    desc: "One of the most beautiful residential neighborhoods in the South. Grand antebellum mansions, ancient live oaks, and quiet tree-lined streets make it ideal for walking tours.",
+    tips: [
+      { icon: '✅', text: 'Very safe for solo daytime strolls' },
+      { icon: '🏛️', text: 'Lafayette Cemetery No. 1 — free admission and very atmospheric' },
+      { icon: '🍽️', text: 'Magazine Street has excellent restaurants and boutiques' },
+      { icon: '🚋', text: 'Ride the historic St. Charles streetcar to arrive in style' }
+    ],
+    coords: [[29.9345,-90.0905],[29.9345,-90.1012],[29.9245,-90.1012],[29.9245,-90.0905]]
+  },
+  {
+    name: 'Uptown', level: 'safe', score: 4.2, crimeCount: null,
+    desc: "Uptown covers the elegant corridor from the Garden District to Audubon Park, home to Tulane and Loyola universities and the famous St. Charles streetcar. One of the city's most comfortable areas for tourists.",
+    tips: [
+      { icon: '✅', text: 'Very safe — popular with students, families, and visitors' },
+      { icon: '🦒', text: 'Audubon Zoo and Park are great for all ages' },
+      { icon: '🍺', text: 'Maple Street and Oak Street have excellent local bars and cafes' },
+      { icon: '🚋', text: 'The St. Charles streetcar runs the full length — don\'t skip it' }
+    ],
+    coords: [[29.9345,-90.1012],[29.9345,-90.1480],[29.9060,-90.1480],[29.9060,-90.1012]]
+  },
+  {
+    name: 'Lakeview', level: 'safe', score: 4.1, crimeCount: null,
+    desc: "An affluent, quiet neighborhood on Lake Pontchartrain's southern shore. Rebuilt strongly after Katrina and consistently one of the city's safest areas. Close to City Park and the lakefront trail.",
+    tips: [
+      { icon: '✅', text: 'One of the safest neighborhoods in the city' },
+      { icon: '🏞️', text: 'City Park entry nearby — beautiful paths and sculpture garden' },
+      { icon: '🚴', text: 'The lakefront seawall is ideal for cycling or a sunset walk' },
+      { icon: '🍴', text: 'Harrison Ave has a solid strip of restaurants' }
+    ],
+    coords: [[30.0120,-90.1420],[30.0120,-90.1050],[29.9960,-90.1050],[29.9960,-90.1420]]
+  },
+  // ── Caution ───────────────────────────────────────────────────────────────
+  {
+    name: 'Faubourg Marigny', level: 'caution', score: 3.4, crimeCount: null,
+    desc: "Just downriver from the French Quarter, the Marigny is a colorful, artsy neighborhood with one of the city's best live music scenes. Frenchmen Street is the authentic local alternative to Bourbon Street.",
+    tips: [
+      { icon: '🎶', text: 'Frenchmen Street at night is the best live music strip in the city' },
+      { icon: '🏠', text: 'Beautiful Creole cottages and shotgun houses throughout' },
+      { icon: '⚠️', text: 'Stick to the main streets — some side blocks get dark and quiet' },
+      { icon: '🎭', text: 'Great Mardi Gras activity and a lively parade viewing area' }
+    ],
+    coords: [[29.9651,-90.0570],[29.9651,-90.0450],[29.9480,-90.0450],[29.9480,-90.0570]]
+  },
+  {
+    name: 'Bywater', level: 'caution', score: 3.1, crimeCount: null,
+    desc: "A rapidly gentrifying waterfront neighborhood with galleries, cafes, and creative businesses. Popular with artists and young locals. Generally safe by day; stay alert at night on quieter blocks.",
+    tips: [
+      { icon: '🎨', text: 'Excellent street art and galleries — bring a camera' },
+      { icon: '☕', text: 'Some of the city\'s best independent coffee shops are here' },
+      { icon: '⚠️', text: 'Busy on weekends; midweek nights on side streets need more caution' },
+      { icon: '🚴', text: 'Flat and very bikeable — great way to explore' }
+    ],
+    coords: [[29.9651,-90.0450],[29.9651,-90.0300],[29.9460,-90.0300],[29.9460,-90.0450]]
+  },
+  {
+    name: 'Tremé', level: 'caution', score: 3.0, crimeCount: null,
+    desc: "America's oldest African-American neighborhood and the birthplace of jazz. Deeply cultural but with elevated crime rates. Stick to main roads and consider a guided tour for the best experience.",
+    tips: [
+      { icon: '🎺', text: 'Second line parades and jazz funerals are unmissable' },
+      { icon: '🏛️', text: 'Congo Square in Armstrong Park is safe and deeply historic' },
+      { icon: '⚠️', text: 'Stay on well-lit main roads; avoid side streets at night' },
+      { icon: '👥', text: 'Best explored with a group or an organized cultural tour' }
+    ],
+    coords: [[29.9651,-90.0785],[29.9651,-90.0668],[29.9583,-90.0668],[29.9583,-90.0785]]
+  },
+  {
+    name: 'Tulane-Gravier', level: 'caution', score: 2.9, crimeCount: null,
+    desc: "The medical and university corridor between the CBD and Mid-City. Busy during the day with hospital workers and students, but quieter and less safe at night. Stick to the main corridors.",
+    tips: [
+      { icon: '🏥', text: 'Major hospitals and Tulane Medical Center are here' },
+      { icon: '⚠️', text: 'Safe during business hours; caution warranted after dark' },
+      { icon: '🚶', text: 'Stay on Tulane Ave and Canal St — avoid quiet side streets at night' },
+      { icon: '🚗', text: 'Rideshare strongly recommended for late evening travel' }
+    ],
+    coords: [[29.9680,-90.0785],[29.9680,-90.0990],[29.9553,-90.0990],[29.9553,-90.0785]]
+  },
+  {
+    name: 'Mid-City', level: 'caution', score: 3.2, crimeCount: null,
+    desc: "A diverse residential area home to the stunning City Park — one of the largest urban parks in the US. Perfectly fine for daytime visits; use caution after dark in less-trafficked areas.",
+    tips: [
+      { icon: '🌿', text: 'City Park is safe, beautiful, and great for families' },
+      { icon: '🎨', text: 'New Orleans Museum of Art is worth a half-day visit' },
+      { icon: '🌙', text: 'Avoid walking alone on quiet residential streets at night' },
+      { icon: '🚗', text: 'Use rideshare after dark rather than walking' }
+    ],
+    coords: [[29.9840,-90.1025],[29.9840,-90.0820],[29.9680,-90.0820],[29.9680,-90.1025]]
+  },
+  {
+    name: 'Broadmoor', level: 'caution', score: 2.8, crimeCount: null,
+    desc: "A centrally located residential neighborhood that has worked hard to rebuild after Katrina. Crime rates remain elevated. Limited tourist attractions; mostly a through-route between other areas.",
+    tips: [
+      { icon: '⚠️', text: 'Residential area — stay on main roads if passing through' },
+      { icon: '🌙', text: 'Not recommended for walking around after dark' },
+      { icon: '🏫', text: 'A.L. Davis Park and Broadmoor Arts & Wellness Center are community anchors' },
+      { icon: '🚗', text: 'Rideshare is the best option here' }
+    ],
+    coords: [[29.9600,-90.0990],[29.9600,-90.1280],[29.9455,-90.1280],[29.9455,-90.0990]]
+  },
+  {
+    name: 'Gentilly', level: 'caution', score: 3.0, crimeCount: null,
+    desc: "A diverse residential neighborhood northeast of Mid-City still recovering from Katrina. Home to Dillard University and Pontchartrain Park. Active community, but use caution especially after dark.",
+    tips: [
+      { icon: '🏛️', text: 'Dillard University campus is safe and worth a visit' },
+      { icon: '⚠️', text: 'Recovery is uneven — some blocks are well-kept, others are not' },
+      { icon: '🌙', text: 'Avoid wandering unfamiliar streets after dark' },
+      { icon: '🚗', text: 'Drive or rideshare — limited pedestrian infrastructure' }
+    ],
+    coords: [[30.0060,-90.0820],[30.0060,-90.0460],[29.9840,-90.0460],[29.9840,-90.0820]]
+  },
+  {
+    name: 'Irish Channel', level: 'caution', score: 3.0, crimeCount: null,
+    desc: "A historic working-class neighborhood between the Garden District and the Mississippi River. Has gentrified significantly with new bars and restaurants. Quality varies by block.",
+    tips: [
+      { icon: '🍺', text: 'Parasol\'s Bar is a beloved neighborhood institution' },
+      { icon: '🎉', text: 'Excellent Mardi Gras parade viewing on Magazine and Tchoupitoulas' },
+      { icon: '⚠️', text: 'Stick to the well-lit commercial streets — some blocks are rough' },
+      { icon: '🚶', text: 'Short walk or bike ride from the Garden District' }
+    ],
+    coords: [[29.9245,-90.0750],[29.9245,-90.1012],[29.9060,-90.1012],[29.9060,-90.0750]]
+  },
+  {
+    name: 'Carrollton', level: 'caution', score: 3.3, crimeCount: null,
+    desc: "Where the St. Charles streetcar bends toward the lake. The Riverbend area around Maple and Oak streets is lively and safe; the further you stray from these corridors, the more caution is needed.",
+    tips: [
+      { icon: '✅', text: 'Riverbend / Maple Street area is safe and fun' },
+      { icon: '🍔', text: 'Oak Street has excellent bars and some of the city\'s best food' },
+      { icon: '⚠️', text: 'Away from the commercial strips, use caution after dark' },
+      { icon: '🚋', text: 'Ride the streetcar back downtown — no car needed' }
+    ],
+    coords: [[29.9680,-90.1280],[29.9680,-90.1550],[29.9345,-90.1550],[29.9345,-90.1280]]
+  },
+  {
+    name: 'Algiers', level: 'caution', score: 3.1, crimeCount: null,
+    desc: "Directly across the Mississippi from downtown via a free ferry. Algiers Point is charming and walkable with sweeping skyline views. Other parts of Algiers require considerably more caution.",
+    tips: [
+      { icon: '⛴️', text: 'Free Algiers Point ferry departs from Canal St regularly' },
+      { icon: '🌆', text: 'Best views of the New Orleans skyline are from the Point' },
+      { icon: '⚠️', text: 'Stick to Algiers Point — other parts of Algiers have higher crime' },
+      { icon: '🕐', text: 'Check ferry times before heading over — last ferry is late evening' }
+    ],
+    coords: [[29.9450,-90.0730],[29.9450,-90.0100],[29.8950,-90.0100],[29.8950,-90.0730]]
+  },
+  // ── Avoid ──────────────────────────────────────────────────────────────────
+  {
+    name: 'Central City', level: 'avoid', score: 1.8, crimeCount: null,
+    desc: "One of the city's highest violent-crime areas with few tourist attractions. It is strongly recommended that visitors avoid this neighborhood entirely, day or night.",
+    tips: [
+      { icon: '🚫', text: 'Not recommended for tourists at any time of day' },
+      { icon: '🚗', text: 'If passing through, remain in your vehicle and do not stop' },
+      { icon: '📞', text: 'Emergency: 911 | NOPD non-emergency: (504) 821-2222' },
+      { icon: '🗺️', text: 'The Garden District nearby is far safer and more rewarding' }
+    ],
+    coords: [[29.9455,-90.1000],[29.9455,-90.1170],[29.9330,-90.1170],[29.9330,-90.1000]]
+  },
+  {
+    name: 'Seventh Ward', level: 'avoid', score: 2.0, crimeCount: null,
+    desc: "A historically significant neighborhood with deep cultural roots, currently experiencing high levels of violent crime. Visitors are strongly advised to avoid this area without a trusted local guide.",
+    tips: [
+      { icon: '🚫', text: 'High violent crime — not suitable for independent tourist visits' },
+      { icon: '⚠️', text: 'Incidents can and do occur at any hour' },
+      { icon: '🎭', text: 'Local cultural events are best attended alongside residents you know' },
+      { icon: '🗺️', text: 'Nearby Frenchmen Street (French Quarter edge) is a much safer option' }
+    ],
+    coords: [[29.9720,-90.0660],[29.9720,-90.0460],[29.9600,-90.0460],[29.9600,-90.0660]]
+  },
+  {
+    name: 'Hollygrove', level: 'avoid', score: 1.6, crimeCount: null,
+    desc: "A low-income neighborhood in northwest New Orleans with persistently high rates of violent crime. Not a tourist destination. Visitors are advised not to enter this area.",
+    tips: [
+      { icon: '🚫', text: 'High violent crime rates — avoid entirely' },
+      { icon: '🚗', text: 'Do not stop or exit your vehicle if driving through' },
+      { icon: '📞', text: 'Emergency: 911 | NOPD: (504) 821-2222' },
+      { icon: '🗺️', text: 'Carrollton\'s Riverbend area (nearby) is a far better option' }
+    ],
+    coords: [[29.9750,-90.1420],[29.9750,-90.1220],[29.9550,-90.1220],[29.9550,-90.1420]]
+  },
+  {
+    name: 'Lower Ninth Ward', level: 'avoid', score: 1.5, crimeCount: null,
+    desc: "Made internationally known by Hurricane Katrina's devastating 2005 flood, the Lower Ninth Ward continues to face both poverty and elevated violent crime. Historically significant but not a safe area for independent tourist visits.",
+    tips: [
+      { icon: '🚫', text: 'High violent crime — not safe for independent visits' },
+      { icon: '📚', text: 'Make It Right Foundation homes are a visible Katrina legacy' },
+      { icon: '🎓', text: 'Guided Katrina tours provide context and support local residents' },
+      { icon: '🚗', text: 'Any visit should be by car with a knowledgeable local guide' }
+    ],
+    coords: [[29.9700,-90.0250],[29.9700,-89.9800],[29.9380,-89.9800],[29.9380,-90.0250]]
+  },
+  {
+    name: 'New Orleans East', level: 'avoid', score: 1.7, crimeCount: null,
+    desc: "A large residential area east of the Industrial Canal with high violent crime rates and limited tourist infrastructure. Katrina recovery has been slow and uneven. Not recommended for visitors.",
+    tips: [
+      { icon: '🚫', text: 'High crime area — tourists should avoid' },
+      { icon: '🍜', text: 'Notable Vietnamese restaurant community on Chef Menteur Hwy — daytime only' },
+      { icon: '⚠️', text: 'If visiting a restaurant, go directly and do not explore on foot' },
+      { icon: '🚗', text: 'Drive directly to your destination and return immediately' }
+    ],
+    coords: [[30.0500,-90.0250],[30.0500,-89.9300],[29.9700,-89.9300],[29.9700,-90.0250]]
+  }
+];
+
+// ── Map styles ───────────────────────────────────────────────────────────────
+const STYLES = {
+  safe:    { color: '#16a34a', fillColor: '#22c55e', fillOpacity: .28, weight: 2 },
+  caution: { color: '#b45309', fillColor: '#eab308', fillOpacity: .32, weight: 2 },
+  avoid:   { color: '#b91c1c', fillColor: '#ef4444', fillOpacity: .32, weight: 2 }
+};
+const HOVER_OPACITY = { safe: .48, caution: .52, avoid: .52 };
+const LEVEL_LABELS  = { safe: 'Safe', caution: 'Use Caution', avoid: 'Avoid' };
+
+// ── Crime severity weights ────────────────────────────────────────────────────
+// Offense strings are matched with .includes() so partial matches work
+const CRIME_WEIGHTS = [
+  { match: 'MURDER',            weight: 5 },
+  { match: 'RAPE',              weight: 5 },
+  { match: 'ARMED ROBBERY',     weight: 4 },
+  { match: 'CARJACKING',        weight: 4 },
+  { match: 'AGGRAVATED ASSAULT',weight: 4 },
+  { match: 'AGGRAVATED BATTERY',weight: 4 },
+  { match: 'ROBBERY',           weight: 3 },
+  { match: 'SIMPLE BATTERY',    weight: 3 },
+  { match: 'SIMPLE ASSAULT',    weight: 3 },
+  { match: 'BURGLARY',          weight: 2 },
+  { match: 'AUTO THEFT',        weight: 2 },
+  { match: 'ARSON',             weight: 2 },
+  { match: 'THEFT',             weight: 1 },
+  { match: 'PICKPOCKET',        weight: 1 },
+];
+
+function crimeWeight(type) {
+  if (!type) return 0;
+  const t = String(type).toUpperCase();
+  for (const { match, weight } of CRIME_WEIGHTS) {
+    if (t.includes(match)) return weight;
+  }
+  return 0; // ignore medical, traffic, noise, checks etc.
+}
+
+// ── Geo utils ────────────────────────────────────────────────────────────────
+// Ray-casting point-in-polygon. coords = [[lat, lng], ...]
+function pointInPolygon(testLat, testLng, coords) {
+  let inside = false;
+  const n = coords.length;
+  for (let i = 0, j = n - 1; i < n; j = i++) {
+    const [lat1, lng1] = coords[i];
+    const [lat2, lng2] = coords[j];
+    if ((lat1 > testLat) !== (lat2 > testLat)) {
+      const xCross = (lng2 - lng1) * (testLat - lat1) / (lat2 - lat1) + lng1;
+      if (testLng < xCross) inside = !inside;
+    }
+  }
+  return inside;
+}
+
+// Shoelace formula — returns area in sq degrees (used for density normalisation)
+function polygonArea(coords) {
+  let area = 0;
+  const n = coords.length;
+  for (let i = 0; i < n; i++) {
+    const j = (i + 1) % n;
+    area += coords[i][1] * coords[j][0]; // lng_i * lat_j
+    area -= coords[j][1] * coords[i][0]; // lng_j * lat_i
+  }
+  return Math.abs(area) / 2;
+}
+
+// ── Score computation ────────────────────────────────────────────────────────
+function computeScores(crimes) {
+  const weighted = {}, rawCount = {};
+  ZONES.forEach(z => { weighted[z.name] = 0; rawCount[z.name] = 0; });
+
+  crimes.forEach(c => {
+    // 2026 dataset uses GeoJSON Point: location.coordinates = [lng, lat]
+    let lat, lng;
+    if (c.location?.coordinates?.length === 2) {
+      lng = c.location.coordinates[0];
+      lat = c.location.coordinates[1];
+    } else if (c.latitude && c.longitude) {
+      lat = parseFloat(c.latitude);
+      lng = parseFloat(c.longitude);
+    }
+    if (!lat || !lng || isNaN(lat) || isNaN(lng)) return;
+
+    const w = crimeWeight(c.typetext ?? c.offensetype ?? c.type_text ?? c.signal);
+
+    ZONES.forEach(zone => {
+      if (pointInPolygon(lat, lng, zone.coords)) {
+        weighted[zone.name] += w;
+        rawCount[zone.name] += 1;
+      }
+    });
+  });
+
+  // Score from raw weighted count — no area normalisation.
+  // Tourists care about how many incidents happen in the area they're walking,
+  // not incidents-per-sq-degree. Calibrated to NOLA 90-day actuals:
+  //   weighted ≈ 140 (Garden District) → score 3.5 (safe boundary)
+  //   weighted ≈ 550 (Seventh Ward)    → score 2.5 (avoid boundary)
+  const BASELINE = 37; // weighted count that anchors score = 5
+  const K        = 2.5;
+
+  const result = {};
+  ZONES.forEach(z => {
+    const w = Math.max(weighted[z.name], 1);
+    const score = Math.max(1, Math.min(5, 5 - K * Math.log10(w / BASELINE)));
+    const level = score >= 3.5 ? 'safe' : score >= 2.5 ? 'caution' : 'avoid';
+    result[z.name] = { score: Math.round(score * 10) / 10, count: rawCount[z.name], level };
+  });
+
+  console.log('SafeRoute weighted counts:', { ...weighted });
+  console.log('SafeRoute scores:', Object.fromEntries(Object.entries(result).map(([k,v]) => [k, v.score])));
+  return result;
+}
+
+// ── LocalStorage cache (6 hours) ─────────────────────────────────────────────
+const CACHE_KEY = 'saferoute_nola_v3';
+const CACHE_TTL = 6 * 60 * 60 * 1000;
+
+function getCached() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const { data, ts } = JSON.parse(raw);
+    return Date.now() - ts < CACHE_TTL ? data : null;
+  } catch { return null; }
+}
+
+function setCached(data) {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: Date.now() })); }
+  catch { /* quota exceeded — skip caching */ }
+}
+
+// ── NOLA Open Data fetch ──────────────────────────────────────────────────────
+// Dataset: NOPD Calls for Service (year-split; update ID when year rolls over)
+// Browse datasets: https://data.nola.gov/browse?category=Public+Safety
+// 2026: es9j-6y5d | 2025: 4xwx-sfte | 2024: 2zcj-b6ts
+const NOLA_DATASET = 'es9j-6y5d';
+
+// Bounding box covering all 20 neighborhoods from Algiers to New Orleans East.
+const BBOX = { n: 30.06, w: -90.16, s: 29.87, e: -89.92 };
+
+async function fetchCrimes() {
+  const cached = getCached();
+  if (cached) { console.log('SafeRoute: using cached crime data'); return cached; }
+
+  const from = new Date();
+  from.setDate(from.getDate() - 90);
+  const fromStr = from.toISOString().slice(0, 10);
+
+  const url = new URL(`https://data.nola.gov/resource/${NOLA_DATASET}.json`);
+  url.searchParams.set('$limit', '50000');
+  url.searchParams.set('$where',
+    `timecreate >= '${fromStr}T00:00:00' AND within_box(location, ${BBOX.n}, ${BBOX.w}, ${BBOX.s}, ${BBOX.e})`
+  );
+
+  console.log('SafeRoute: fetching', url.toString());
+  const res = await fetch(url.toString());
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+  const data = await res.json();
+  if (!Array.isArray(data)) throw new Error(data.message ?? 'Unexpected response format');
+  if (data.length === 0) throw new Error('API returned 0 records — date filter or dataset ID may need updating');
+
+  setCached(data);
+  return data;
+}
+
+// ── Status indicator ─────────────────────────────────────────────────────────
+function setStatus(state, detail) {
+  const pill = document.getElementById('status-pill');
+  const dot  = pill.querySelector('.s-dot');
+  const txt  = document.getElementById('status-text');
+  dot.className = 's-dot';
+  if (state === 'loading') {
+    dot.classList.add('s-dot-loading');
+    txt.textContent = 'Loading crime data…';
+  } else if (state === 'live') {
+    dot.classList.add('s-dot-live');
+    txt.textContent = `Live · ${Number(detail).toLocaleString()} incidents · 90 days`;
+  } else {
+    dot.classList.add('s-dot-fallback');
+    txt.textContent = 'Sample data (API unavailable)';
+  }
+}
+
+// ── Map setup ────────────────────────────────────────────────────────────────
+const map = L.map('map', { center: [29.9700, -90.0600], zoom: 11 });
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com">CARTO</a>',
+  maxZoom: 19
+}).addTo(map);
+
+// ── Zone layers ──────────────────────────────────────────────────────────────
+const polyLayers = {};   // name → Leaflet polygon (so we can call setStyle later)
+let activeZoneName = null;
+
+ZONES.forEach(zone => {
+  const s = STYLES[zone.level];
+  const poly = L.polygon(zone.coords, { ...s }).addTo(map);
+  polyLayers[zone.name] = poly;
+
+  // Floating label (neutral border so it doesn't need to update with level changes)
+  L.marker(poly.getBounds().getCenter(), {
+    icon: L.divIcon({
+      className: '',
+      iconSize: [0, 0],
+      html: `<div style="
+        transform:translate(-50%,-50%);
+        background:#fff;
+        border:1.5px solid #475569;
+        color:#1e293b;
+        font-size:11px;
+        font-weight:600;
+        font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+        padding:3px 8px;
+        border-radius:4px;
+        white-space:nowrap;
+        box-shadow:0 1px 6px rgba(0,0,0,.18);
+        pointer-events:none;
+      ">${zone.name}</div>`
+    })
+  }).addTo(map);
+
+  poly.on('mouseover', function () {
+    this.setStyle({ fillOpacity: HOVER_OPACITY[zone.level], weight: 3 });
+  });
+  poly.on('mouseout', function () {
+    this.setStyle({ fillOpacity: STYLES[zone.level].fillOpacity, weight: 2 });
+  });
+  poly.on('click', e => { L.DomEvent.stopPropagation(e); showZone(zone); });
+});
+
+map.on('click', resetPanel);
+
+// ── Sidebar helpers ───────────────────────────────────────────────────────────
+const PLACEHOLDER = `
+  <div class="placeholder">
+    <div class="ph-icon">🗺️</div>
+    <h3>Tap a neighborhood</h3>
+    <p>Click any colored zone on the map to see safety details and tourist tips.</p>
+  </div>`;
+
+function resetPanel() {
+  activeZoneName = null;
+  document.getElementById('panel').innerHTML = PLACEHOLDER;
+}
+
+function starsHtml(score) {
+  const n = Math.round(score);
+  return '★'.repeat(n) + '☆'.repeat(5 - n);
+}
+
+function showZone(zone) {
+  activeZoneName = zone.name;
+
+  const crimeBox = zone.crimeCount !== null ? `
+    <div class="crime-box">
+      <div class="crime-box-title">Live Crime Data · Last 90 Days</div>
+      <div class="crime-row">
+        <span>Reported incidents</span>
+        <span class="crime-val">${zone.crimeCount.toLocaleString()}</span>
+      </div>
+      <div class="crime-row">
+        <span>Safety score</span>
+        <span class="crime-val">${zone.score} / 5</span>
+      </div>
+      <div class="crime-row">
+        <span>Source</span>
+        <span class="crime-val">NOLA Open Data</span>
+      </div>
+    </div>` : '';
+
+  document.getElementById('panel').innerHTML = `
+    <div>
+      <div class="zone-name">${zone.name}</div>
+      <span class="badge badge-${zone.level}">
+        <span class="badge-dot"></span>${LEVEL_LABELS[zone.level]}
+      </span>
+      <div class="score-row">
+        <span class="stars">${starsHtml(zone.score)}</span>
+        <span class="score-num">Safety ${zone.score} / 5</span>
+      </div>
+      <div class="divider"></div>
+      <div class="desc">${zone.desc}</div>
+      ${crimeBox}
+      <div class="tips-heading">Tourist Tips</div>
+      ${zone.tips.map(t =>
+        `<div class="tip"><span class="tip-icon">${t.icon}</span><span>${t.text}</span></div>`
+      ).join('')}
+    </div>`;
+
+  if (window.innerWidth <= 700) {
+    document.getElementById('sidebar').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+// ── Apply live scores to zones + map ─────────────────────────────────────────
+function applyScores(scoreMap) {
+  ZONES.forEach(zone => {
+    const { score, count, level } = scoreMap[zone.name];
+    zone.score = score;
+    zone.level = level;
+    zone.crimeCount = count;
+    polyLayers[zone.name].setStyle(STYLES[level]);
+  });
+  // Refresh the sidebar if a zone is currently open
+  if (activeZoneName) {
+    showZone(ZONES.find(z => z.name === activeZoneName));
+  }
+}
+
+// ── Bootstrap ─────────────────────────────────────────────────────────────────
+async function init() {
+  setStatus('loading');
+  try {
+    const crimes = await fetchCrimes();
+    const scoreMap = computeScores(crimes);
+    applyScores(scoreMap);
+    setStatus('live', crimes.length);
+  } catch (err) {
+    console.warn('SafeRoute: live data unavailable, using sample scores —', err.message);
+    setStatus('fallback');
+  }
+}
+
+resetPanel();
+init();
+</script>
+</body>
+</html>
