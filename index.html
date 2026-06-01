@@ -1096,7 +1096,7 @@ const CITIES = {
     crimeEndpoint: 'https://data.phila.gov/resource/sspu-uyfa.json',
     dateField: 'dispatch_date_time', typeFields: ['text_general_code'],
     bbox: [40.14, -75.28, 39.87, -74.96], bboxField: null, noBbox: true, noDateFilter: true,
-    latField: 'point_y', lngField: 'point_x',
+    latField: 'point_y', lngField: 'point_x', limit: 5000,
     baseline: 55, dataSource: 'Philly Open Data', zoneDefs: PHILLY_ZONE_DEFS,
   },
 };
@@ -1252,7 +1252,7 @@ function setCached(key, data) {
 
 // ── Crime data fetch (Socrata, OData, ArcGIS) ────────────────────────────────
 async function fetchCrimes(cityId, city) {
-  const key = `saferoute_crimes_${cityId}_v1`;
+  const key = `saferoute_crimes_${cityId}_v2`;
   const cached = getCached(key, CACHE_TTL);
   if (cached) return cached;
 
@@ -1268,7 +1268,7 @@ async function fetchCrimes(cityId, city) {
   let data;
   if (apiType === 'socrata') {
     const url = new URL(city.crimeEndpoint);
-    url.searchParams.set('$limit', '50000');
+    url.searchParams.set('$limit', String(city.limit || 50000));
     if (city.noDateFilter) {
       // Dataset is stale or $where unsupported — fetch most recent records
       url.searchParams.set('$order', `${city.dateField} DESC`);
@@ -1326,7 +1326,7 @@ async function fetchCrimes(cityId, city) {
 
 // ── GeoJSON fetch ─────────────────────────────────────────────────────────────
 async function fetchGeoJSON(cityId, city) {
-  const key = `saferoute_geo_${cityId}_v1`;
+  const key = `saferoute_geo_${cityId}_v2`;
   const cached = getCached(key, GEO_TTL);
   if (cached) return cached;
   const res = await fetch(city.geoURL);
