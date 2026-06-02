@@ -1698,7 +1698,7 @@ const CITIES = {
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/dallas.geojson',
     crimeEndpoint: 'https://www.dallasopendata.com/resource/qv6i-rri7.json',
     dateField: 'date1', typeFields: ['offincident', 'nibrs_crime'],
-    bbox: [33.02, -97.10, 32.56, -96.55], bboxField: null,
+    bbox: [33.02, -97.10, 32.56, -96.55], bboxField: 'geocoded_column',
     baseline: 55, dataSource: 'Dallas Open Data', zoneDefs: {},
   },
   'austin': {
@@ -1741,7 +1741,7 @@ const CITIES = {
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/oakland.geojson',
     crimeEndpoint: 'https://data.oaklandca.gov/resource/ym6k-rx7a.json',
     dateField: 'datetime', typeFields: ['crimetype', 'description'],
-    bbox: [37.90, -122.38, 37.69, -122.11], bboxField: null,
+    bbox: [37.90, -122.38, 37.69, -122.11], bboxField: 'location_1',
     noDateFilter: true, baseline: 12, dataSource: 'Oakland Open Data', zoneDefs: {},
   },
   'sacramento': {
@@ -1787,7 +1787,7 @@ const CITIES = {
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/cincinnati.geojson',
     crimeEndpoint: 'https://data.cincinnati-oh.gov/resource/k59e-2pvf.json',
     dateField: 'date_reported', typeFields: ['offense', 'ucr_group'],
-    bbox: [39.25, -84.75, 39.00, -84.30], bboxField: null,
+    bbox: [39.25, -84.75, 39.00, -84.30], bboxField: null, noBbox: true,
     latField: 'latitude_x', lngField: 'longitude_x',
     baseline: 50, dataSource: 'Cincinnati Open Data', zoneDefs: {},
   },
@@ -1876,8 +1876,8 @@ const CITIES = {
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/fort-lauderdale.geojson',
     crimeEndpoint: 'https://fortlauderdale.data.socrata.com/resource/4gb7-f88q.json',
     dateField: 'date_occu', typeFields: ['offense', 'reportedas'],
-    bbox: [26.24, -80.28, 26.05, -80.07], bboxField: null,
-    latField: 'geoy', lngField: 'geox',
+    bbox: [26.24, -80.28, 26.05, -80.07], bboxField: null, noBbox: true,
+    latField: 'geox', lngField: 'geoy',
     baseline: 35, dataSource: 'Fort Lauderdale PD', zoneDefs: {},
   },
   'raleigh': {
