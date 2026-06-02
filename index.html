@@ -2652,36 +2652,30 @@ async function fetchTractGeoJSON(bounds) {
   return data;
 }
 
-// Census Reporter (api.censusreporter.org) is CORS-enabled; Census Bureau's api.census.gov is not.
-// Batching fails when GEOIDs span different ACS releases, so fetch individually with concurrency limit.
-async function fetchACSForTracts(geoids) {
+// Census API via corsproxy.io — 1 request per county covers all tracts (vs 1 per tract with Census Reporter)
+async function fetchACSForCounty(stateCode, countyCode) {
   const ACS_TTL = 30 * 24 * 60 * 60 * 1000;
-  const result = {};
-  const toFetch = geoids.filter(g => {
-    const hit = getCached(`saferoute_acs2_${g}`, ACS_TTL);
-    if (hit) { result[g] = hit; return false; }
-    return true;
+  const cacheKey = `saferoute_acs3_${stateCode}_${countyCode}`;
+  const cached = getCached(cacheKey, ACS_TTL);
+  if (cached) return cached;
+  const censusUrl = `https://api.census.gov/data/2022/acs/acs5?get=B19013_001E,B17001_002E,B17001_001E&for=tract:*&in=state:${stateCode}&in=county:${countyCode}`;
+  const res = await fetch(`https://corsproxy.io/?url=${encodeURIComponent(censusUrl)}`);
+  if (!res.ok) throw new Error(`ACS ${res.status}`);
+  const rows = await res.json();
+  const hdr = rows[0];
+  const iInc = hdr.indexOf('B19013_001E'), iPovPop = hdr.indexOf('B17001_002E');
+  const iPovTot = hdr.indexOf('B17001_001E'), iSt = hdr.indexOf('state');
+  const iCo = hdr.indexOf('county'), iTr = hdr.indexOf('tract');
+  const acsMap = {};
+  rows.slice(1).forEach(row => {
+    const geoid = row[iSt] + row[iCo] + row[iTr];
+    const income = parseInt(row[iInc]);
+    const povPop = parseInt(row[iPovPop]) || 0;
+    const povTot = parseInt(row[iPovTot]) || 1;
+    acsMap[geoid] = { income: income > 0 ? income : -1, povertyRate: povPop / povTot };
   });
-  const CONCURRENCY = 10;
-  for (let i = 0; i < toFetch.length; i += CONCURRENCY) {
-    await Promise.all(toFetch.slice(i, i + CONCURRENCY).map(async geoid => {
-      try {
-        const res = await fetch(`https://api.censusreporter.org/1.0/data/show/latest?table_ids=B19013,B17001&geo_ids=14000US${geoid}`);
-        if (!res.ok) throw new Error(`${res.status}`);
-        const data = await res.json();
-        const tables = data.data?.[`14000US${geoid}`];
-        const income = tables?.B19013?.estimate?.B19013001 ?? -1;
-        const povPop = tables?.B17001?.estimate?.B17001002 ?? 0;
-        const povTot = tables?.B17001?.estimate?.B17001001 ?? 1;
-        const entry = { income: income > 0 ? income : -1, povertyRate: povTot > 0 ? povPop / povTot : 0.12 };
-        result[geoid] = entry;
-        setCached(`saferoute_acs2_${geoid}`, entry);
-      } catch(e) {
-        result[geoid] = { income: -1, povertyRate: 0.12 };
-      }
-    }));
-  }
-  return result;
+  setCached(cacheKey, acsMap);
+  return acsMap;
 }
 
 function computeTractScore(income, povertyRate) {
@@ -2786,8 +2780,25 @@ async function _doLoadCensusTracts() {
   });
   if (!drawable.length) return;
 
-  const acsMap = await fetchACSForTracts(drawable.map(f => f.properties.GEOID));
-  buildCensusTractZones(drawable, acsMap);
+  // Group by state+county — 1 Census API call per county covers all its tracts
+  const byCounty = {};
+  drawable.forEach(f => {
+    const geoid = f.properties.GEOID;
+    const stateCode  = f.properties.STATE  || geoid.slice(0, 2);
+    const countyCode = f.properties.COUNTY || geoid.slice(2, 5);
+    const key = `${stateCode}|${countyCode}`;
+    if (!byCounty[key]) byCounty[key] = { stateCode, countyCode, features: [] };
+    byCounty[key].features.push(f);
+  });
+  await Promise.all(Object.values(byCounty).map(async ({ stateCode, countyCode, features }) => {
+    try {
+      const acsMap = await fetchACSForCounty(stateCode, countyCode);
+      buildCensusTractZones(features, acsMap);
+    } catch(e) {
+      console.warn(`SafeRoute: ACS failed for ${stateCode}-${countyCode}:`, e);
+      buildCensusTractZones(features, {});
+    }
+  }));
 }
 
 document.getElementById('map-loading').classList.add('done');
