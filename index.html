@@ -2394,6 +2394,7 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 }).addTo(map);
 map.on('click', resetPanel);
 
+const censusLayerGroup = L.layerGroup().addTo(map); // below city neighborhoods
 const zonesLayerGroup = L.layerGroup().addTo(map);
 const cityMarkersLayer = L.layerGroup().addTo(map);
 
@@ -2722,7 +2723,7 @@ function buildCensusTractZones(features, acsMap) {
     const { score, level } = computeTractScore(income, povertyRate);
     const name = props.NAME || `Census Tract ${parseInt(geoid.slice(5), 10) / 100}`;
     const st = STYLES[level];
-    const geoLayer = L.geoJSON(geoFeature, { style: () => ({ ...st, weight: 0.5 }) }).addTo(zonesLayerGroup);
+    const geoLayer = L.geoJSON(geoFeature, { style: () => ({ ...st, weight: 0.5 }) }).addTo(censusLayerGroup);
     polyLayers[tractKey] = geoLayer;
     const zone = {
       name,
@@ -2774,16 +2775,10 @@ async function _doLoadCensusTracts() {
   });
   if (!newFeatures.length) return;
 
-  // Pre-check: skip water-only tracts (ALAND=0) and city-covered tracts
+  // Skip water-only tracts (AREALAND=0); land tracts draw in censusLayerGroup below city neighborhoods
   const drawable = newFeatures.filter(f => {
     const geoid = f.properties.GEOID;
     if (!(parseInt(f.properties.AREALAND) > 0)) {
-      polyLayers[`tract:${geoid}`] = 'covered';
-      return false;
-    }
-    const b = L.geoJSON({ type: 'Feature', geometry: f.geometry }).getBounds();
-    const c = b.getCenter();
-    if (isCoveredByCity(c.lat, c.lng)) {
       polyLayers[`tract:${geoid}`] = 'covered';
       return false;
     }
