@@ -448,7 +448,7 @@
         <div class="leg-item"><div class="leg-swatch" style="background:var(--caution)"></div>Use Caution</div>
         <div class="leg-item"><div class="leg-swatch" style="background:var(--avoid)"></div>Avoid</div>
       </div>
-      <p class="method-note">Scores (1–5) from 90 days of live police data, weighted by crime severity. Higher = safer.</p>
+      <p class="method-note">Scores (1–5) from 12 months of live police data, weighted by crime severity. Higher = safer.</p>
     </div>
   </div>
 </div>
@@ -471,7 +471,7 @@
     <p class="modal-body">The weighted sum is converted to a 1–5 score using a log scale calibrated per city: <span class="modal-code">score = 5 − 2.5 × log₁₀(weighted / baseline)</span>, clamped to 1–5. Neighborhoods scoring ≥ 3.5 are <strong style="color:#16a34a">Safe</strong>, 2.5–3.5 are <strong style="color:#b45309">Use Caution</strong>, below 2.5 are <strong style="color:#b91c1c">Avoid</strong>.</p>
 
     <div class="modal-h">Data sources &amp; update frequency</div>
-    <p class="modal-body">Crime scores refresh from live APIs every 6 hours and cover the most recent 90 days of reported incidents. Neighborhood boundaries are cached for 7 days.</p>
+    <p class="modal-body">Crime scores refresh from live APIs every 6 hours and cover the most recent 12 months of reported incidents. Neighborhood boundaries are cached for 7 days.</p>
     <table class="modal-table">
       <tr><th>City</th><th>Source</th></tr>
       <tr><td>New Orleans</td><td>NOLA Open Data (Socrata)</td></tr>
@@ -1879,16 +1879,16 @@ function setCached(key, data) {
 }
 
 // ── Crime data fetch (Socrata, OData, ArcGIS) ────────────────────────────────
-// period=0 → last 90 days; period=1 → prior 90 days (90-180 days ago, for trend)
+// period=0 → last 365 days; period=1 → prior 365 days (365-730 days ago, for trend)
 async function fetchCrimes(cityId, city, period = 0) {
   if (city.noApi) return null;
   if (city.noDateFilter && period > 0) return null;
-  const key = `saferoute_crimes_${cityId}_v3_p${period}`;
+  const key = `saferoute_crimes_${cityId}_v4_p${period}`;
   const cached = getCached(key, CACHE_TTL);
   if (cached) return cached;
 
-  const toDate = new Date(); toDate.setDate(toDate.getDate() - 90 * period);
-  const fromDate = new Date(); fromDate.setDate(fromDate.getDate() - 90 * (period + 1));
+  const toDate = new Date(); toDate.setDate(toDate.getDate() - 365 * period);
+  const fromDate = new Date(); fromDate.setDate(fromDate.getDate() - 365 * (period + 1));
   const fromStr = fromDate.toISOString().slice(0, 10);
   const toStr   = toDate.toISOString().slice(0, 10);
 
@@ -2117,10 +2117,10 @@ function showZone(zone) {
   activeZoneName = zone.name;
   const crimeBox = zone.crimeCount !== null ? `
     <div class="crime-box">
-      <div class="crime-box-title">Live Crime Data · Last 90 Days</div>
+      <div class="crime-box-title">Live Crime Data · Last 12 Months</div>
       <div class="crime-row"><span>Reported incidents</span><span class="crime-val">${zone.crimeCount.toLocaleString()}</span></div>
       <div class="crime-row"><span>Safety score</span><span class="crime-val">${zone.score} / 5${zone.trend ? ' ' + trendBadge(zone.trend) : ''}</span></div>
-      <div class="crime-row"><span>vs. prior 90 days</span><span class="crime-val">${zone.trend ? (zone.trend === 'improving' ? '↓ Improving' : zone.trend === 'worsening' ? '↑ Increasing' : '→ Stable') : '—'}</span></div>
+      <div class="crime-row"><span>vs. prior 12 months</span><span class="crime-val">${zone.trend ? (zone.trend === 'improving' ? '↓ Improving' : zone.trend === 'worsening' ? '↑ Increasing' : '→ Stable') : '—'}</span></div>
       <div class="crime-row"><span>Source</span><span class="crime-val">${currentCity.dataSource}</span></div>
     </div>` : '';
 
