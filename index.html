@@ -1668,60 +1668,60 @@ const CITIES = {
     label: 'Miami, FL',
     center: [25.7617, -80.1918], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/miami.geojson',
-    crimeEndpoint: 'https://opendata.miamigov.com/resource/k9e7-enfw.json',
-    dateField: 'occurred_on', typeFields: ['offense', 'offense_description', 'offense_type'],
-    bbox: [25.85, -80.35, 25.70, -80.12], bboxField: null, noBbox: true, noDateFilter: true,
-    latField: 'lat', lngField: 'lon',
-    baseline: 30, dataSource: 'Miami Open Data', zoneDefs: MIAMI_ZONE_DEFS,
+    noApi: true,
+    bbox: [25.85, -80.35, 25.70, -80.12],
+    baseline: 30, dataSource: 'Curated', zoneDefs: MIAMI_ZONE_DEFS,
   },
   'atlanta': {
     label: 'Atlanta, GA',
     center: [33.749, -84.388], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/atlanta.geojson',
-    crimeEndpoint: 'https://services3.arcgis.com/Mt4kiXQpNVOmxXEi/arcgis/rest/services/APD_Crime/FeatureServer/0/query',
-    apiType: 'arcgis', noDateFilter: true,
-    dateField: 'rpt_date', typeFields: ['UC2_Literal'],
-    bbox: [33.89, -84.55, 33.64, -84.29], bboxField: null,
-    latField: 'lat', lngField: 'long',
-    baseline: 45, dataSource: 'Atlanta PD Open Data', zoneDefs: ATLANTA_ZONE_DEFS,
+    noApi: true,
+    bbox: [33.89, -84.55, 33.64, -84.29],
+    baseline: 45, dataSource: 'Curated', zoneDefs: ATLANTA_ZONE_DEFS,
   },
   'denver': {
     label: 'Denver, CO',
     center: [39.7392, -104.9903], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/denver.geojson',
-    crimeEndpoint: 'https://data.denvergov.org/resource/mnnd-mq2c.json',
-    dateField: 'first_occurrence_date', typeFields: ['offense_category_id', 'offense_type_id'],
-    bbox: [39.91, -105.11, 39.61, -104.60], bboxField: null, noBbox: true, noDateFilter: true,
-    latField: 'geo_lat', lngField: 'geo_lon',
+    crimeEndpoint: 'https://services1.arcgis.com/zdB7qR0BtYrg0Xpl/arcgis/rest/services/ODC_CRIME_OFFENSES_P/FeatureServer/324/query',
+    apiType: 'arcgis',
+    dateField: 'FIRST_OCCURRENCE_DATE', typeFields: ['OFFENSE_CATEGORY_ID', 'OFFENSE_TYPE_ID'],
+    bbox: [39.91, -105.11, 39.61, -104.60], bboxField: null,
+    latField: 'GEO_LAT', lngField: 'GEO_LON',
     baseline: 40, dataSource: 'Denver Open Data', zoneDefs: DENVER_ZONE_DEFS,
   },
   'portland': {
     label: 'Portland, OR',
     center: [45.5051, -122.6750], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/portland.geojson',
-    crimeEndpoint: 'https://services.arcgis.com/quVN97tn06YNGj9s/arcgis/rest/services/PortlandPoliceDataShare/FeatureServer/0/query',
-    apiType: 'arcgis', noDateFilter: true,
-    dateField: 'OccurDate', typeFields: ['OffenseCategory', 'OffenseType'],
+    crimeEndpoint: 'https://www.portlandmaps.com/arcgis/rest/services/Public/Crime/MapServer/40/query',
+    apiType: 'arcgis',
+    dateField: 'REPORTED_DATETIME', typeFields: ['CrimeType'],
     bbox: [45.65, -122.84, 45.43, -122.47], bboxField: null,
-    latField: 'OpenDataLat', lngField: 'OpenDataLon',
+    latField: 'latitude', lngField: 'longitude',
     baseline: 35, dataSource: 'Portland PD Open Data', zoneDefs: PORTLAND_ZONE_DEFS,
   },
   'baltimore': {
     label: 'Baltimore, MD',
     center: [39.2904, -76.6122], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/baltimore.geojson',
-    crimeEndpoint: 'https://data.baltimorecity.gov/resource/wsfq-mvij.json',
-    dateField: 'crimedate', typeFields: ['description'],
-    bbox: [39.37, -76.72, 39.20, -76.53], bboxField: null, noBbox: true, noDateFilter: true,
+    crimeEndpoint: 'https://services1.arcgis.com/UWYHeuuJISiGmgXx/arcgis/rest/services/Part1_Crime_Beta/FeatureServer/0/query',
+    apiType: 'arcgis', noDateFilter: true,
+    dateField: 'CrimeDateTime', typeFields: ['Description'],
+    bbox: [39.37, -76.72, 39.20, -76.53], bboxField: null,
+    latField: 'Latitude', lngField: 'Longitude',
     baseline: 50, dataSource: 'Open Baltimore', zoneDefs: BALTIMORE_ZONE_DEFS,
   },
   'detroit': {
     label: 'Detroit, MI',
     center: [42.3314, -83.0458], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/detroit.geojson',
-    crimeEndpoint: 'https://data.detroitmi.gov/resource/wgv9-drfc.json',
-    dateField: 'report_date', typeFields: ['category', 'offense_description'],
-    bbox: [42.45, -83.29, 42.25, -82.91], bboxField: null, noBbox: true, noDateFilter: true,
+    crimeEndpoint: 'https://services2.arcgis.com/qvkbeam7Wirps6zC/arcgis/rest/services/RMS_Crime_Incidents/FeatureServer/0/query',
+    apiType: 'arcgis',
+    dateField: 'incident_occurred_at', typeFields: ['offense_category', 'offense_description'],
+    bbox: [42.45, -83.29, 42.25, -82.91], bboxField: null,
+    latField: 'latitude', lngField: 'longitude',
     baseline: 40, dataSource: 'Detroit Open Data', zoneDefs: DETROIT_ZONE_DEFS,
   },
 };
@@ -1750,33 +1750,36 @@ const LEVEL_LABELS  = { safe:'Safe', caution:'Use Caution', avoid:'Avoid' };
 
 // ── Crime severity weights (most-specific match first) ───────────────────────
 const CRIME_WEIGHTS = [
-  { match:'MURDER',             weight:5 },  // NOLA, NYC "MURDER & NON-NEGL."
-  { match:'HOMICIDE',           weight:5 },  // Chicago
+  { match:'MURDER',             weight:5 },
+  { match:'HOMICIDE',           weight:5 },
   { match:'RAPE',               weight:5 },
-  { match:'SEXUAL ASSAULT',     weight:5 },  // Chicago "CRIM SEXUAL ASSAULT"
+  { match:'SEXUAL ASSAULT',     weight:5 },
+  { match:'SEXUAL OFFENSE',     weight:5 },  // Detroit
   { match:'KIDNAP',             weight:4 },
   { match:'ARMED ROBBERY',      weight:4 },
   { match:'CARJACKING',         weight:4 },
+  { match:'SHOOTING',           weight:4 },  // Baltimore
   { match:'AGGRAVATED ASSAULT', weight:4 },
   { match:'AGGRAVATED BATTERY', weight:4 },
-  { match:'FELONY ASSAULT',     weight:4 },  // NYC
+  { match:'FELONY ASSAULT',     weight:4 },
+  { match:'AGG. ASSAULT',       weight:4 },  // Baltimore abbreviation
   { match:'ROBBERY',            weight:3 },
   { match:'SIMPLE BATTERY',     weight:3 },
   { match:'SIMPLE ASSAULT',     weight:3 },
-  { match:'BATTERY',            weight:3 },  // Chicago (after more-specific entries)
+  { match:'BATTERY',            weight:3 },
   { match:'ASSAULT',            weight:3 },
-  { match:'MOTOR VEHICLE THEFT',weight:2 },  // before THEFT
+  { match:'MOTOR VEHICLE THEFT',weight:2 },
   { match:'BURGLARY',           weight:2 },
   { match:'AUTO THEFT',         weight:2 },
   { match:'ARSON',              weight:2 },
   { match:'THEFT',              weight:1 },
-  { match:'LARCENY',            weight:1 },  // NYC "GRAND LARCENY"
+  { match:'LARCENY',            weight:1 },
   { match:'PICKPOCKET',         weight:1 },
 ];
 
 function crimeWeight(type) {
   if (!type) return 0;
-  const t = String(type).toUpperCase();
+  const t = String(type).toUpperCase().replace(/-/g, ' ');
   for (const { match, weight } of CRIME_WEIGHTS) {
     if (t.includes(match)) return weight;
   }
@@ -1878,8 +1881,9 @@ function setCached(key, data) {
 // ── Crime data fetch (Socrata, OData, ArcGIS) ────────────────────────────────
 // period=0 → last 90 days; period=1 → prior 90 days (90-180 days ago, for trend)
 async function fetchCrimes(cityId, city, period = 0) {
+  if (city.noApi) return null;
   if (city.noDateFilter && period > 0) return null;
-  const key = `saferoute_crimes_${cityId}_v2_p${period}`;
+  const key = `saferoute_crimes_${cityId}_v3_p${period}`;
   const cached = getCached(key, CACHE_TTL);
   if (cached) return cached;
 
@@ -1894,6 +1898,7 @@ async function fetchCrimes(cityId, city, period = 0) {
   const apiType = city.apiType || 'socrata';
 
   let data;
+  if (!city.crimeEndpoint) throw new Error('No crime endpoint configured');
   if (apiType === 'socrata') {
     const url = new URL(city.crimeEndpoint);
     url.searchParams.set('$limit', String(city.limit || 50000));
@@ -1932,18 +1937,22 @@ async function fetchCrimes(cityId, city, period = 0) {
     const arcWhere = city.noDateFilter ? '1=1'
       : `${city.dateField} >= DATE '${fromStr}' AND ${city.dateField} < DATE '${toStr}'`;
     url.searchParams.set('where', arcWhere);
-    url.searchParams.set('outFields', `${city.typeFields[0]},${latF},${lngF}`);
-    url.searchParams.set('resultRecordCount', '50000');
+    const outFieldsList = [...new Set([...city.typeFields, latF, lngF])].join(',');
+    url.searchParams.set('outFields', outFieldsList);
+    url.searchParams.set('resultRecordCount', String(city.limit || 50000));
     url.searchParams.set('orderByFields', `${city.dateField} DESC`);
+    url.searchParams.set('outSR', '4326');
     url.searchParams.set('f', 'json');
     const res = await fetch(url.toString());
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
-    data = (json.features || []).map(f => ({
-      ...f.attributes,
-      latitude: f.attributes[latF],
-      longitude: f.attributes[lngF],
-    }));
+    data = (json.features || []).map(f => {
+      const attrs = f.attributes || {};
+      // Fall back to geometry coordinates when lat/lng not in attributes (e.g. Portland MapServer)
+      const lat = attrs[latF] != null ? parseFloat(attrs[latF]) : f.geometry?.y ?? null;
+      const lng = attrs[lngF] != null ? parseFloat(attrs[lngF]) : f.geometry?.x ?? null;
+      return { ...attrs, latitude: lat, longitude: lng };
+    });
   }
 
   if (!Array.isArray(data) || data.length === 0) throw new Error('No crime data returned');
@@ -1953,7 +1962,7 @@ async function fetchCrimes(cityId, city, period = 0) {
 
 // ── GeoJSON fetch ─────────────────────────────────────────────────────────────
 async function fetchGeoJSON(cityId, city) {
-  const key = `saferoute_geo_${cityId}_v2`;
+  const key = `saferoute_geo_${cityId}_v3`;
   const cached = getCached(key, GEO_TTL);
   if (cached) return cached;
   const res = await fetch(city.geoURL);
