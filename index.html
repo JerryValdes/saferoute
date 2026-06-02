@@ -2620,10 +2620,158 @@ function fetchVisibleCityData() {
     crimeLoaded.add(cityId);
     loadVisibleCity(cityId);
   }
+  loadCensusTracts();
 }
 
 map.on('zoomend', fetchVisibleCityData);
 map.on('moveend', fetchVisibleCityData);
+
+// ── Census tract coverage (Phase 2) ──────────────────────────────────────────
+const tractGeoCache = {};
+
+async function fetchTractGeoJSON(bounds) {
+  const s = bounds.getSouth().toFixed(3), w = bounds.getWest().toFixed(3);
+  const n = bounds.getNorth().toFixed(3), e = bounds.getEast().toFixed(3);
+  const cacheKey = `${w},${s},${e},${n}`;
+  if (tractGeoCache[cacheKey]) return tractGeoCache[cacheKey];
+  const url = new URL('https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/Tracts_Blocks/MapServer/0/query');
+  url.searchParams.set('where', '1=1');
+  url.searchParams.set('geometry', `${w},${s},${e},${n}`);
+  url.searchParams.set('geometryType', 'esriGeometryEnvelope');
+  url.searchParams.set('inSR', '4326');
+  url.searchParams.set('spatialRel', 'esriSpatialRelIntersects');
+  url.searchParams.set('outFields', 'GEOID,NAME,STATE,COUNTY,TRACT');
+  url.searchParams.set('outSR', '4326');
+  url.searchParams.set('resultRecordCount', '500');
+  url.searchParams.set('f', 'geojson');
+  const res = await fetch(url.toString());
+  if (!res.ok) throw new Error(`TIGERweb HTTP ${res.status}`);
+  const data = await res.json();
+  tractGeoCache[cacheKey] = data;
+  return data;
+}
+
+async function fetchACSForCounty(stateCode, countyCode) {
+  const cacheKey = `saferoute_acs_${stateCode}_${countyCode}_v1`;
+  const cached = getCached(cacheKey, 30 * 24 * 60 * 60 * 1000);
+  if (cached) return cached;
+  const url = `https://api.census.gov/data/2022/acs/acs5?get=B19013_001E,B17001_002E,B17001_001E&for=tract:*&in=state:${stateCode}&in=county:${countyCode}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`ACS HTTP ${res.status}`);
+  const rows = await res.json();
+  const hdr = rows[0];
+  const iInc = hdr.indexOf('B19013_001E'), iPovPop = hdr.indexOf('B17001_002E');
+  const iPovTot = hdr.indexOf('B17001_001E'), iSt = hdr.indexOf('state');
+  const iCo = hdr.indexOf('county'), iTr = hdr.indexOf('tract');
+  const acsMap = {};
+  rows.slice(1).forEach(row => {
+    const geoid = row[iSt] + row[iCo] + row[iTr];
+    const income = parseInt(row[iInc]);
+    const povPop = parseInt(row[iPovPop]) || 0;
+    const povTot = parseInt(row[iPovTot]) || 1;
+    acsMap[geoid] = { income: income > 0 ? income : -1, povertyRate: povPop / povTot };
+  });
+  setCached(cacheKey, acsMap);
+  return acsMap;
+}
+
+function computeTractScore(income, povertyRate) {
+  const pov = Math.max(povertyRate * 100, 0.1);
+  const povertyScore = Math.min(5, Math.max(1, 5 - 2 * Math.log10(pov / 3)));
+  if (income <= 0) {
+    const s = Math.round(povertyScore * 10) / 10;
+    return { score: s, level: s >= 3.5 ? 'safe' : s >= 2.5 ? 'caution' : 'avoid' };
+  }
+  const incomeScore = Math.min(5, Math.max(1,
+    1 + 4 * (Math.log10(income) - 4) / (Math.log10(200000) - 4)
+  ));
+  const raw = 0.6 * incomeScore + 0.4 * povertyScore;
+  const s = Math.round(raw * 10) / 10;
+  return { score: s, level: s >= 3.5 ? 'safe' : s >= 2.5 ? 'caution' : 'avoid' };
+}
+
+function isCoveredByCity(lat, lng) {
+  return Object.values(CITIES).some(city => {
+    const [n, w, s, e] = city.bbox;
+    return lat >= s && lat <= n && lng >= w && lng <= e;
+  });
+}
+
+function buildCensusTractZones(features, acsMap) {
+  features.forEach(feature => {
+    const props = feature.properties || {};
+    const geoid = props.GEOID;
+    if (!geoid || !feature.geometry) return;
+    const tractKey = `tract:${geoid}`;
+    if (polyLayers[tractKey]) return;
+    const geoFeature = { type: 'Feature', geometry: feature.geometry };
+    const bounds = L.geoJSON(geoFeature).getBounds();
+    const center = bounds.getCenter();
+    if (isCoveredByCity(center.lat, center.lng)) return;
+    const acs = acsMap[geoid] || {};
+    const income = acs.income ?? -1;
+    const povertyRate = acs.povertyRate ?? 0.12;
+    const { score, level } = computeTractScore(income, povertyRate);
+    const name = props.NAME || `Census Tract ${parseInt(geoid.slice(5), 10) / 100}`;
+    const st = STYLES[level];
+    const geoLayer = L.geoJSON(geoFeature, { style: () => ({ ...st, weight: 0.5 }) }).addTo(zonesLayerGroup);
+    polyLayers[tractKey] = geoLayer;
+    const zone = {
+      name,
+      cityId: `census-${geoid.slice(0, 5)}`,
+      cityLabel: 'US Census Tract',
+      dataSource: 'ACS 5-Year 2022',
+      level, score,
+      desc: income > 0
+        ? `Census tract with a median household income of $${income.toLocaleString()} and a poverty rate of ${(povertyRate * 100).toFixed(1)}%.`
+        : `Census tract with a poverty rate of ${(povertyRate * 100).toFixed(1)}%.`,
+      tips: [
+        ...(income > 0 ? [{ icon: '💰', text: `Median income: $${income.toLocaleString()}` }] : []),
+        { icon: '📊', text: `Poverty rate: ${(povertyRate * 100).toFixed(1)}%` },
+        { icon: 'ℹ️', text: `GEOID: ${geoid} · US Census Bureau ACS 2022` },
+      ],
+      crimeScore: null, qolScore: null, amenityScore: null, crimeCount: null,
+      geometry: feature.geometry,
+    };
+    ZONES.push(zone);
+    geoLayer.on('mouseover', () => geoLayer.setStyle({ fillOpacity: HOVER_OPACITY[level], weight: 1.5 }));
+    geoLayer.on('mouseout',  () => geoLayer.setStyle({ ...st, weight: 0.5 }));
+    geoLayer.on('click', e => { L.DomEvent.stopPropagation(e); showZone(zone); });
+  });
+}
+
+async function loadCensusTracts() {
+  if (map.getZoom() < 10) return;
+  const bounds = map.getBounds();
+  let geoJSON;
+  try {
+    geoJSON = await fetchTractGeoJSON(bounds);
+  } catch (e) {
+    console.warn('SafeRoute: TIGERweb fetch failed:', e);
+    return;
+  }
+  if (!geoJSON.features?.length) return;
+  const byCounty = {};
+  geoJSON.features.forEach(f => {
+    const geoid = f.properties?.GEOID;
+    if (!geoid || polyLayers[`tract:${geoid}`]) return;
+    const stateCode  = f.properties?.STATE  || geoid.slice(0, 2);
+    const countyCode = f.properties?.COUNTY || geoid.slice(2, 5);
+    const key = `${stateCode}|${countyCode}`;
+    if (!byCounty[key]) byCounty[key] = { stateCode, countyCode, features: [] };
+    byCounty[key].features.push(f);
+  });
+  if (!Object.keys(byCounty).length) return;
+  await Promise.all(Object.values(byCounty).map(async ({ stateCode, countyCode, features }) => {
+    try {
+      const acsMap = await fetchACSForCounty(stateCode, countyCode);
+      buildCensusTractZones(features, acsMap);
+    } catch (e) {
+      console.warn(`SafeRoute: ACS failed for ${stateCode}-${countyCode}:`, e);
+      buildCensusTractZones(features, {});
+    }
+  }));
+}
 
 document.getElementById('map-loading').classList.add('done');
 setStatus('ready');
