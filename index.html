@@ -19,7 +19,7 @@
 
     :root {
       --safe:    #22c55e;
-      --caution: #3b82f6;
+      --caution: #eab308;
       --avoid:   #ef4444;
       --dark:    #0f172a;
       --text:    #1e293b;
@@ -148,7 +148,7 @@
     .badge-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
     .badge-safe    { background: #dcfce7; color: #166534; }
     .badge-safe    .badge-dot { background: var(--safe); }
-    .badge-caution { background: #dbeafe; color: #1e40af; }
+    .badge-caution { background: #fef9c3; color: #92400e; }
     .badge-caution .badge-dot { background: var(--caution); }
     .badge-avoid   { background: #fee2e2; color: #991b1b; }
     .badge-avoid   .badge-dot { background: var(--avoid); }
@@ -413,7 +413,7 @@
       <li><strong>Weight 2:</strong> Burglary, motor vehicle theft, arson</li>
       <li><strong>Weight 1:</strong> Theft, larceny</li>
     </ul>
-    <p class="modal-body">The weighted sum is converted to a 1–5 score using a log scale calibrated per city: <span class="modal-code">score = 5 − 2.5 × log₁₀(weighted / baseline)</span>, clamped to 1–5. Neighborhoods scoring ≥ 3.5 are <strong style="color:#16a34a">Safe</strong>, 2.5–3.5 are <strong style="color:#1d4ed8">Use Caution</strong>, below 2.5 are <strong style="color:#b91c1c">Avoid</strong>.</p>
+    <p class="modal-body">The weighted sum is converted to a 1–5 score using a log scale calibrated per city: <span class="modal-code">score = 5 − 2.5 × log₁₀(weighted / baseline)</span>, clamped to 1–5. Neighborhoods scoring ≥ 3.5 are <strong style="color:#16a34a">Safe</strong>, 2.5–3.5 are <strong style="color:#b45309">Use Caution</strong>, below 2.5 are <strong style="color:#b91c1c">Avoid</strong>.</p>
 
     <div class="modal-h">Data sources &amp; update frequency</div>
     <p class="modal-body">Crime scores refresh from live APIs every 6 hours and cover the most recent 12 months of reported incidents. Neighborhood boundaries are cached for 7 days.</p>
@@ -1988,7 +1988,7 @@ function defaultDef(cityId, name) {
 // ── Map styles ───────────────────────────────────────────────────────────────
 const STYLES = {
   safe:    { color:'#16a34a', fillColor:'#22c55e', fillOpacity:.28, weight:1.5 },
-  caution: { color:'#1d4ed8', fillColor:'#3b82f6', fillOpacity:.32, weight:1.5 },
+  caution: { color:'#b45309', fillColor:'#eab308', fillOpacity:.32, weight:1.5 },
   avoid:   { color:'#b91c1c', fillColor:'#ef4444', fillOpacity:.32, weight:1.5 }
 };
 const HOVER_OPACITY = { safe:.48, caution:.52, avoid:.52 };
