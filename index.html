@@ -2146,10 +2146,13 @@ function ovRow(zone) {
 }
 
 function showCityOverview() {
-  const scored = ZONES.filter(z => z.crimeCount !== null).sort((a, b) => b.score - a.score);
-  if (scored.length < 3) return;
-  const safest   = scored.slice(0, 3);
-  const riskiest = scored.slice(-3).reverse();
+  if (ZONES.length < 3) return;
+  const sorted = [...ZONES].sort((a, b) => b.score - a.score);
+  const hasLive = ZONES.some(z => z.crimeCount !== null);
+  const safest   = sorted.slice(0, 3);
+  const riskiest = sorted.slice(-3).reverse();
+  const note = hasLive ? '' :
+    '<p class="ov-hint" style="color:var(--caution);margin-top:8px">Live API unavailable — showing curated scores</p>';
   document.getElementById('panel').innerHTML = `
     <div class="ov-panel">
       <div class="ov-city">${currentCity.label}</div>
@@ -2158,6 +2161,7 @@ function showCityOverview() {
       <div class="ov-divider"></div>
       <div class="ov-section">Exercise Caution</div>
       ${riskiest.map(ovRow).join('')}
+      ${note}
       <p class="ov-hint">Tap any neighborhood on the map for details.</p>
     </div>`;
 }
@@ -2215,17 +2219,28 @@ async function init(cityId) {
   loader.classList.remove('done');
   setStatus('loading');
   try {
-    const [geoJSON, crimes, priorCrimes] = await Promise.all([
-      fetchGeoJSON(cityId, city),
-      fetchCrimes(cityId, city, 0),
-      fetchCrimes(cityId, city, 1).catch(() => null),
-    ]);
+    const geoJSON = await fetchGeoJSON(cityId, city);
     if (loadingCityId !== cityId) return;
     buildAndDrawZones(geoJSON, city, cityId);
-    const scoreMap = computeScores(crimes, city);
-    const priorMap = priorCrimes ? computeScores(priorCrimes, city) : null;
-    applyScores(scoreMap, priorMap);
-    setStatus('live', crimes.length);
+
+    let crimes = null, priorCrimes = null;
+    try {
+      [crimes, priorCrimes] = await Promise.all([
+        fetchCrimes(cityId, city, 0),
+        fetchCrimes(cityId, city, 1).catch(() => null),
+      ]);
+    } catch (e) {
+      console.warn('SafeRoute crime fetch failed:', e);
+      setStatus('fallback');
+    }
+
+    if (loadingCityId !== cityId) return;
+    if (crimes) {
+      const scoreMap = computeScores(crimes, city);
+      const priorMap = priorCrimes ? computeScores(priorCrimes, city) : null;
+      applyScores(scoreMap, priorMap);
+      setStatus('live', crimes.length);
+    }
     if (!activeZoneName) showCityOverview();
   } catch (err) {
     if (loadingCityId !== cityId) return;
