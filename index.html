@@ -6,7 +6,7 @@
   <title>SafeRoute — Tourist Safety Map</title>
   <meta name="description" content="Interactive tourist safety map with live crime data and neighborhood-by-neighborhood safety scores.">
   <meta property="og:title" content="SafeRoute — Tourist Safety Map">
-  <meta property="og:description" content="Live neighborhood safety scores for New Orleans, Chicago, San Francisco, Manhattan, Brooklyn, Seattle, Los Angeles, Boston, Washington DC, and Philadelphia.">
+  <meta property="og:description" content="Live neighborhood safety scores for 20 major US cities, powered by open police data. Know before you go.">
   <meta property="og:url" content="https://jerryvaldes.github.io/saferoute/">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary">
@@ -77,32 +77,6 @@
     .s-dot-fallback { background: var(--caution); }
     @keyframes blink { 0%,100%{opacity:.3} 50%{opacity:1} }
 
-    .city-picker {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-      color: #94a3b8;
-    }
-    #city-select {
-      background: rgba(255,255,255,.07);
-      border: 1px solid rgba(255,255,255,.14);
-      border-radius: 6px;
-      color: #e2e8f0;
-      font-size: 12.5px;
-      font-family: inherit;
-      padding: 4px 26px 4px 9px;
-      cursor: pointer;
-      outline: none;
-      appearance: none;
-      -webkit-appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 8px center;
-    }
-    #city-select:hover { background-color: rgba(255,255,255,.12); }
-    #city-select option { background: #1e293b; color: #e2e8f0; }
 
     /* ─── Main ─── */
     #main { flex: 1; display: flex; overflow: hidden; min-height: 0; }
@@ -271,7 +245,7 @@
       font-size: 12px; font-weight: 700;
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; margin-left: 8px;
+      flex-shrink: 0; margin-left: auto;
       line-height: 1;
     }
     #info-btn:hover { background: rgba(255,255,255,.16); color: #e2e8f0; }
@@ -388,8 +362,6 @@
       #panel { overflow: visible; padding: 16px; }
       .placeholder { min-height: 110px; }
       #status-pill { display: none; }
-      .city-picker svg { display: none; }
-      #city-select { font-size: 14px; padding: 6px 28px 6px 10px; border-radius: 8px; }
       #info-btn { width: 30px; height: 30px; font-size: 14px; }
       #info-modal { padding: 22px 18px; }
     }
@@ -402,33 +374,6 @@
   <div id="status-pill">
     <div class="s-dot s-dot-loading"></div>
     <span id="status-text">Loading crime data…</span>
-  </div>
-  <div class="city-picker">
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-      <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/>
-      <circle cx="12" cy="10" r="3"/>
-    </svg>
-    <select id="city-select">
-      <option value="new-orleans">New Orleans, LA</option>
-      <option value="chicago">Chicago, IL</option>
-      <option value="san-francisco">San Francisco, CA</option>
-      <option value="new-york">Manhattan, NY</option>
-      <option value="brooklyn">Brooklyn, NY</option>
-      <option value="queens">Queens, NY</option>
-      <option value="bronx">The Bronx, NY</option>
-      <option value="staten-island">Staten Island, NY</option>
-      <option value="seattle">Seattle, WA</option>
-      <option value="los-angeles">Los Angeles, CA</option>
-      <option value="boston">Boston, MA</option>
-      <option value="washington-dc">Washington, DC</option>
-      <option value="philadelphia">Philadelphia, PA</option>
-      <option value="miami">Miami, FL</option>
-      <option value="atlanta">Atlanta, GA</option>
-      <option value="denver">Denver, CO</option>
-      <option value="portland">Portland, OR</option>
-      <option value="baltimore">Baltimore, MD</option>
-      <option value="detroit">Detroit, MI</option>
-    </select>
   </div>
   <button id="info-btn" aria-label="About SafeRoute">?</button>
 </div>
@@ -1985,20 +1930,6 @@ async function fetchGeoJSON(cityId, city) {
   return data;
 }
 
-// ── Meta tag updater ─────────────────────────────────────────────────────────
-function updateMeta(cityId, city) {
-  const title = `SafeRoute — ${city.label}`;
-  const desc  = `Live neighborhood safety scores for ${city.label}, powered by open police data. Know before you go.`;
-  document.title = title;
-  document.querySelector('meta[name="description"]')?.setAttribute('content', desc);
-  document.querySelector('meta[property="og:title"]')?.setAttribute('content', title);
-  document.querySelector('meta[property="og:description"]')?.setAttribute('content', desc);
-  document.querySelector('meta[property="og:url"]')?.setAttribute('content',
-    `https://jerryvaldes.github.io/saferoute/#${cityId}`);
-  document.querySelector('meta[name="twitter:title"]')?.setAttribute('content', title);
-  document.querySelector('meta[name="twitter:description"]')?.setAttribute('content', desc);
-}
-
 // ── Status indicator ──────────────────────────────────────────────────────────
 function setStatus(state, detail) {
   const pill = document.getElementById('status-pill');
@@ -2018,7 +1949,7 @@ function setStatus(state, detail) {
 }
 
 // ── Map setup ─────────────────────────────────────────────────────────────────
-const map = L.map('map', { center:[29.9700,-90.0600], zoom:11 });
+const map = L.map('map', { center:[39.5,-98.35], zoom:4 });
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   attribution:'© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com">CARTO</a>',
   maxZoom:19
@@ -2034,31 +1965,29 @@ map.on('zoomend', () => {
 });
 
 // ── Zone state ────────────────────────────────────────────────────────────────
-let currentCityId = 'new-orleans';
-let currentCity   = CITIES['new-orleans'];
 let ZONES = [];
 const polyLayers = {};
-let activeZoneName = null;
-let loadingCityId  = null;
+let activeZone = null;
 
 // ── Build and draw zones from GeoJSON ─────────────────────────────────────────
 function buildAndDrawZones(geoJSON, city, cityId) {
-  ZONES = geoJSON.features.map(feature => {
+  const cityZones = geoJSON.features.map(feature => {
     const name = feature.properties.name || feature.properties.neighborhood || '';
     const key  = name.replace(/\s+/g, ' ');
     const defs = city.zoneDefs;
     const def  = defs[name] || defs[key] || defaultDef(cityId, name);
-    return { name, ...def, crimeCount: null, geometry: feature.geometry };
+    return { name, cityId, cityLabel: city.label, dataSource: city.dataSource, ...def, crimeCount: null, geometry: feature.geometry };
   });
+  ZONES.push(...cityZones);
 
-  ZONES.forEach(zone => {
+  cityZones.forEach(zone => {
     const s = STYLES[zone.level];
     const geoLayer = L.geoJSON(
       { type:'Feature', geometry: zone.geometry },
       { style: () => ({ ...s }) }
     ).addTo(zonesLayerGroup);
 
-    polyLayers[zone.name] = geoLayer;
+    polyLayers[`${cityId}:${zone.name}`] = geoLayer;
 
     const center = geoLayer.getBounds().getCenter();
     L.marker(center, {
@@ -2094,7 +2023,6 @@ function buildAndDrawZones(geoJSON, city, cityId) {
     });
   });
 
-  // Initial label visibility
   const show = map.getZoom() >= 12;
   document.querySelectorAll('.zone-label').forEach(el => {
     el.style.display = show ? '' : 'none';
@@ -2110,7 +2038,7 @@ const PLACEHOLDER = `
   </div>`;
 
 function resetPanel() {
-  activeZoneName = null;
+  activeZone = null;
   document.getElementById('panel').innerHTML = PLACEHOLDER;
 }
 
@@ -2126,19 +2054,20 @@ function trendBadge(trend) {
 }
 
 function showZone(zone) {
-  activeZoneName = zone.name;
+  activeZone = zone;
   const crimeBox = zone.crimeCount !== null ? `
     <div class="crime-box">
       <div class="crime-box-title">Live Crime Data · Last 12 Months</div>
       <div class="crime-row"><span>Reported incidents</span><span class="crime-val">${zone.crimeCount.toLocaleString()}</span></div>
       <div class="crime-row"><span>Safety score</span><span class="crime-val">${zone.score} / 5${zone.trend ? ' ' + trendBadge(zone.trend) : ''}</span></div>
       <div class="crime-row"><span>vs. prior 12 months</span><span class="crime-val">${zone.trend ? (zone.trend === 'improving' ? '↓ Improving' : zone.trend === 'worsening' ? '↑ Increasing' : '→ Stable') : '—'}</span></div>
-      <div class="crime-row"><span>Source</span><span class="crime-val">${currentCity.dataSource}</span></div>
+      <div class="crime-row"><span>Source</span><span class="crime-val">${zone.dataSource}</span></div>
     </div>` : '';
 
   document.getElementById('panel').innerHTML = `
     <div>
       <div class="zone-name">${zone.name}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px">${zone.cityLabel}</div>
       <span class="badge badge-${zone.level}"><span class="badge-dot"></span>${LEVEL_LABELS[zone.level]}</span>
       <div class="score-row">
         <span class="stars">${starsHtml(zone.score)}</span>
@@ -2156,40 +2085,9 @@ function showZone(zone) {
   }
 }
 
-// ── City overview panel (shown before any neighborhood selected) ───────────────
-function ovRow(zone) {
-  const safe = zone.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-  return `<div class="ov-row" onclick="(function(){const z=ZONES.find(z=>z.name==='${safe}');if(!z)return;const l=polyLayers['${safe}'];if(l)map.fitBounds(l.getBounds(),{padding:[40,40]});showZone(z);})()">
-    <span class="ov-dot ov-${zone.level}"></span>
-    <span class="ov-name">${zone.name}</span>
-    <span class="ov-score">${zone.score}</span>
-  </div>`;
-}
-
-function showCityOverview() {
-  if (ZONES.length < 3) return;
-  const sorted = [...ZONES].sort((a, b) => b.score - a.score);
-  const hasLive = ZONES.some(z => z.crimeCount !== null);
-  const safest   = sorted.slice(0, 3);
-  const riskiest = sorted.slice(-3).reverse();
-  const note = hasLive ? '' :
-    '<p class="ov-hint" style="color:var(--caution);margin-top:8px">Live API unavailable — showing curated scores</p>';
-  document.getElementById('panel').innerHTML = `
-    <div class="ov-panel">
-      <div class="ov-city">${currentCity.label}</div>
-      <div class="ov-section">Safest Areas</div>
-      ${safest.map(ovRow).join('')}
-      <div class="ov-divider"></div>
-      <div class="ov-section">Exercise Caution</div>
-      ${riskiest.map(ovRow).join('')}
-      ${note}
-      <p class="ov-hint">Tap any neighborhood on the map for details.</p>
-    </div>`;
-}
-
 // ── Apply live scores + trend ─────────────────────────────────────────────────
-function applyScores(scoreMap, priorMap) {
-  ZONES.forEach(zone => {
+function applyScores(scoreMap, priorMap, cityId) {
+  ZONES.filter(z => z.cityId === cityId).forEach(zone => {
     const s = scoreMap[zone.name];
     if (!s) return;
     zone.score  = s.score;
@@ -2202,77 +2100,50 @@ function applyScores(scoreMap, priorMap) {
         zone.trend = pct > 0.18 ? 'worsening' : pct < -0.18 ? 'improving' : 'stable';
       }
     }
-    polyLayers[zone.name]?.setStyle(STYLES[s.level]);
+    polyLayers[`${cityId}:${zone.name}`]?.setStyle(STYLES[s.level]);
   });
-  if (activeZoneName) showZone(ZONES.find(z => z.name === activeZoneName));
+  if (activeZone && activeZone.cityId === cityId) showZone(activeZone);
 }
 
-// ── City switch ───────────────────────────────────────────────────────────────
-function switchCity(cityId) {
-  if (cityId === currentCityId) return;
-  currentCityId = cityId;
-  currentCity   = CITIES[cityId];
-  zonesLayerGroup.clearLayers();
-  Object.keys(polyLayers).forEach(k => delete polyLayers[k]);
-  ZONES = [];
-  activeZoneName = null;
-  map.setView(currentCity.center, currentCity.zoom);
-  updateMeta(cityId, currentCity);
-  if (window.location.hash.slice(1) !== cityId) window.location.hash = cityId;
-  if (window.innerWidth <= 700) window.scrollTo({ top: 0, behavior: 'smooth' });
-  resetPanel();
-  init(cityId);
+// ── Load all cities ───────────────────────────────────────────────────────────
+let pendingGeo = Object.keys(CITIES).length;
+let totalIncidents = 0;
+
+function onGeoComplete() {
+  pendingGeo--;
+  if (pendingGeo === 0) document.getElementById('map-loading').classList.add('done');
 }
 
-window.addEventListener('hashchange', () => {
-  const cityId = window.location.hash.slice(1);
-  if (CITIES[cityId] && cityId !== currentCityId) {
-    document.getElementById('city-select').value = cityId;
-    switchCity(cityId);
-  }
-});
-
-// ── Bootstrap ─────────────────────────────────────────────────────────────────
-async function init(cityId) {
-  loadingCityId = cityId;
+async function initCity(cityId) {
   const city = CITIES[cityId];
-  const loader = document.getElementById('map-loading');
-  loader.classList.remove('done');
-  setStatus('loading');
   try {
     const geoJSON = await fetchGeoJSON(cityId, city);
-    if (loadingCityId !== cityId) return;
     buildAndDrawZones(geoJSON, city, cityId);
+  } catch (e) {
+    console.warn(`SafeRoute: GeoJSON failed for ${cityId}:`, e);
+  }
+  onGeoComplete();
 
-    let crimes = null, priorCrimes = null;
-    try {
-      [crimes, priorCrimes] = await Promise.all([
-        fetchCrimes(cityId, city, 0),
-        fetchCrimes(cityId, city, 1).catch(() => null),
-      ]);
-    } catch (e) {
-      console.warn('SafeRoute crime fetch failed:', e);
-      setStatus('fallback');
-    }
-
-    if (loadingCityId !== cityId) return;
+  try {
+    const [crimes, priorCrimes] = await Promise.all([
+      fetchCrimes(cityId, city, 0),
+      fetchCrimes(cityId, city, 1).catch(() => null),
+    ]);
     if (crimes) {
       const scoreMap = computeScores(crimes, city);
       const priorMap = priorCrimes ? computeScores(priorCrimes, city) : null;
-      applyScores(scoreMap, priorMap);
-      setStatus('live', crimes.length);
+      applyScores(scoreMap, priorMap, cityId);
+      totalIncidents += crimes.length;
+      setStatus('live', totalIncidents);
     }
-    if (!activeZoneName) showCityOverview();
-  } catch (err) {
-    if (loadingCityId !== cityId) return;
-    console.error('SafeRoute:', err);
-    setStatus('fallback');
-  } finally {
-    if (loadingCityId === cityId) loader.classList.add('done');
+  } catch (e) {
+    console.warn(`SafeRoute: crime fetch failed for ${cityId}:`, e);
   }
 }
 
-document.getElementById('city-select').addEventListener('change', e => switchCity(e.target.value));
+setStatus('loading');
+resetPanel();
+Promise.all(Object.keys(CITIES).map(initCity));
 
 // ── Neighborhood search ───────────────────────────────────────────────────────
 const searchInput = document.getElementById('search-input');
@@ -2288,9 +2159,9 @@ searchInput.addEventListener('input', () => {
   hits.forEach(z => {
     const item = document.createElement('div');
     item.className = 'search-item';
-    item.textContent = z.name;
+    item.textContent = `${z.name} — ${z.cityLabel}`;
     item.addEventListener('click', () => {
-      const layer = polyLayers[z.name];
+      const layer = polyLayers[`${z.cityId}:${z.name}`];
       if (layer) map.fitBounds(layer.getBounds(), { padding: [50, 50] });
       showZone(z);
       searchInput.value = '';
@@ -2317,18 +2188,6 @@ document.getElementById('info-modal-overlay').addEventListener('click', e => {
   if (e.target === document.getElementById('info-modal-overlay')) closeInfoModal();
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeInfoModal(); });
-
-// ── Initial city from URL hash ────────────────────────────────────────────────
-const hashCity = window.location.hash.slice(1);
-if (hashCity && CITIES[hashCity]) {
-  currentCityId = hashCity;
-  currentCity   = CITIES[hashCity];
-  map.setView(currentCity.center, currentCity.zoom);
-  document.getElementById('city-select').value = hashCity;
-}
-updateMeta(currentCityId, currentCity);
-resetPanel();
-init(currentCityId);
 </script>
 </body>
 </html>
