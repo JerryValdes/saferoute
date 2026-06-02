@@ -1481,6 +1481,7 @@ const CITIES = {
     bboxField: 'location',
     baseline: 37,
     dataSource: 'NOLA Open Data',
+    qa311: { endpoint:'https://data.nola.gov/resource/2jgv-pqrq.json', dateField:'date_created', latField:'latitude', lngField:'longitude' },
     zoneDefs: NOLA_ZONE_DEFS,
   },
   'chicago': {
@@ -1495,6 +1496,7 @@ const CITIES = {
     limit: 250000,
     baseline: 55,
     dataSource: 'Chicago Open Data',
+    qa311: { endpoint:'https://data.cityofchicago.org/resource/v6vf-nfxy.json', dateField:'created_date', latField:'latitude', lngField:'longitude' },
     zoneDefs: CHICAGO_ZONE_DEFS,
   },
   'san-francisco': {
@@ -1523,6 +1525,7 @@ const CITIES = {
     limit: 75000,
     baseline: 70,
     dataSource: 'NYC Open Data',
+    qa311: { endpoint:'https://data.cityofnewyork.us/resource/erm2-nwe9.json', dateField:'created_date', latField:'latitude', lngField:'longitude' },
     zoneDefs: MANHATTAN_ZONE_DEFS,
   },
   'brooklyn': {
@@ -1533,7 +1536,9 @@ const CITIES = {
     dateField: 'cmplnt_fr_dt', typeFields: ['ofns_desc', 'pd_desc'],
     bbox: [40.74, -74.04, 40.57, -73.83], bboxField: null,
     limit: 75000,
-    baseline: 65, dataSource: 'NYC Open Data', zoneDefs: BROOKLYN_ZONE_DEFS,
+    baseline: 65, dataSource: 'NYC Open Data',
+    qa311: { endpoint:'https://data.cityofnewyork.us/resource/erm2-nwe9.json', dateField:'created_date', latField:'latitude', lngField:'longitude' },
+    zoneDefs: BROOKLYN_ZONE_DEFS,
   },
   'queens': {
     label: 'Queens, NY',
@@ -1543,7 +1548,9 @@ const CITIES = {
     dateField: 'cmplnt_fr_dt', typeFields: ['ofns_desc', 'pd_desc'],
     bbox: [40.80, -73.97, 40.54, -73.70], bboxField: null,
     limit: 75000,
-    baseline: 60, dataSource: 'NYC Open Data', zoneDefs: QUEENS_ZONE_DEFS,
+    baseline: 60, dataSource: 'NYC Open Data',
+    qa311: { endpoint:'https://data.cityofnewyork.us/resource/erm2-nwe9.json', dateField:'created_date', latField:'latitude', lngField:'longitude' },
+    zoneDefs: QUEENS_ZONE_DEFS,
   },
   'bronx': {
     label: 'The Bronx, NY',
@@ -1552,7 +1559,9 @@ const CITIES = {
     crimeEndpoint: 'https://data.cityofnewyork.us/resource/5uac-w243.json',
     dateField: 'cmplnt_fr_dt', typeFields: ['ofns_desc', 'pd_desc'],
     bbox: [40.92, -73.94, 40.79, -73.75], bboxField: null,
-    baseline: 55, dataSource: 'NYC Open Data', zoneDefs: BRONX_ZONE_DEFS,
+    baseline: 55, dataSource: 'NYC Open Data',
+    qa311: { endpoint:'https://data.cityofnewyork.us/resource/erm2-nwe9.json', dateField:'created_date', latField:'latitude', lngField:'longitude' },
+    zoneDefs: BRONX_ZONE_DEFS,
   },
   'staten-island': {
     label: 'Staten Island, NY',
@@ -1561,7 +1570,9 @@ const CITIES = {
     crimeEndpoint: 'https://data.cityofnewyork.us/resource/5uac-w243.json',
     dateField: 'cmplnt_fr_dt', typeFields: ['ofns_desc', 'pd_desc'],
     bbox: [40.65, -74.26, 40.48, -74.03], bboxField: null,
-    baseline: 40, dataSource: 'NYC Open Data', zoneDefs: STATEN_ISLAND_ZONE_DEFS,
+    baseline: 40, dataSource: 'NYC Open Data',
+    qa311: { endpoint:'https://data.cityofnewyork.us/resource/erm2-nwe9.json', dateField:'created_date', latField:'latitude', lngField:'longitude' },
+    zoneDefs: STATEN_ISLAND_ZONE_DEFS,
   },
   'seattle': {
     label: 'Seattle, WA',
@@ -1580,7 +1591,9 @@ const CITIES = {
     dateField: 'date_occ', typeFields: ['crm_cd_desc'],
     bbox: [34.34, -118.67, 33.70, -118.15], bboxField: null, noBbox: true, noDateFilter: true,
     latField: 'lat', lngField: 'lon',
-    baseline: 60, dataSource: 'LA Open Data', zoneDefs: LA_ZONE_DEFS,
+    baseline: 60, dataSource: 'LA Open Data',
+    qa311: { endpoint:'https://data.lacity.org/resource/4a4x-mna2.json', dateField:'createddate', latField:'latitude', lngField:'longitude' },
+    zoneDefs: LA_ZONE_DEFS,
   },
   'boston': {
     label: 'Boston, MA',
@@ -1930,6 +1943,157 @@ async function fetchGeoJSON(cityId, city) {
   return data;
 }
 
+// ── Point-in-polygon helpers ──────────────────────────────────────────────────
+function pointInRing(lat, lng, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [xi, yi] = ring[i], [xj, yj] = ring[j];
+    if ((yi > lat) !== (yj > lat) && lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi)
+      inside = !inside;
+  }
+  return inside;
+}
+function geometryContains(lat, lng, geometry) {
+  if (geometry.type === 'Polygon') return pointInRing(lat, lng, geometry.coordinates[0]);
+  if (geometry.type === 'MultiPolygon')
+    return geometry.coordinates.some(p => pointInRing(lat, lng, p[0]));
+  return false;
+}
+function findZoneForPoint(lat, lng, cityZones) {
+  const candidates = cityZones.filter(z => {
+    const b = polyLayers[`${z.cityId}:${z.name}`]?.getBounds();
+    return b && lat >= b.getSouth() && lat <= b.getNorth()
+              && lng >= b.getWest()  && lng <= b.getEast();
+  });
+  return candidates.find(z => geometryContains(lat, lng, z.geometry));
+}
+
+// ── 311 quality-of-life fetch ─────────────────────────────────────────────────
+async function fetchQoL(cityId, city) {
+  const qa  = city.qa311;
+  const key = `saferoute_311_${cityId}_v1`;
+  const cached = getCached(key, CACHE_TTL);
+  if (cached) return cached;
+
+  const fromDate = new Date(); fromDate.setDate(fromDate.getDate() - 365);
+  const toDate   = new Date();
+  const fromStr  = fromDate.toISOString().slice(0, 10);
+  const toStr    = toDate.toISOString().slice(0, 10);
+  const [n, w, s, e] = city.bbox;
+
+  const url = new URL(qa.endpoint);
+  url.searchParams.set('$limit', '25000');
+  url.searchParams.set('$select', [qa.dateField, qa.latField, qa.lngField].join(','));
+  url.searchParams.set('$where',
+    `${qa.dateField} >= '${fromStr}T00:00:00' AND ${qa.dateField} < '${toStr}T00:00:00' ` +
+    `AND ${qa.latField} >= ${s} AND ${qa.latField} <= ${n} ` +
+    `AND ${qa.lngField} >= ${w} AND ${qa.lngField} <= ${e}`
+  );
+  const res = await fetch(url.toString());
+  if (!res.ok) throw new Error(`311 HTTP ${res.status}`);
+  const data = await res.json();
+  if (!Array.isArray(data) || !data.length) throw new Error('No 311 data returned');
+  setCached(key, data);
+  return data;
+}
+
+// ── OSM amenity fetch (Overpass API) ─────────────────────────────────────────
+async function fetchAmenities(cityId, city) {
+  const key = `saferoute_osm_${cityId}_v1`;
+  const cached = getCached(key, GEO_TTL);
+  if (cached) return cached;
+
+  const [n, w, s, e] = city.bbox;
+  const query =
+    `[out:json][timeout:30];(` +
+    `node["amenity"~"restaurant|cafe|bar|pub|fast_food|nightclub|theatre|cinema|pharmacy|atm"](${s},${w},${n},${e});` +
+    `node["tourism"~"hotel|motel|hostel|museum|attraction|gallery"](${s},${w},${n},${e});` +
+    `);out;`;
+  const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
+  if (!res.ok) throw new Error(`Overpass HTTP ${res.status}`);
+  const json = await res.json();
+  const points = (json.elements || []).map(el => ({ lat: el.lat, lng: el.lon })).filter(p => p.lat && p.lng);
+  setCached(key, points);
+  return points;
+}
+
+// ── 311 & amenity score computation ──────────────────────────────────────────
+function computeQoLScores(data, city, cityId) {
+  const cityZones = ZONES.filter(z => z.cityId === cityId);
+  const counts = {};
+  data.forEach(rec => {
+    const lat = parseFloat(rec[city.qa311.latField]);
+    const lng = parseFloat(rec[city.qa311.lngField]);
+    if (!isFinite(lat) || !isFinite(lng)) return;
+    const zone = findZoneForPoint(lat, lng, cityZones);
+    if (zone) counts[zone.name] = (counts[zone.name] || 0) + 1;
+  });
+  const sorted = cityZones.map(z => counts[z.name] || 0).filter(c => c > 0).sort((a, b) => a - b);
+  const median = sorted[Math.floor(sorted.length / 2)] || 1;
+  const scoreMap = {};
+  cityZones.forEach(zone => {
+    const c = counts[zone.name] || 0;
+    const raw = c === 0 ? 3.5 : 5 - 2.5 * Math.log10(Math.max(c, 1) / median);
+    scoreMap[zone.name] = Math.round(Math.min(5, Math.max(1, raw)) * 10) / 10;
+  });
+  return scoreMap;
+}
+
+function computeAmenityScores(points, cityId) {
+  const cityZones = ZONES.filter(z => z.cityId === cityId);
+  const counts = {};
+  points.forEach(({ lat, lng }) => {
+    const zone = findZoneForPoint(lat, lng, cityZones);
+    if (zone) counts[zone.name] = (counts[zone.name] || 0) + 1;
+  });
+  const densities = {};
+  cityZones.forEach(zone => {
+    const b = polyLayers[`${zone.cityId}:${zone.name}`]?.getBounds();
+    const area = b ? (b.getNorth() - b.getSouth()) * (b.getEast() - b.getWest()) : 0.001;
+    densities[zone.name] = (counts[zone.name] || 0) / Math.max(area, 1e-5);
+  });
+  const maxD = Math.max(...Object.values(densities), 1);
+  const scoreMap = {};
+  cityZones.forEach(zone => {
+    const d = densities[zone.name] || 0;
+    const raw = d === 0 ? 1 : 1 + (Math.log10(d + 1) / Math.log10(maxD + 1)) * 4;
+    scoreMap[zone.name] = Math.round(Math.min(5, Math.max(1, raw)) * 10) / 10;
+  });
+  return scoreMap;
+}
+
+// ── Composite scoring ─────────────────────────────────────────────────────────
+function computeComposite(zone) {
+  if (zone.crimeScore === null) return zone.curatedScore;
+  const parts = [{ v: zone.crimeScore, w: 0.60 }];
+  if (zone.qolScore     !== null) parts.push({ v: zone.qolScore,     w: 0.25 });
+  if (zone.amenityScore !== null) parts.push({ v: zone.amenityScore, w: 0.15 });
+  const totalW = parts.reduce((s, x) => s + x.w, 0);
+  const score  = parts.reduce((s, x) => s + x.v * (x.w / totalW), 0);
+  return Math.round(Math.min(5, Math.max(1, score)) * 10) / 10;
+}
+function applyComposite(zone) {
+  zone.score = computeComposite(zone);
+  zone.level = zone.score >= 3.5 ? 'safe' : zone.score >= 2.5 ? 'caution' : 'avoid';
+  polyLayers[`${zone.cityId}:${zone.name}`]?.setStyle(STYLES[zone.level]);
+}
+function applyQoLScores(scoreMap, cityId) {
+  ZONES.filter(z => z.cityId === cityId).forEach(zone => {
+    if (scoreMap[zone.name] == null) return;
+    zone.qolScore = scoreMap[zone.name];
+    applyComposite(zone);
+  });
+  if (activeZone && activeZone.cityId === cityId) showZone(activeZone);
+}
+function applyAmenityScores(scoreMap, cityId) {
+  ZONES.filter(z => z.cityId === cityId).forEach(zone => {
+    if (scoreMap[zone.name] == null) return;
+    zone.amenityScore = scoreMap[zone.name];
+    applyComposite(zone);
+  });
+  if (activeZone && activeZone.cityId === cityId) showZone(activeZone);
+}
+
 // ── Status indicator ──────────────────────────────────────────────────────────
 function setStatus(state, detail) {
   const pill = document.getElementById('status-pill');
@@ -1979,7 +2143,7 @@ function buildAndDrawZones(geoJSON, city, cityId) {
     const key  = name.replace(/\s+/g, ' ');
     const defs = city.zoneDefs;
     const def  = defs[name] || defs[key] || defaultDef(cityId, name);
-    return { name, cityId, cityLabel: city.label, dataSource: city.dataSource, ...def, crimeCount: null, geometry: feature.geometry };
+    return { name, cityId, cityLabel: city.label, dataSource: city.dataSource, ...def, curatedScore: def.score || 3.0, crimeScore: null, qolScore: null, amenityScore: null, crimeCount: null, geometry: feature.geometry };
   });
   ZONES.push(...cityZones);
 
@@ -2058,13 +2222,21 @@ function trendBadge(trend) {
 
 function showZone(zone) {
   activeZone = zone;
-  const crimeBox = zone.crimeCount !== null ? `
+  const hasLive = zone.crimeCount !== null || zone.qolScore !== null || zone.amenityScore !== null;
+  const multiSrc = [zone.crimeScore, zone.qolScore, zone.amenityScore].filter(s => s !== null).length > 1;
+  const sources = [zone.dataSource, zone.qolScore !== null ? '311' : null, zone.amenityScore !== null ? 'OSM' : null].filter(Boolean).join(' + ');
+  const crimeBox = hasLive ? `
     <div class="crime-box">
-      <div class="crime-box-title">Live Crime Data · Last 12 Months</div>
-      <div class="crime-row"><span>Reported incidents</span><span class="crime-val">${zone.crimeCount.toLocaleString()}</span></div>
-      <div class="crime-row"><span>Safety score</span><span class="crime-val">${zone.score} / 5${zone.trend ? ' ' + trendBadge(zone.trend) : ''}</span></div>
-      <div class="crime-row"><span>vs. prior 12 months</span><span class="crime-val">${zone.trend ? (zone.trend === 'improving' ? '↓ Improving' : zone.trend === 'worsening' ? '↑ Increasing' : '→ Stable') : '—'}</span></div>
-      <div class="crime-row"><span>Source</span><span class="crime-val">${zone.dataSource}</span></div>
+      <div class="crime-box-title">Live Data · Last 12 Months</div>
+      ${zone.crimeCount !== null ? `
+        <div class="crime-row"><span>Reported crimes</span><span class="crime-val">${zone.crimeCount.toLocaleString()}</span></div>
+        <div class="crime-row"><span>Crime safety</span><span class="crime-val">${zone.crimeScore}/5${zone.trend ? ' ' + trendBadge(zone.trend) : ''}</span></div>
+        <div class="crime-row"><span>vs. prior 12 months</span><span class="crime-val">${zone.trend ? (zone.trend === 'improving' ? '↓ Improving' : zone.trend === 'worsening' ? '↑ Increasing' : '→ Stable') : '—'}</span></div>
+      ` : ''}
+      ${zone.qolScore !== null ? `<div class="crime-row"><span>Quality of life</span><span class="crime-val">${zone.qolScore}/5</span></div>` : ''}
+      ${zone.amenityScore !== null ? `<div class="crime-row"><span>Tourist amenities</span><span class="crime-val">${zone.amenityScore}/5</span></div>` : ''}
+      ${multiSrc ? `<div class="crime-row"><span><strong>Composite score</strong></span><span class="crime-val"><strong>${zone.score}/5</strong></span></div>` : ''}
+      <div class="crime-row"><span>Source</span><span class="crime-val">${sources}</span></div>
     </div>` : '';
 
   document.getElementById('panel').innerHTML = `
@@ -2093,8 +2265,7 @@ function applyScores(scoreMap, priorMap, cityId) {
   ZONES.filter(z => z.cityId === cityId).forEach(zone => {
     const s = scoreMap[zone.name];
     if (!s) return;
-    zone.score  = s.score;
-    zone.level  = s.level;
+    zone.crimeScore = s.score;
     zone.crimeCount = s.count;
     if (priorMap) {
       const p = priorMap[zone.name];
@@ -2103,7 +2274,7 @@ function applyScores(scoreMap, priorMap, cityId) {
         zone.trend = pct > 0.18 ? 'worsening' : pct < -0.18 ? 'improving' : 'stable';
       }
     }
-    polyLayers[`${cityId}:${zone.name}`]?.setStyle(STYLES[s.level]);
+    applyComposite(zone);
   });
   if (activeZone && activeZone.cityId === cityId) showZone(activeZone);
 }
@@ -2135,35 +2306,35 @@ async function initCity(cityId) {
   onGeoComplete();
 }
 
-async function loadCrimeForCity(cityId) {
+async function loadCityData(cityId) {
   const city = CITIES[cityId];
-  try {
-    const [crimes, priorCrimes] = await Promise.all([
-      fetchCrimes(cityId, city, 0),
-      fetchCrimes(cityId, city, 1).catch(() => null),
-    ]);
-    if (crimes) {
-      const scoreMap = computeScores(crimes, city);
-      const priorMap = priorCrimes ? computeScores(priorCrimes, city) : null;
-      applyScores(scoreMap, priorMap, cityId);
-      totalIncidents += crimes.length;
-      setStatus('live', totalIncidents);
-    }
-  } catch (e) {
-    console.warn(`SafeRoute: crime fetch failed for ${cityId}:`, e);
-    crimeLoaded.delete(cityId);
+  const [crimeRes, priorRes, qolRes, amenityRes] = await Promise.all([
+    city.noApi ? Promise.resolve(null) : fetchCrimes(cityId, city, 0).catch(() => null),
+    city.noApi ? Promise.resolve(null) : fetchCrimes(cityId, city, 1).catch(() => null),
+    city.qa311 ? fetchQoL(cityId, city).catch(() => null) : Promise.resolve(null),
+    fetchAmenities(cityId, city).catch(() => null),
+  ]);
+  if (crimeRes) {
+    const scoreMap = computeScores(crimeRes, city);
+    const priorMap = priorRes ? computeScores(priorRes, city) : null;
+    applyScores(scoreMap, priorMap, cityId);
+    totalIncidents += crimeRes.length;
+    setStatus('live', totalIncidents);
   }
+  if (qolRes) applyQoLScores(computeQoLScores(qolRes, city, cityId), cityId);
+  if (amenityRes) applyAmenityScores(computeAmenityScores(amenityRes, cityId), cityId);
+  if (!crimeRes && !qolRes && !amenityRes) crimeLoaded.delete(cityId);
 }
 
 function fetchVisibleCityData() {
   if (map.getZoom() < 10) return;
   const bounds = map.getBounds();
   for (const [cityId, city] of Object.entries(CITIES)) {
-    if (crimeLoaded.has(cityId) || !geoLoaded.has(cityId) || city.noApi) continue;
+    if (crimeLoaded.has(cityId) || !geoLoaded.has(cityId)) continue;
     const [n, w, s, e] = city.bbox;
     if (!bounds.intersects(L.latLngBounds([s, w], [n, e]))) continue;
     crimeLoaded.add(cityId);
-    loadCrimeForCity(cityId);
+    loadCityData(cityId);
   }
 }
 
