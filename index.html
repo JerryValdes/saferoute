@@ -1780,18 +1780,22 @@ function pointInGeoJSON(testLat, testLng, geometry) {
 }
 
 // ── Score computation ────────────────────────────────────────────────────────
-function computeScores(crimes, city) {
+function computeScores(crimes, city, cityId) {
+  const cityZones = ZONES.filter(z => z.cityId === cityId);
   const weighted = {}, rawCount = {};
-  ZONES.forEach(z => { weighted[z.name] = 0; rawCount[z.name] = 0; });
+  cityZones.forEach(z => { weighted[z.name] = 0; rawCount[z.name] = 0; });
 
-  const latF = city.latField || 'latitude';
-  const lngF = city.lngField || 'longitude';
+  const latF  = city.latField  || 'latitude';
+  const lngF  = city.lngField  || 'longitude';
+  const bboxF = city.bboxField;
 
   crimes.forEach(c => {
     let lat, lng;
-    if (c.location?.coordinates?.length === 2) {
-      lng = c.location.coordinates[0];
-      lat = c.location.coordinates[1];
+    if (bboxF && c[bboxF]?.coordinates?.length === 2) {
+      [lng, lat] = c[bboxF].coordinates;                    // GeoJSON Point field
+    } else if (bboxF && c[bboxF]?.latitude != null) {
+      lat = parseFloat(c[bboxF].latitude);                  // Socrata location object
+      lng = parseFloat(c[bboxF].longitude);
     } else if (c[latF] && c[lngF]) {
       lat = parseFloat(c[latF]);
       lng = parseFloat(c[lngF]);
@@ -1804,17 +1808,16 @@ function computeScores(crimes, city) {
     const w = crimeWeight(getCrimeType(c, city.typeFields));
     if (w === 0) return;
 
-    ZONES.forEach(zone => {
-      if (pointInGeoJSON(lat, lng, zone.geometry)) {
-        weighted[zone.name] += w;
-        rawCount[zone.name] += 1;
-      }
-    });
+    const zone = findZoneForPoint(lat, lng, cityZones);
+    if (zone) {
+      weighted[zone.name] += w;
+      rawCount[zone.name] += 1;
+    }
   });
 
   const BASELINE = city.baseline, K = 2.5;
   const result = {};
-  ZONES.forEach(z => {
+  cityZones.forEach(z => {
     const w = Math.max(weighted[z.name], 1);
     const score = Math.max(1, Math.min(5, 5 - K * Math.log10(w / BASELINE)));
     const level = score >= 3.5 ? 'safe' : score >= 2.5 ? 'caution' : 'avoid';
@@ -1846,7 +1849,7 @@ function setCached(key, data) {
 async function fetchCrimes(cityId, city, period = 0) {
   if (city.noApi) return null;
   if (city.noDateFilter && period > 0) return null;
-  const key = `saferoute_crimes_${cityId}_v5_p${period}`;
+  const key = `saferoute_crimes_${cityId}_v6_p${period}`;
   const cached = getCached(key, CACHE_TTL);
   if (cached) return cached;
 
@@ -1944,28 +1947,13 @@ async function fetchGeoJSON(cityId, city) {
 }
 
 // ── Point-in-polygon helpers ──────────────────────────────────────────────────
-function pointInRing(lat, lng, ring) {
-  let inside = false;
-  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    const [xi, yi] = ring[i], [xj, yj] = ring[j];
-    if ((yi > lat) !== (yj > lat) && lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi)
-      inside = !inside;
-  }
-  return inside;
-}
-function geometryContains(lat, lng, geometry) {
-  if (geometry.type === 'Polygon') return pointInRing(lat, lng, geometry.coordinates[0]);
-  if (geometry.type === 'MultiPolygon')
-    return geometry.coordinates.some(p => pointInRing(lat, lng, p[0]));
-  return false;
-}
 function findZoneForPoint(lat, lng, cityZones) {
   const candidates = cityZones.filter(z => {
     const b = polyLayers[`${z.cityId}:${z.name}`]?.getBounds();
     return b && lat >= b.getSouth() && lat <= b.getNorth()
               && lng >= b.getWest()  && lng <= b.getEast();
   });
-  return candidates.find(z => geometryContains(lat, lng, z.geometry));
+  return candidates.find(z => pointInGeoJSON(lat, lng, z.geometry));
 }
 
 // ── 311 quality-of-life fetch ─────────────────────────────────────────────────
@@ -2315,8 +2303,8 @@ async function loadCityData(cityId) {
     fetchAmenities(cityId, city).catch(() => null),
   ]);
   if (crimeRes) {
-    const scoreMap = computeScores(crimeRes, city);
-    const priorMap = priorRes ? computeScores(priorRes, city) : null;
+    const scoreMap = computeScores(crimeRes, city, cityId);
+    const priorMap = priorRes ? computeScores(priorRes, city, cityId) : null;
     applyScores(scoreMap, priorMap, cityId);
     totalIncidents += crimeRes.length;
     setStatus('live', totalIncidents);
