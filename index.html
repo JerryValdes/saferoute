@@ -2658,8 +2658,7 @@ async function fetchACSForCounty(stateCode, countyCode) {
   const cacheKey = `saferoute_acs3_${stateCode}_${countyCode}`;
   const cached = getCached(cacheKey, ACS_TTL);
   if (cached) return cached;
-  const censusUrl = `https://api.census.gov/data/2022/acs/acs5?get=B19013_001E,B17001_002E,B17001_001E&for=tract:*&in=state:${stateCode}&in=county:${countyCode}`;
-  const res = await fetch(`https://corsproxy.io/?url=${encodeURIComponent(censusUrl)}`);
+  const res = await fetch(`https://api.census.gov/data/2022/acs/acs5?get=B19013_001E,B17001_002E,B17001_001E&for=tract:*&in=state:${stateCode}&in=county:${countyCode}&key=6f40113c1e1bd9bd1784637176039eba443f4e4b`);
   if (!res.ok) throw new Error(`ACS ${res.status}`);
   const rows = await res.json();
   const hdr = rows[0];
