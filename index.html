@@ -1687,6 +1687,262 @@ const CITIES = {
     latField: 'latitude', lngField: 'longitude',
     baseline: 40, dataSource: 'Detroit Open Data', zoneDefs: DETROIT_ZONE_DEFS,
   },
+  // ── Expanded US city coverage ────────────────────────────────────────────────
+  'houston': {
+    label: 'Houston, TX', center: [29.7604, -95.3698], zoom: 11,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/houston.geojson',
+    bbox: [30.15, -95.85, 29.52, -94.98], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'dallas': {
+    label: 'Dallas, TX', center: [32.7767, -96.7970], zoom: 11,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/dallas.geojson',
+    bbox: [33.02, -97.10, 32.56, -96.55], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'austin': {
+    label: 'Austin, TX', center: [30.2672, -97.7431], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/austin.geojson',
+    bbox: [30.52, -97.98, 30.10, -97.55], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'san-antonio': {
+    label: 'San Antonio, TX', center: [29.4241, -98.4936], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/san-antonio.geojson',
+    bbox: [29.71, -98.77, 29.21, -98.24], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'phoenix': {
+    label: 'Phoenix, AZ', center: [33.4484, -112.0740], zoom: 11,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/phoenix.geojson',
+    bbox: [33.75, -112.42, 33.23, -111.76], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'las-vegas': {
+    label: 'Las Vegas, NV', center: [36.1699, -115.1398], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/las-vegas.geojson',
+    bbox: [36.35, -115.45, 36.00, -114.97], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'henderson': {
+    label: 'Henderson, NV', center: [36.0397, -114.9817], zoom: 13,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/henderson.geojson',
+    bbox: [36.13, -115.10, 35.96, -114.84], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'san-diego': {
+    label: 'San Diego, CA', center: [32.7157, -117.1611], zoom: 11,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/san-diego.geojson',
+    bbox: [32.96, -117.39, 32.53, -116.91], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'silicon-valley': {
+    label: 'Silicon Valley / San Jose, CA', center: [37.3382, -121.8863], zoom: 11,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/silicon-valley.geojson',
+    bbox: [37.55, -122.30, 37.15, -121.80], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'oakland': {
+    label: 'Oakland, CA', center: [37.8044, -122.2712], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/oakland.geojson',
+    bbox: [37.90, -122.38, 37.69, -122.11], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'sacramento': {
+    label: 'Sacramento, CA', center: [38.5816, -121.4944], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/sacramento.geojson',
+    bbox: [38.70, -121.66, 38.46, -121.36], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'alameda': {
+    label: 'Alameda, CA', center: [37.7652, -122.2416], zoom: 14,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/alameda.geojson',
+    bbox: [37.79, -122.28, 37.74, -122.21], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'minneapolis': {
+    label: 'Minneapolis, MN', center: [44.9778, -93.2650], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/minneapolis.geojson',
+    bbox: [45.06, -93.41, 44.89, -93.14], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'st-louis': {
+    label: 'St. Louis, MO', center: [38.6270, -90.1994], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/st-louis.geojson',
+    bbox: [38.77, -90.37, 38.52, -90.06], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'kansas-city': {
+    label: 'Kansas City, MO', center: [39.0997, -94.5786], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/kansas-city.geojson',
+    bbox: [39.35, -94.85, 38.85, -94.33], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'pittsburgh': {
+    label: 'Pittsburgh, PA', center: [40.4406, -79.9959], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/pittsburgh.geojson',
+    bbox: [40.60, -80.18, 40.29, -79.82], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'cincinnati': {
+    label: 'Cincinnati, OH', center: [39.1031, -84.5120], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/cincinnati.geojson',
+    bbox: [39.25, -84.75, 39.00, -84.30], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'cleveland': {
+    label: 'Cleveland, OH', center: [41.4993, -81.6944], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/cleveland.geojson',
+    bbox: [41.62, -81.88, 41.38, -81.53], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'columbus': {
+    label: 'Columbus, OH', center: [39.9612, -82.9988], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/columbus.geojson',
+    bbox: [40.16, -83.20, 39.83, -82.77], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'akron': {
+    label: 'Akron, OH', center: [41.0814, -81.5190], zoom: 13,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/akron.geojson',
+    bbox: [41.15, -81.65, 41.01, -81.43], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'milwaukee': {
+    label: 'Milwaukee, WI', center: [43.0389, -87.9065], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/milwaukee.geojson',
+    bbox: [43.20, -88.07, 42.92, -87.78], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'louisville': {
+    label: 'Louisville, KY', center: [38.2527, -85.7585], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/louisville.geojson',
+    bbox: [38.40, -85.98, 38.08, -85.55], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'lexington': {
+    label: 'Lexington, KY', center: [38.0406, -84.5037], zoom: 13,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/lexington.geojson',
+    bbox: [38.18, -84.67, 37.92, -84.34], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'des-moines': {
+    label: 'Des Moines, IA', center: [41.5868, -93.6250], zoom: 13,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/des-moines.geojson',
+    bbox: [41.72, -93.79, 41.50, -93.48], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'salt-lake-city': {
+    label: 'Salt Lake City, UT', center: [40.7608, -111.8910], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/salt-lake-city.geojson',
+    bbox: [40.85, -112.01, 40.69, -111.77], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'anchorage': {
+    label: 'Anchorage, AK', center: [61.2181, -149.9003], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/anchorage.geojson',
+    bbox: [61.35, -150.30, 61.10, -149.60], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'fairbanks': {
+    label: 'Fairbanks, AK', center: [64.8378, -147.7164], zoom: 13,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/fairbanks.geojson',
+    bbox: [64.90, -147.90, 64.78, -147.55], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'honolulu': {
+    label: 'Honolulu, HI', center: [21.3069, -157.8583], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/honolulu.geojson',
+    bbox: [21.42, -157.98, 21.22, -157.67], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'birmingham': {
+    label: 'Birmingham, AL', center: [33.5186, -86.8104], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/birmingham.geojson',
+    bbox: [33.65, -87.00, 33.40, -86.65], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'macon': {
+    label: 'Macon, GA', center: [32.8407, -83.6324], zoom: 13,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/macon.geojson',
+    bbox: [32.93, -83.78, 32.76, -83.52], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'orlando': {
+    label: 'Orlando, FL', center: [28.5383, -81.3792], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/orlando.geojson',
+    bbox: [28.72, -81.55, 28.38, -81.16], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'tampa': {
+    label: 'Tampa, FL', center: [27.9506, -82.4572], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/tampa.geojson',
+    bbox: [28.10, -82.65, 27.80, -82.27], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'fort-lauderdale': {
+    label: 'Fort Lauderdale, FL', center: [26.1224, -80.1373], zoom: 13,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/fort-lauderdale.geojson',
+    bbox: [26.24, -80.28, 26.05, -80.07], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'raleigh': {
+    label: 'Raleigh, NC', center: [35.7796, -78.6382], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/raleigh.geojson',
+    bbox: [35.95, -78.85, 35.63, -78.45], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'chapel-hill': {
+    label: 'Chapel Hill, NC', center: [35.9132, -79.0558], zoom: 14,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/chapel-hill.geojson',
+    bbox: [35.97, -79.12, 35.85, -79.00], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'norfolk': {
+    label: 'Norfolk, VA', center: [36.8508, -76.2859], zoom: 13,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/norfolk.geojson',
+    bbox: [36.95, -76.40, 36.78, -76.18], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'chesapeake': {
+    label: 'Chesapeake, VA', center: [36.7682, -76.2875], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/chesapeake.geojson',
+    bbox: [36.92, -76.47, 36.55, -76.08], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'richmond': {
+    label: 'Richmond, VA', center: [37.5407, -77.4360], zoom: 13,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/richmond.geojson',
+    bbox: [37.64, -77.60, 37.44, -77.32], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'charlottesville': {
+    label: 'Charlottesville, VA', center: [38.0293, -78.4767], zoom: 14,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/charlottesville.geojson',
+    bbox: [38.08, -78.55, 37.98, -78.42], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'hampton': {
+    label: 'Hampton, VA', center: [37.0299, -76.3452], zoom: 13,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/hampton.geojson',
+    bbox: [37.12, -76.50, 36.93, -76.22], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'williamsburg': {
+    label: 'Williamsburg, VA', center: [37.2707, -76.7075], zoom: 14,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/williamsburg.geojson',
+    bbox: [37.31, -76.77, 37.22, -76.65], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'albany': {
+    label: 'Albany, NY', center: [42.6526, -73.7562], zoom: 13,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/albany.geojson',
+    bbox: [42.75, -73.90, 42.60, -73.65], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'rochester': {
+    label: 'Rochester, NY', center: [43.1566, -77.6088], zoom: 13,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/rochester.geojson',
+    bbox: [43.27, -77.78, 43.06, -77.48], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'hartford': {
+    label: 'Hartford, CT', center: [41.7658, -72.6851], zoom: 13,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/hartford.geojson',
+    bbox: [41.83, -72.78, 41.71, -72.60], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'new-haven': {
+    label: 'New Haven, CT', center: [41.3083, -72.9279], zoom: 13,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/new-haven.geojson',
+    bbox: [41.38, -73.00, 41.26, -72.85], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'stamford': {
+    label: 'Stamford, CT', center: [41.0534, -73.5387], zoom: 13,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/stamford.geojson',
+    bbox: [41.14, -73.68, 41.00, -73.44], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'rockville': {
+    label: 'Rockville, MD', center: [39.0840, -77.1528], zoom: 14,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/rockville.geojson',
+    bbox: [39.16, -77.24, 39.03, -77.09], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'providence': {
+    label: 'Providence, RI', center: [41.8240, -71.4128], zoom: 13,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/providence.geojson',
+    bbox: [41.89, -71.53, 41.76, -71.33], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'springfield': {
+    label: 'Springfield, MA', center: [42.1015, -72.5898], zoom: 13,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/springfield.geojson',
+    bbox: [42.14, -72.64, 42.06, -72.54], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'olympia': {
+    label: 'Olympia, WA', center: [47.0379, -122.9007], zoom: 14,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/olympia.geojson',
+    bbox: [47.10, -122.98, 46.99, -122.82], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
+  'west-linn': {
+    label: 'West Linn, OR', center: [45.3648, -122.6407], zoom: 14,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/west-linn.geojson',
+    bbox: [45.40, -122.68, 45.33, -122.60], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+  },
 };
 
 // ── Default zone for any neighborhood without a hand-written entry ───────────
@@ -2096,7 +2352,7 @@ function setStatus(state, detail) {
     txt.textContent = `Live · ${Number(detail).toLocaleString()} incidents`;
   } else if (state === 'ready') {
     dot.classList.add('s-dot-live');
-    txt.textContent = 'Zoom in for live data';
+    txt.textContent = 'Zoom in to explore';
   } else {
     dot.classList.add('s-dot-fallback');
     txt.textContent = 'Sample data (API unavailable)';
@@ -2267,31 +2523,25 @@ function applyScores(scoreMap, priorMap, cityId) {
   if (activeZone && activeZone.cityId === cityId) showZone(activeZone);
 }
 
-// ── Load all cities ───────────────────────────────────────────────────────────
-let pendingGeo = Object.keys(CITIES).length;
+// ── Load cities on demand ─────────────────────────────────────────────────────
 let totalIncidents = 0;
 const geoLoaded   = new Set();
 const crimeLoaded = new Set();
 
-function onGeoComplete() {
-  pendingGeo--;
-  if (pendingGeo === 0) {
-    document.getElementById('map-loading').classList.add('done');
-    if (totalIncidents === 0) setStatus('ready');
-    fetchVisibleCityData();
-  }
-}
-
-async function initCity(cityId) {
+async function loadVisibleCity(cityId) {
   const city = CITIES[cityId];
-  try {
-    const geoJSON = await fetchGeoJSON(cityId, city);
-    buildAndDrawZones(geoJSON, city, cityId);
-    geoLoaded.add(cityId);
-  } catch (e) {
-    console.warn(`SafeRoute: GeoJSON failed for ${cityId}:`, e);
+  if (!geoLoaded.has(cityId)) {
+    try {
+      const geoJSON = await fetchGeoJSON(cityId, city);
+      buildAndDrawZones(geoJSON, city, cityId);
+      geoLoaded.add(cityId);
+    } catch (e) {
+      console.warn(`SafeRoute: GeoJSON failed for ${cityId}:`, e);
+      crimeLoaded.delete(cityId);
+      return;
+    }
   }
-  onGeoComplete();
+  await loadCityData(cityId);
 }
 
 async function loadCityData(cityId) {
@@ -2318,20 +2568,20 @@ function fetchVisibleCityData() {
   if (map.getZoom() < 10) return;
   const bounds = map.getBounds();
   for (const [cityId, city] of Object.entries(CITIES)) {
-    if (crimeLoaded.has(cityId) || !geoLoaded.has(cityId)) continue;
+    if (crimeLoaded.has(cityId)) continue;
     const [n, w, s, e] = city.bbox;
     if (!bounds.intersects(L.latLngBounds([s, w], [n, e]))) continue;
     crimeLoaded.add(cityId);
-    loadCityData(cityId);
+    loadVisibleCity(cityId);
   }
 }
 
 map.on('zoomend', fetchVisibleCityData);
 map.on('moveend', fetchVisibleCityData);
 
-setStatus('loading');
+document.getElementById('map-loading').classList.add('done');
+setStatus('ready');
 resetPanel();
-Promise.all(Object.keys(CITIES).map(initCity));
 
 // ── Neighborhood search ───────────────────────────────────────────────────────
 const searchInput = document.getElementById('search-input');
