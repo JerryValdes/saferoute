@@ -2640,7 +2640,7 @@ async function fetchTractGeoJSON(bounds) {
   url.searchParams.set('geometryType', 'esriGeometryEnvelope');
   url.searchParams.set('inSR', '4326');
   url.searchParams.set('spatialRel', 'esriSpatialRelIntersects');
-  url.searchParams.set('outFields', 'GEOID,NAME,STATE,COUNTY,TRACT,ALAND');
+  url.searchParams.set('outFields', 'GEOID,NAME,STATE,COUNTY,TRACT,AREALAND');
   url.searchParams.set('outSR', '4326');
   url.searchParams.set('resultRecordCount', '500');
   url.searchParams.set('f', 'geojson');
@@ -2777,7 +2777,7 @@ async function _doLoadCensusTracts() {
   // Pre-check: skip water-only tracts (ALAND=0) and city-covered tracts
   const drawable = newFeatures.filter(f => {
     const geoid = f.properties.GEOID;
-    if (!(f.properties.ALAND > 0)) {
+    if (!(parseInt(f.properties.AREALAND) > 0)) {
       polyLayers[`tract:${geoid}`] = 'covered';
       return false;
     }
