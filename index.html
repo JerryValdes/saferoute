@@ -2395,11 +2395,30 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 map.on('click', resetPanel);
 
 const zonesLayerGroup = L.layerGroup().addTo(map);
-map.on('zoomend', () => {
-  const show = map.getZoom() >= 12;
-  document.querySelectorAll('.zone-label').forEach(el => {
-    el.style.display = show ? '' : 'none';
+const cityMarkersLayer = L.layerGroup().addTo(map);
+
+function buildCityMarkers() {
+  cityMarkersLayer.clearLayers();
+  if (map.getZoom() >= 10) return;
+  Object.entries(CITIES).forEach(([, city]) => {
+    if (!city.center) return;
+    const m = L.circleMarker(city.center, {
+      radius: 7, fillColor: '#3b82f6', color: '#1e40af',
+      weight: 1.5, fillOpacity: 0.85, bubblingMouseEvents: false,
+    });
+    m.bindTooltip(city.label, { direction: 'top', offset: [0, -8] });
+    m.on('click', () => map.setView(city.center, city.zoom || 12));
+    cityMarkersLayer.addLayer(m);
   });
+}
+buildCityMarkers();
+
+map.on('zoomend', () => {
+  const z = map.getZoom();
+  document.querySelectorAll('.zone-label').forEach(el => {
+    el.style.display = z >= 12 ? '' : 'none';
+  });
+  buildCityMarkers();
 });
 
 // ── Zone state ────────────────────────────────────────────────────────────────
@@ -2472,7 +2491,7 @@ const PLACEHOLDER = `
   <div class="placeholder">
     <div class="ph-icon">🗺️</div>
     <h3>Tap a neighborhood</h3>
-    <p>Click any colored zone on the map to see safety details and tourist tips.</p>
+    <p>Zoom into any city — blue dots mark available cities — then click a colored neighborhood for details.</p>
   </div>`;
 
 function resetPanel() {
