@@ -1547,6 +1547,7 @@ const CITIES = {
     typeFields: ['primary_type', 'description'],
     bbox: [42.03, -87.95, 41.64, -87.52],
     bboxField: 'location',
+    limit: 250000,
     baseline: 55,
     dataSource: 'Chicago Open Data',
     zoneDefs: CHICAGO_ZONE_DEFS,
@@ -1560,6 +1561,7 @@ const CITIES = {
     typeFields: ['incident_category', 'incident_subcategory'],
     bbox: [37.83, -122.52, 37.70, -122.36],
     bboxField: 'point',
+    limit: 100000,
     baseline: 30,
     dataSource: 'SF Open Data',
     zoneDefs: SF_ZONE_DEFS,
@@ -1573,6 +1575,7 @@ const CITIES = {
     typeFields: ['ofns_desc', 'pd_desc'],
     bbox: [40.88, -74.02, 40.70, -73.90],
     bboxField: null,
+    limit: 75000,
     baseline: 70,
     dataSource: 'NYC Open Data',
     zoneDefs: MANHATTAN_ZONE_DEFS,
@@ -1584,6 +1587,7 @@ const CITIES = {
     crimeEndpoint: 'https://data.cityofnewyork.us/resource/5uac-w243.json',
     dateField: 'cmplnt_fr_dt', typeFields: ['ofns_desc', 'pd_desc'],
     bbox: [40.74, -74.04, 40.57, -73.83], bboxField: null,
+    limit: 75000,
     baseline: 65, dataSource: 'NYC Open Data', zoneDefs: BROOKLYN_ZONE_DEFS,
   },
   'queens': {
@@ -1593,6 +1597,7 @@ const CITIES = {
     crimeEndpoint: 'https://data.cityofnewyork.us/resource/5uac-w243.json',
     dateField: 'cmplnt_fr_dt', typeFields: ['ofns_desc', 'pd_desc'],
     bbox: [40.80, -73.97, 40.54, -73.70], bboxField: null,
+    limit: 75000,
     baseline: 60, dataSource: 'NYC Open Data', zoneDefs: QUEENS_ZONE_DEFS,
   },
   'bronx': {
@@ -1661,7 +1666,7 @@ const CITIES = {
     crimeEndpoint: 'https://data.phila.gov/resource/sspu-uyfa.json',
     dateField: 'dispatch_date_time', typeFields: ['text_general_code'],
     bbox: [40.14, -75.28, 39.87, -74.96], bboxField: null, noBbox: true, noDateFilter: true,
-    latField: 'point_y', lngField: 'point_x', limit: 5000,
+    latField: 'point_y', lngField: 'point_x', limit: 8000,
     baseline: 55, dataSource: 'Philly Open Data', zoneDefs: PHILLY_ZONE_DEFS,
   },
   'miami': {
@@ -1883,7 +1888,7 @@ function setCached(key, data) {
 async function fetchCrimes(cityId, city, period = 0) {
   if (city.noApi) return null;
   if (city.noDateFilter && period > 0) return null;
-  const key = `saferoute_crimes_${cityId}_v4_p${period}`;
+  const key = `saferoute_crimes_${cityId}_v5_p${period}`;
   const cached = getCached(key, CACHE_TTL);
   if (cached) return cached;
 
@@ -1902,6 +1907,13 @@ async function fetchCrimes(cityId, city, period = 0) {
   if (apiType === 'socrata') {
     const url = new URL(city.crimeEndpoint);
     url.searchParams.set('$limit', String(city.limit || 50000));
+    // Only fetch the fields we actually use — reduces payload by ~90%
+    const neededFields = [...new Set([
+      city.dateField,
+      ...city.typeFields,
+      ...(city.bboxField ? [city.bboxField] : [latF, lngF]),
+    ])];
+    url.searchParams.set('$select', neededFields.join(','));
     if (city.noDateFilter) {
       url.searchParams.set('$order', `${city.dateField} DESC`);
     } else {
