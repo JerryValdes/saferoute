@@ -1696,7 +1696,10 @@ const CITIES = {
   'dallas': {
     label: 'Dallas, TX', center: [32.7767, -96.7970], zoom: 11,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/dallas.geojson',
-    bbox: [33.02, -97.10, 32.56, -96.55], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    crimeEndpoint: 'https://www.dallasopendata.com/resource/qv6i-rri7.json',
+    dateField: 'date1', typeFields: ['offincident', 'nibrs_crime'],
+    bbox: [33.02, -97.10, 32.56, -96.55], bboxField: null,
+    baseline: 55, dataSource: 'Dallas Open Data', zoneDefs: {},
   },
   'austin': {
     label: 'Austin, TX', center: [30.2672, -97.7431], zoom: 12,
@@ -1736,7 +1739,10 @@ const CITIES = {
   'oakland': {
     label: 'Oakland, CA', center: [37.8044, -122.2712], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/oakland.geojson',
-    bbox: [37.90, -122.38, 37.69, -122.11], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    crimeEndpoint: 'https://data.oaklandca.gov/resource/ym6k-rx7a.json',
+    dateField: 'datetime', typeFields: ['crimetype', 'description'],
+    bbox: [37.90, -122.38, 37.69, -122.11], bboxField: null,
+    noDateFilter: true, baseline: 12, dataSource: 'Oakland Open Data', zoneDefs: {},
   },
   'sacramento': {
     label: 'Sacramento, CA', center: [38.5816, -121.4944], zoom: 12,
@@ -1751,7 +1757,12 @@ const CITIES = {
   'minneapolis': {
     label: 'Minneapolis, MN', center: [44.9778, -93.2650], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/minneapolis.geojson',
-    bbox: [45.06, -93.41, 44.89, -93.14], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    crimeEndpoint: 'https://services.arcgis.com/afSMGVsC7QlRK1kZ/arcgis/rest/services/Crime_Data/FeatureServer/0/query',
+    apiType: 'arcgis',
+    dateField: 'Reported_Date', typeFields: ['Offense', 'Offense_Category'],
+    bbox: [45.06, -93.41, 44.89, -93.14], bboxField: null,
+    latField: 'Latitude', lngField: 'Longitude',
+    baseline: 50, dataSource: 'Minneapolis Open Data', zoneDefs: {},
   },
   'st-louis': {
     label: 'St. Louis, MO', center: [38.6270, -90.1994], zoom: 12,
@@ -1761,7 +1772,10 @@ const CITIES = {
   'kansas-city': {
     label: 'Kansas City, MO', center: [39.0997, -94.5786], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/kansas-city.geojson',
-    bbox: [39.35, -94.85, 38.85, -94.33], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    crimeEndpoint: 'https://data.kcmo.org/resource/isbe-v4d8.json',
+    dateField: 'reported_date', typeFields: ['offense', 'description'],
+    bbox: [39.35, -94.85, 38.85, -94.33], bboxField: 'location',
+    baseline: 45, dataSource: 'Kansas City Open Data', zoneDefs: {},
   },
   'pittsburgh': {
     label: 'Pittsburgh, PA', center: [40.4406, -79.9959], zoom: 12,
@@ -1771,12 +1785,21 @@ const CITIES = {
   'cincinnati': {
     label: 'Cincinnati, OH', center: [39.1031, -84.5120], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/cincinnati.geojson',
-    bbox: [39.25, -84.75, 39.00, -84.30], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    crimeEndpoint: 'https://data.cincinnati-oh.gov/resource/k59e-2pvf.json',
+    dateField: 'date_reported', typeFields: ['offense', 'ucr_group'],
+    bbox: [39.25, -84.75, 39.00, -84.30], bboxField: null,
+    latField: 'latitude_x', lngField: 'longitude_x',
+    baseline: 50, dataSource: 'Cincinnati Open Data', zoneDefs: {},
   },
   'cleveland': {
     label: 'Cleveland, OH', center: [41.4993, -81.6944], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/cleveland.geojson',
-    bbox: [41.62, -81.88, 41.38, -81.53], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    crimeEndpoint: 'https://services3.arcgis.com/dty2kHktVXHrqO8i/ArcGIS/rest/services/Crime_Incidents/FeatureServer/0/query',
+    apiType: 'arcgis',
+    dateField: 'ReportedDate', typeFields: ['UCRdesc', 'StatDesc'],
+    bbox: [41.62, -81.88, 41.38, -81.53], bboxField: null,
+    latField: 'LAT', lngField: 'LON',
+    baseline: 55, dataSource: 'Cleveland Open Data', zoneDefs: {},
   },
   'columbus': {
     label: 'Columbus, OH', center: [39.9612, -82.9988], zoom: 12,
@@ -1851,7 +1874,11 @@ const CITIES = {
   'fort-lauderdale': {
     label: 'Fort Lauderdale, FL', center: [26.1224, -80.1373], zoom: 13,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/fort-lauderdale.geojson',
-    bbox: [26.24, -80.28, 26.05, -80.07], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    crimeEndpoint: 'https://fortlauderdale.data.socrata.com/resource/4gb7-f88q.json',
+    dateField: 'date_occu', typeFields: ['offense', 'reportedas'],
+    bbox: [26.24, -80.28, 26.05, -80.07], bboxField: null,
+    latField: 'geoy', lngField: 'geox',
+    baseline: 35, dataSource: 'Fort Lauderdale PD', zoneDefs: {},
   },
   'raleigh': {
     label: 'Raleigh, NC', center: [35.7796, -78.6382], zoom: 12,
@@ -1901,7 +1928,11 @@ const CITIES = {
   'rochester': {
     label: 'Rochester, NY', center: [43.1566, -77.6088], zoom: 13,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/rochester.geojson',
-    bbox: [43.27, -77.78, 43.06, -77.48], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    crimeEndpoint: 'https://maps.cityofrochester.gov/arcgis/rest/services/RPD/RPD_Part_I_Crime/FeatureServer/1/query',
+    apiType: 'arcgis', noDateFilter: true,
+    dateField: 'OccurredFrom_Timestamp', typeFields: ['Statute_Description', 'Statute_Text', 'Statute_CrimeCategory'],
+    bbox: [43.27, -77.78, 43.06, -77.48], bboxField: null,
+    baseline: 45, dataSource: 'Rochester PD Open Data', zoneDefs: {},
   },
   'hartford': {
     label: 'Hartford, CT', center: [41.7658, -72.6851], zoom: 13,
