@@ -1942,6 +1942,9 @@ function setStatus(state, detail) {
   } else if (state === 'live') {
     dot.classList.add('s-dot-live');
     txt.textContent = `Live · ${Number(detail).toLocaleString()} incidents`;
+  } else if (state === 'ready') {
+    dot.classList.add('s-dot-live');
+    txt.textContent = 'Zoom in for live data';
   } else {
     dot.classList.add('s-dot-fallback');
     txt.textContent = 'Sample data (API unavailable)';
@@ -2108,10 +2111,16 @@ function applyScores(scoreMap, priorMap, cityId) {
 // ── Load all cities ───────────────────────────────────────────────────────────
 let pendingGeo = Object.keys(CITIES).length;
 let totalIncidents = 0;
+const geoLoaded   = new Set();
+const crimeLoaded = new Set();
 
 function onGeoComplete() {
   pendingGeo--;
-  if (pendingGeo === 0) document.getElementById('map-loading').classList.add('done');
+  if (pendingGeo === 0) {
+    document.getElementById('map-loading').classList.add('done');
+    if (totalIncidents === 0) setStatus('ready');
+    fetchVisibleCityData();
+  }
 }
 
 async function initCity(cityId) {
@@ -2119,11 +2128,15 @@ async function initCity(cityId) {
   try {
     const geoJSON = await fetchGeoJSON(cityId, city);
     buildAndDrawZones(geoJSON, city, cityId);
+    geoLoaded.add(cityId);
   } catch (e) {
     console.warn(`SafeRoute: GeoJSON failed for ${cityId}:`, e);
   }
   onGeoComplete();
+}
 
+async function loadCrimeForCity(cityId) {
+  const city = CITIES[cityId];
   try {
     const [crimes, priorCrimes] = await Promise.all([
       fetchCrimes(cityId, city, 0),
@@ -2138,8 +2151,24 @@ async function initCity(cityId) {
     }
   } catch (e) {
     console.warn(`SafeRoute: crime fetch failed for ${cityId}:`, e);
+    crimeLoaded.delete(cityId);
   }
 }
+
+function fetchVisibleCityData() {
+  if (map.getZoom() < 10) return;
+  const bounds = map.getBounds();
+  for (const [cityId, city] of Object.entries(CITIES)) {
+    if (crimeLoaded.has(cityId) || !geoLoaded.has(cityId) || city.noApi) continue;
+    const [n, w, s, e] = city.bbox;
+    if (!bounds.intersects(L.latLngBounds([s, w], [n, e]))) continue;
+    crimeLoaded.add(cityId);
+    loadCrimeForCity(cityId);
+  }
+}
+
+map.on('zoomend', fetchVisibleCityData);
+map.on('moveend', fetchVisibleCityData);
 
 setStatus('loading');
 resetPanel();
