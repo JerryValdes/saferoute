@@ -1987,7 +1987,15 @@ const CITIES = {
   'pittsburgh': {
     label: 'Pittsburgh, PA', center: [40.4406, -79.9959], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/pittsburgh.geojson',
-    bbox: [40.60, -80.18, 40.29, -79.82], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: PITTSBURGH_ZONE_DEFS,
+    crimeEndpoint: 'https://data.wprdc.org/api/action/datastore_search_sql',
+    resourceId: 'bd41992a-987a-4cca-8798-fbe1cd946b07',
+    apiType: 'ckan',
+    dateField: 'ReportedDate',
+    typeFields: ['NIBRS_Offense_Type', 'NIBRS_Coded_Offense'],
+    latField: 'YCOORD', lngField: 'XCOORD',
+    bbox: [40.60, -80.18, 40.29, -79.82],
+    baseline: 30, dataSource: 'Pittsburgh PD / WPRDC',
+    zoneDefs: PITTSBURGH_ZONE_DEFS,
   },
   'cincinnati': {
     label: 'Cincinnati, OH', center: [39.1031, -84.5120], zoom: 12,
@@ -2701,7 +2709,7 @@ function getCountyCrime(fips5) {
   return v != null ? { violentPer1k: v } : null;
 }
 
-// ── Crime data fetch (Socrata, OData, ArcGIS) ────────────────────────────────
+// ── Crime data fetch (Socrata, OData, ArcGIS, CKAN) ────────────────────────────
 // period=0 → last 365 days; period=1 → prior 365 days (365-730 days ago, for trend)
 async function fetchCrimes(cityId, city, period = 0) {
   if (city.noApi) return null;
@@ -2783,6 +2791,23 @@ async function fetchCrimes(cityId, city, period = 0) {
       const lng = attrs[lngF] != null ? parseFloat(attrs[lngF]) : f.geometry?.x ?? null;
       return { ...attrs, latitude: lat, longitude: lng };
     });
+
+  } else if (apiType === 'ckan') {
+    const latF2 = city.latField || 'latitude';
+    const lngF2 = city.lngField || 'longitude';
+    const fields = [...new Set([city.dateField, ...city.typeFields, latF2, lngF2])].map(f => `"${f}"`).join(',');
+    const dateFilter = city.noDateFilter ? '' : `AND "${city.dateField}" >= '${fromStr}' AND "${city.dateField}" < '${toStr}'`;
+    const sql = `SELECT ${fields} FROM "${city.resourceId}" WHERE 1=1 ${dateFilter} LIMIT 50000`;
+    const url = `${city.crimeEndpoint}?sql=${encodeURIComponent(sql)}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`CKAN HTTP ${res.status}`);
+    const json = await res.json();
+    if (!json.success) throw new Error(`CKAN query failed`);
+    data = (json.result?.records || []).map(r => ({
+      ...r,
+      [latF2]: parseFloat(r[latF2]),
+      [lngF2]: parseFloat(r[lngF2]),
+    }));
   }
 
   if (!Array.isArray(data) || data.length === 0) throw new Error('No crime data returned');
