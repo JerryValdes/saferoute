@@ -768,12 +768,13 @@
       <tr><td>Boston</td><td>Boston Open Data (CKAN OData)</td></tr>
       <tr><td>Washington, DC</td><td>DC GIS / MPD (ArcGIS REST)</td></tr>
       <tr><td>Philadelphia</td><td>OpenDataPhilly (Socrata)</td></tr>
-      <tr><td>Miami</td><td>Miami Open Data (Socrata)</td></tr>
       <tr><td>Atlanta</td><td>Atlanta PD (ArcGIS REST)</td></tr>
-      <tr><td>Denver</td><td>Denver Open Data (Socrata)</td></tr>
+      <tr><td>Denver</td><td>Denver Open Data (ArcGIS REST)</td></tr>
       <tr><td>Portland</td><td>Portland PD (ArcGIS REST)</td></tr>
-      <tr><td>Baltimore</td><td>Open Baltimore (Socrata)</td></tr>
-      <tr><td>Detroit</td><td>Detroit Open Data (Socrata)</td></tr>
+      <tr><td>Baltimore</td><td>Baltimore PD (ArcGIS REST)</td></tr>
+      <tr><td>Detroit</td><td>Detroit PD (ArcGIS REST)</td></tr>
+      <tr><td>Las Vegas</td><td>LVMPD Calls for Service (live ArcGIS)</td></tr>
+      <tr><td>Houston</td><td>Houston PD NIBRS 2024 (ArcGIS)</td></tr>
       <tr><td>All other US areas (census tracts)</td><td>County Health Rankings 2022 (FBI UCR violent crime) + ACS 5-Year 2022</td></tr>
       <tr><td>England (all areas)</td><td>English Indices of Multiple Deprivation 2019 (ONS) — 32,844 LSOAs</td></tr>
       <tr><td>Wales (all areas)</td><td>Welsh Index of Multiple Deprivation 2019 (StatsWales) — 1,909 LSOAs</td></tr>
@@ -2968,7 +2969,14 @@ const CITIES = {
   'houston': {
     label: 'Houston, TX', center: [29.7604, -95.3698], zoom: 11,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/houston.geojson',
-    bbox: [30.15, -95.85, 29.52, -94.98], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: HOUSTON_ZONE_DEFS,
+    crimeEndpoint: 'https://services.arcgis.com/NummVBqZSIJKUeVR/arcgis/rest/services/HPD_NIBRS_Yearly_Cases/FeatureServer/0/query',
+    apiType: 'arcgis',
+    dateField: 'HPD_Occurrence_Date', typeFields: ['HPD_NIBRS_Class', 'HPD_NIBRSDescription'],
+    latField: 'Latitude', lngField: 'Longitude',
+    bbox: [30.15, -95.85, 29.52, -94.98], bboxField: null,
+    noDateFilter: true, limit: 50000,
+    baseline: 80, dataSource: 'Houston PD (HPD NIBRS 2024)',
+    zoneDefs: HOUSTON_ZONE_DEFS,
   },
   'dallas': {
     label: 'Dallas, TX', center: [32.7767, -96.7970], zoom: 11,
@@ -2996,7 +3004,14 @@ const CITIES = {
   'las-vegas': {
     label: 'Las Vegas, NV', center: [36.1699, -115.1398], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/las-vegas.geojson',
-    bbox: [36.35, -115.45, 36.00, -114.97], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: LAS_VEGAS_ZONE_DEFS,
+    crimeEndpoint: 'https://services1.arcgis.com/F1v0ufATbBQScMtY/arcgis/rest/services/MetroCFS_OpenData/FeatureServer/0/query',
+    apiType: 'arcgis',
+    dateField: 'Event_Date', typeFields: ['Type_Description'],
+    latField: 'LAT', lngField: 'LONG',
+    bbox: [36.35, -115.45, 36.00, -114.97], bboxField: null, noBbox: true,
+    limit: 50000,
+    baseline: 120, dataSource: 'LVMPD Calls for Service (live)',
+    zoneDefs: LAS_VEGAS_ZONE_DEFS,
   },
   'henderson': {
     label: 'Henderson, NV', center: [36.0397, -114.9817], zoom: 13,
