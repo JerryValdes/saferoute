@@ -435,6 +435,7 @@
       <tr><td>Portland</td><td>Portland PD (ArcGIS REST)</td></tr>
       <tr><td>Baltimore</td><td>Open Baltimore (Socrata)</td></tr>
       <tr><td>Detroit</td><td>Detroit Open Data (Socrata)</td></tr>
+      <tr><td>All other areas (census tracts)</td><td>FBI Crime Data Explorer UCR 2022 + ACS 5-Year 2022</td></tr>
     </table>
 
     <div class="modal-h">About the descriptions</div>
@@ -2174,6 +2175,51 @@ function setCached(key, data) {
   catch { }
 }
 
+// ── FBI Crime Data Explorer API ───────────────────────────────────────────────
+const FBI_API_KEY = 'iiHnOKfno2Mgkt5AynpvPpUQTEyxE77jo1RU8PIv';
+
+async function fetchFBICrimeForCounty(fips5) {
+  const FBI_TTL = 30 * 24 * 60 * 60 * 1000;
+  const cacheKey = `saferoute_fbi_${fips5}`;
+  const cached = getCached(cacheKey, FBI_TTL);
+  if (cached) return cached;
+  try {
+    const res = await fetch(
+      `https://api.usa.gov/crime/fbi/cde/offenses/county/${fips5}?from=2022&to=2022&API_KEY=${FBI_API_KEY}`,
+      { signal: AbortSignal.timeout(8000) }
+    );
+    if (!res.ok) return null;
+    const json = await res.json();
+    let violent = 0, property = 0, population = 0;
+    const rows = json.data;
+    if (Array.isArray(rows)) {
+      rows.forEach(r => {
+        const cnt = r.offense_count ?? r.value ?? 0;
+        const off = (r.offense || r.offense_name || '').toLowerCase();
+        if (off.includes('violent')) violent += cnt;
+        else if (off.includes('property')) property += cnt;
+        if (r.population) population = Math.max(population, r.population);
+      });
+    } else if (rows && typeof rows === 'object') {
+      Object.values(rows).forEach(d => {
+        if (d && typeof d === 'object') {
+          if (d.violent_crime)  violent   = Math.max(violent,   Number(d.violent_crime));
+          if (d.property_crime) property  = Math.max(property,  Number(d.property_crime));
+          if (d.population)     population = Math.max(population, Number(d.population));
+        }
+      });
+    }
+    if (population < 1000) return null;
+    const result = {
+      violentPer1k:  (violent  / population) * 1000,
+      propertyPer1k: (property / population) * 1000,
+      violent, property, population,
+    };
+    setCached(cacheKey, result);
+    return result;
+  } catch { return null; }
+}
+
 // ── Crime data fetch (Socrata, OData, ArcGIS) ────────────────────────────────
 // period=0 → last 365 days; period=1 → prior 365 days (365-730 days ago, for trend)
 async function fetchCrimes(cityId, city, period = 0) {
@@ -2699,13 +2745,14 @@ async function fetchTractGeoJSON(bounds) {
   return data;
 }
 
-// Census API via corsproxy.io — 1 request per county covers all tracts (vs 1 per tract with Census Reporter)
+// Census API — 1 request per county covers all its tracts; includes income, poverty, unemployment, vacancy
 async function fetchACSForCounty(stateCode, countyCode) {
   const ACS_TTL = 30 * 24 * 60 * 60 * 1000;
   const cacheKey = `saferoute_acs4_${stateCode}_${countyCode}`;
   const cached = getCached(cacheKey, ACS_TTL);
   if (cached) return cached;
-  const res = await fetch(`https://api.census.gov/data/2022/acs/acs5?get=B19013_001E,B17001_002E,B17001_001E&for=tract:*&in=state:${stateCode}&in=county:${countyCode}&key=6f40113c1e1bd9bd1784637176039eba443f4e4b`);
+  const vars = 'B19013_001E,B17001_002E,B17001_001E,B23025_005E,B23025_003E,B25002_003E,B25002_001E';
+  const res = await fetch(`https://api.census.gov/data/2022/acs/acs5?get=${vars}&for=tract:*&in=state:${stateCode}&in=county:${countyCode}&key=6f40113c1e1bd9bd1784637176039eba443f4e4b`);
   if (!res.ok) throw new Error(`ACS ${res.status}`);
   const rows = await res.json();
   const hdr = rows[0];
@@ -2735,23 +2782,42 @@ async function fetchACSForCounty(stateCode, countyCode) {
   return acsMap;
 }
 
-function computeTractScore(income, povertyRate, unemploymentRate, vacancyRate) {
+function computeTractScore(acs, fbiData) {
+  const { income = -1, povertyRate = 0.12, unemploymentRate = -1, vacancyRate = -1 } = acs || {};
+
+  // ACS composite (always available as fallback)
   const pov = Math.max(povertyRate * 100, 0.1);
   const povertyScore = Math.min(5, Math.max(1, 5 - 2 * Math.log10(pov / 3)));
   const incomeScore = income > 0
     ? Math.min(5, Math.max(1, 1 + 4 * (Math.log10(income) - 4) / (Math.log10(200000) - 4)))
-    : 3;
-  const unempScore = unemploymentRate >= 0
-    ? Math.min(5, Math.max(1, 5 - 2 * Math.log10(Math.max(unemploymentRate * 100, 0.1) / 2)))
-    : 3.5;
-  const vacScore = vacancyRate >= 0
-    ? Math.min(5, Math.max(1, 5 - 2 * Math.log10(Math.max(vacancyRate * 100, 0.1) / 3)))
-    : 3.5;
-  const w = income > 0 ? 0.35 : 0;
-  const total = w + 0.30 + 0.20 + 0.15;
-  const raw = (w * incomeScore + 0.30 * povertyScore + 0.20 * unempScore + 0.15 * vacScore) / total;
+    : null;
+  const unemployScore = unemploymentRate >= 0
+    ? Math.min(5, Math.max(1, 5 - 1.5 * Math.log10(Math.max(0.5, unemploymentRate * 100) / 4)))
+    : null;
+  const vacancyScore = vacancyRate >= 0
+    ? Math.min(5, Math.max(1, 5 - 1.5 * Math.log10(Math.max(0.5, vacancyRate * 100) / 6)))
+    : null;
+  let acsW = 0.4, acsSum = povertyScore * 0.4;
+  if (incomeScore   != null) { acsSum += incomeScore   * 0.3; acsW += 0.3; }
+  if (unemployScore != null) { acsSum += unemployScore * 0.2; acsW += 0.2; }
+  if (vacancyScore  != null) { acsSum += vacancyScore  * 0.1; acsW += 0.1; }
+  const acsComposite = acsSum / acsW;
+
+  let raw, hasFBI = false;
+  if (fbiData && fbiData.population >= 1000) {
+    // Violent crime: national avg ~3.7/1k; calibrate so ~3.7 → score 3.5 (caution boundary)
+    const vScore = Math.min(5, Math.max(1, 5 - 2.2 * Math.log10(Math.max(0.05, fbiData.violentPer1k) / 1.2)));
+    // Property crime: national avg ~20/1k; calibrate so ~20 → score 3.5
+    const pScore = Math.min(5, Math.max(1, 5 - 1.6 * Math.log10(Math.max(0.5, fbiData.propertyPer1k) / 10)));
+    const fbiScore = 0.65 * vScore + 0.35 * pScore;
+    raw = 0.7 * fbiScore + 0.3 * acsComposite;
+    hasFBI = true;
+  } else {
+    raw = acsComposite;
+  }
+
   const s = Math.round(raw * 10) / 10;
-  return { score: s, level: s >= 3.5 ? 'safe' : s >= 2.5 ? 'caution' : 'avoid' };
+  return { score: s, level: s >= 3.5 ? 'safe' : s >= 2.5 ? 'caution' : 'avoid', hasFBI };
 }
 
 function isCoveredByCity(lat, lng) {
@@ -2761,7 +2827,7 @@ function isCoveredByCity(lat, lng) {
   });
 }
 
-function buildCensusTractZones(features, acsMap) {
+function buildCensusTractZones(features, acsMap, fbiData) {
   features.forEach(feature => {
     const props = feature.properties || {};
     const geoid = props.GEOID;
@@ -2777,23 +2843,32 @@ function buildCensusTractZones(features, acsMap) {
     const povertyRate = acs.povertyRate ?? 0.12;
     const unemploymentRate = acs.unemploymentRate ?? -1;
     const vacancyRate = acs.vacancyRate ?? -1;
-    const { score, level } = computeTractScore(income, povertyRate, unemploymentRate, vacancyRate);
+    const { score, level, hasFBI } = computeTractScore(acs, fbiData);
     const name = props.NAME || `Census Tract ${parseInt(geoid.slice(5), 10) / 100}`;
     const st = STYLES[level];
     const geoLayer = L.geoJSON(geoFeature, { style: () => ({ ...st, weight: 0.5 }) }).addTo(censusLayerGroup);
     polyLayers[tractKey] = geoLayer;
+
+    const fbiDesc = hasFBI
+      ? `Census tract in a county reporting ${fbiData.violentPer1k.toFixed(1)} violent and ${fbiData.propertyPer1k.toFixed(1)} property crimes per 1,000 residents (FBI UCR 2022).`
+      : income > 0
+        ? `Census tract with a median household income of $${income.toLocaleString()} and a poverty rate of ${(povertyRate * 100).toFixed(1)}%.`
+        : `Census tract with a poverty rate of ${(povertyRate * 100).toFixed(1)}%.`;
+
     const zone = {
       name,
       geoid,
       acsScore: score,
       cityId: `census-${geoid.slice(0, 5)}`,
       cityLabel: 'US Census Tract',
-      dataSource: 'ACS 5-Year 2022',
+      dataSource: hasFBI ? 'FBI UCR 2022 + ACS 2022' : 'ACS 5-Year 2022',
       level, score,
-      desc: income > 0
-        ? `Census tract — median income $${income.toLocaleString()}, poverty ${(povertyRate * 100).toFixed(1)}%${unemploymentRate >= 0 ? ', unemployment ' + (unemploymentRate * 100).toFixed(1) + '%' : ''}.`
-        : `Census tract — poverty ${(povertyRate * 100).toFixed(1)}%${unemploymentRate >= 0 ? ', unemployment ' + (unemploymentRate * 100).toFixed(1) + '%' : ''}.`,
+      desc: fbiDesc,
       tips: [
+        ...(hasFBI ? [
+          { icon: '🚔', text: `Violent crime: ${fbiData.violentPer1k.toFixed(1)}/1,000 residents (county, FBI UCR 2022)` },
+          { icon: '🚗', text: `Property crime: ${fbiData.propertyPer1k.toFixed(1)}/1,000 residents (county, FBI UCR 2022)` },
+        ] : []),
         ...(income > 0 ? [{ icon: '💰', text: `Median income: $${income.toLocaleString()}` }] : []),
         { icon: '📊', text: `Poverty rate: ${(povertyRate * 100).toFixed(1)}%` },
         ...(unemploymentRate >= 0 ? [{ icon: '💼', text: `Unemployment: ${(unemploymentRate * 100).toFixed(1)}%` }] : []),
@@ -2938,13 +3013,15 @@ async function _doLoadCensusTracts() {
     byCounty[key].features.push(f);
   });
   await Promise.all(Object.values(byCounty).map(async ({ stateCode, countyCode, features }) => {
-    try {
-      const acsMap = await fetchACSForCounty(stateCode, countyCode);
-      buildCensusTractZones(features, acsMap);
-    } catch(e) {
-      console.warn(`SafeRoute: ACS failed for ${stateCode}-${countyCode}:`, e);
-      buildCensusTractZones(features, {});
-    }
+    const fips5 = stateCode + countyCode;
+    const [acsMap, fbiData] = await Promise.all([
+      fetchACSForCounty(stateCode, countyCode).catch(e => {
+        console.warn(`SafeRoute: ACS failed for ${fips5}:`, e);
+        return {};
+      }),
+      fetchFBICrimeForCounty(fips5).catch(() => null),
+    ]);
+    buildCensusTractZones(features, acsMap, fbiData);
   }));
 
   // Upgrade tracts in Socrata-covered cities with real crime data
