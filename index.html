@@ -1800,6 +1800,46 @@ const TORONTO_ZONE_DEFS = {
 };
 
 
+// ── Additional city zone definitions ─────────────────────────────────────────
+const BIRMINGHAM_ZONE_DEFS = {
+  "Central City":{level:"safe",score:3.8,desc:"Downtown Birmingham's core \u2014 Railroad Park, Regions Field (Barons baseball), Protective Life Stadium, and the Uptown entertainment district. Safe in the main entertainment areas.",tips:[{"icon": "✅", "text": "Generally safe in the entertainment/stadium district"}, {"icon": "⚾", "text": "Regions Field and Railroad Park are genuinely excellent"}, {"icon": "🍺", "text": "Good craft beer scene in the Uptown district"}, {"icon": "🚗", "text": "Walkable in the main core; use rideshare for outlying areas"}]},
+  "Five Points South":{level:"safe",score:3.7,desc:"Birmingham's premier dining and nightlife district. Safe in the main restaurant and bar areas.",tips:[{"icon": "✅", "text": "Generally safe in the main district"}, {"icon": "🍽️", "text": "Some of Birmingham's best independent restaurants here"}, {"icon": "🎵", "text": "Live music venues throughout"}, {"icon": "🌙", "text": "Lively on weekends; stay on the main streets"}]},
+  "Southside":{level:"safe",score:3.9,desc:"Hip residential and commercial district around UAB and Five Points. Safe with a young professional and student vibe.",tips:[{"icon": "✅", "text": "Generally safe"}, {"icon": "🎓", "text": "University of Alabama at Birmingham campus"}, {"icon": "🍽️", "text": "Good dining along 20th Street and Highland Ave"}, {"icon": "🌳", "text": "Red Mountain Park is nearby"}]},
+  "Highland Park":{level:"safe",score:4.2,desc:"Affluent hilltop neighbourhood with beautiful early 20th-century architecture. Very safe.",tips:[{"icon": "✅", "text": "Very safe — one of Birmingham's nicest neighbourhoods"}, {"icon": "🏡", "text": "Beautiful craftsman bungalows and Tudor Revival homes"}, {"icon": "🌳", "text": "Caldwell Park has good views"}, {"icon": "☕", "text": "Good local coffee shops and restaurants"}]},
+  "Avondale":{level:"safe",score:3.8,desc:"Up-and-coming east Birmingham neighbourhood with excellent craft breweries and restaurants. Generally safe in commercial areas.",tips:[{"icon": "✅", "text": "Generally safe in commercial areas"}, {"icon": "🍺", "text": "Avondale Brewing Co. is excellent"}, {"icon": "🍽️", "text": "Several good restaurants opening up"}, {"icon": "🌙", "text": "Safe in main areas; exercise caution on quieter streets"}]},
+  "Crestwood North":{level:"safe",score:4.1,desc:"Safe east side residential neighbourhood.",tips:[{"icon": "✅", "text": "Very safe residential area"}, {"icon": "🏡", "text": "Good mid-century residential architecture"}, {"icon": "🚗", "text": "Car required"}, {"icon": "🛒", "text": "Crestwood Blvd has good dining"}]},
+  "Crestwood South":{level:"safe",score:4.0,desc:"Safe east side residential neighbourhood.",tips:[{"icon": "✅", "text": "Very safe"}, {"icon": "🏡", "text": "Well-maintained residential streets"}, {"icon": "🚗", "text": "Car required"}, {"icon": "🌳", "text": "Several parks nearby"}]},
+  "East Lake":{level:"caution",score:2.9,desc:"East Birmingham residential neighbourhood. Elevated crime.",tips:[{"icon": "⚠️", "text": "Elevated crime — exercise caution"}, {"icon": "🚗", "text": "Car recommended"}, {"icon": "🌙", "text": "Use caution after dark"}]},
+  "East Birmingham":{level:"caution",score:2.8,desc:"East Birmingham neighbourhood. Elevated crime.",tips:[{"icon": "⚠️", "text": "Elevated crime — exercise caution"}, {"icon": "🚗", "text": "Car recommended"}, {"icon": "🌙", "text": "Not recommended for walking after dark"}]},
+  "Druid Hills":{level:"caution",score:3.0,desc:"North Birmingham residential neighbourhood. Some elevated crime.",tips:[{"icon": "⚠️", "text": "Exercise caution"}, {"icon": "🌳", "text": "Woodrow Wilson Park is nearby"}, {"icon": "🚗", "text": "Car recommended"}]},
+};
+
+const MANCHESTER_ZONE_DEFS = {
+  "City Centre":{level:"caution",score:3.2,desc:"Manchester's vibrant city centre \u2014 the Arndale Centre, Manchester Arena, Exchange Square, and the Northern Quarter. Safe in the main areas but watch for pickpockets.",tips:[{"icon": "✅", "text": "Generally safe in the main shopping and entertainment areas"}, {"icon": "⚠️", "text": "Pickpocketing on Market Street — keep valuables secure"}, {"icon": "🎵", "text": "Albert Hall, Manchester Arena, and many music venues"}, {"icon": "🍺", "text": "Northern Quarter has Manchester's best bar and restaurant scene"}]},
+  "Northern Quarter":{level:"caution",score:3.3,desc:"Manchester's coolest neighbourhood \u2014 independent record shops, street art, vintage clothing, and some of the best bars and restaurants in the North of England.",tips:[{"icon": "✅", "text": "Generally safe — the best area in Manchester for tourists"}, {"icon": "🎨", "text": "Street art throughout — Instagram favourite"}, {"icon": "🍺", "text": "Excellent craft beer bars and cocktail spots"}, {"icon": "🍽️", "text": "Outstanding independent dining — some of the UK's best restaurants"}]},
+  "Castlefield":{level:"safe",score:4.0,desc:"Beautifully preserved canal and Roman fort area. Manchester's most pleasant neighbourhood for walking and outdoor dining.",tips:[{"icon": "✅", "text": "Very safe — upscale canal district"}, {"icon": "⚓", "text": "Castlefield Basin has canal boats, restaurants, and outdoor bars"}, {"icon": "🏛️", "text": "Museum of Science and Industry is here — excellent and free"}, {"icon": "🌊", "text": "Canal walks connect to Spinningfields and the city centre"}]},
+  "Deansgate":{level:"caution",score:3.1,desc:"West Manchester \u2014 major shopping and nightlife area with the Corn Exchange and many large bars and clubs.",tips:[{"icon": "✅", "text": "Safe during the day"}, {"icon": "⚠️", "text": "Busy nightlife area — can be rowdy late nights on weekends"}, {"icon": "🛒", "text": "The Great Northern and Corn Exchange have good dining"}, {"icon": "🎭", "text": "Bridgewater Hall concert venue is here"}]},
+  "Ancoats":{level:"caution",score:3.2,desc:"Former industrial neighbourhood now a foodie hotspot \u2014 some of Manchester's best restaurants and coffee shops are in old mill buildings.",tips:[{"icon": "✅", "text": "Generally safe and rapidly gentrifying"}, {"icon": "🍝", "text": "Some of the UK's best Italian restaurants — Manchester's 'Little Italy'"}, {"icon": "☕", "text": "Outstanding coffee shops throughout"}, {"icon": "🏭", "text": "Beautiful Victorian mill architecture"}]},
+  "Salford":{level:"caution",score:2.9,desc:"MediaCityUK (BBC, ITV), The Lowry arts centre, and the Imperial War Museum North. Safe near media/arts area, rougher parts exist.",tips:[{"icon": "✅", "text": "Very safe near MediaCityUK and The Lowry"}, {"icon": "🎭", "text": "The Lowry is an excellent theatre and gallery"}, {"icon": "🏛️", "text": "Imperial War Museum North has a spectacular building"}, {"icon": "⚠️", "text": "Some areas away from the media district have elevated crime"}]},
+  "Chorlton":{level:"safe",score:4.1,desc:"Bohemian south Manchester suburb \u2014 independent shops, cafes, and a young family atmosphere. Very safe.",tips:[{"icon": "✅", "text": "Very safe"}, {"icon": "☕", "text": "Excellent independent coffee shops and restaurants"}, {"icon": "🌳", "text": "Chorlton-cum-Hardy has a villagey feel"}, {"icon": "🚋", "text": "Metrolink tram connections to city centre"}]},
+  "Didsbury":{level:"safe",score:4.4,desc:"Affluent south Manchester suburb \u2014 beautiful Victorian architecture, great restaurants, and a relaxed atmosphere.",tips:[{"icon": "✅", "text": "Very safe — one of Manchester's nicest suburbs"}, {"icon": "🍽️", "text": "Exceptional restaurant scene on Wilmslow Road"}, {"icon": "🌳", "text": "Fletcher Moss Park is beautiful"}, {"icon": "🚋", "text": "Metrolink connections to city centre"}]},
+  "Moss Side":{level:"avoid",score:2.2,desc:"Historically high crime rate. Not recommended for tourists.",tips:[{"icon": "🚫", "text": "High crime — not recommended for tourists"}, {"icon": "🚗", "text": "Drive through only"}, {"icon": "⚽", "text": "Manchester City's Etihad Stadium is nearby — use shuttle buses"}]},
+  "Gorton":{level:"caution",score:2.7,desc:"East Manchester neighbourhood. Elevated crime.",tips:[{"icon": "⚠️", "text": "Elevated crime — exercise caution"}, {"icon": "🚗", "text": "Car recommended"}, {"icon": "🌙", "text": "Use caution after dark"}]},
+};
+
+const LIVERPOOL_ZONE_DEFS = {
+  "City Centre":{level:"caution",score:3.4,desc:"Liverpool's city centre \u2014 The Beatles story, the Albert Dock, Mathew Street, and the famous waterfront. Safe in tourist areas but petty crime is common.",tips:[{"icon": "🎸", "text": "The Beatles Story at the Albert Dock is excellent"}, {"icon": "⚠️", "text": "Pickpocketing on Mathew Street and the waterfront — keep valuables secure"}, {"icon": "🌊", "text": "The Three Graces (Liver Building, Cunard, Port of Liverpool) are stunning"}, {"icon": "🍺", "text": "Cavern Quarter has the famous Cavern Club"}]},
+  "Waterfront":{level:"safe",score:3.9,desc:"Albert Dock \u2014 Liverpool's outstanding waterfront regeneration. Tate Liverpool, Beatles Story, Maritime Museum, and river views. Very safe tourist area.",tips:[{"icon": "✅", "text": "Very safe in the Albert Dock area"}, {"icon": "🎨", "text": "Tate Liverpool is free and excellent"}, {"icon": "🚢", "text": "Mersey Ferry is a classic — great views and narration"}, {"icon": "🍽️", "text": "Good restaurants in the Albert Dock complex"}]},
+  "Georgian Quarter":{level:"safe",score:4.0,desc:"Historic south Liverpool neighbourhood with beautiful Georgian and Victorian architecture. Hope Street (two cathedrals!). Very safe.",tips:[{"icon": "✅", "text": "Very safe"}, {"icon": "⛪", "text": "Two cathedrals at either end of Hope Street — Metropolitan and Anglican"}, {"icon": "🎭", "text": "Liverpool Philharmonic Hall and Everyman Theatre are here"}, {"icon": "🏛️", "text": "The Phil (Philharmonic Dining Rooms) is one of the UK's most beautiful pubs"}]},
+  "Ropewalks":{level:"caution",score:3.1,desc:"Liverpool's nightlife district \u2014 Bold Street, Berry Street, and the Baltic Triangle arts/creative scene. Generally safe in main areas.",tips:[{"icon": "✅", "text": "Generally safe in main areas"}, {"icon": "🍽️", "text": "Bold Street has excellent independent restaurants — Liverpool's best food street"}, {"icon": "🎵", "text": "Baltic Triangle has music venues and creative spaces"}, {"icon": "⚠️", "text": "Can be very busy and rowdy on weekend nights"}]},
+  "Toxteth":{level:"caution",score:2.7,desc:"South Liverpool neighbourhood with a significant cultural history. Mixed safety.",tips:[{"icon": "⚠️", "text": "Elevated crime — exercise caution"}, {"icon": "🏟️", "text": "Adjacent to Sefton Park — one of Liverpool's best parks"}, {"icon": "🌳", "text": "Sefton Park itself is beautiful and safe"}, {"icon": "🚗", "text": "Rideshare recommended at night"}]},
+  "Everton":{level:"caution",score:2.6,desc:"North Liverpool neighbourhood. Elevated crime.",tips:[{"icon": "⚠️", "text": "Elevated crime — exercise caution"}, {"icon": "⚽", "text": "Everton FC's new stadium (Bramley-Moore Dock) is being built nearby"}, {"icon": "🚗", "text": "Car recommended"}, {"icon": "🌙", "text": "Use caution after dark"}]},
+  "Kensington":{level:"caution",score:2.5,desc:"East Liverpool neighbourhood. High crime.",tips:[{"icon": "⚠️", "text": "Elevated crime — not recommended for tourists"}, {"icon": "🚗", "text": "Car recommended"}, {"icon": "🌙", "text": "Use caution after dark"}]},
+  "Tuebrook":{level:"caution",score:2.9,desc:"North-east Liverpool residential neighbourhood. Some elevated crime.",tips:[{"icon": "⚠️", "text": "Exercise caution"}, {"icon": "🚗", "text": "Car recommended"}, {"icon": "🌙", "text": "Use caution after dark"}]},
+  "Childwall":{level:"safe",score:4.2,desc:"Safe suburban south Liverpool neighbourhood.",tips:[{"icon": "✅", "text": "Very safe residential suburb"}, {"icon": "🌳", "text": "Childwall Woods are pleasant"}, {"icon": "🚗", "text": "Car required"}, {"icon": "🏡", "text": "Well-maintained residential streets"}]},
+  "Woolton":{level:"safe",score:4.5,desc:"Affluent south Liverpool village \u2014 where John Lennon grew up. Very safe.",tips:[{"icon": "✅", "text": "Very safe"}, {"icon": "🎸", "text": "John Lennon's childhood home (Mendips) is here — National Trust"}, {"icon": "🌳", "text": "Woolton Village has a pleasant village character"}, {"icon": "🍺", "text": "Good pubs in the village"}]},
+};
+
 // ── City configurations ──────────────────────────────────────────────────────
 const CITIES = {
   'new-orleans': {
@@ -2346,6 +2386,41 @@ const CITIES = {
     limit: 50000, baseline: 40,
     dataSource: 'Toronto Police Service Open Data',
     zoneDefs: TORONTO_ZONE_DEFS,
+  },
+  'birmingham': {
+    label: 'Birmingham, AL', center: [33.5186, -86.8104], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/birmingham.geojson',
+    bbox: [33.66, -87.00, 33.40, -86.60],
+    noApi: true, dataSource: 'OpenStreetMap',
+    zoneDefs: BIRMINGHAM_ZONE_DEFS,
+  },
+  'manchester-uk': {
+    label: 'Manchester, UK', center: [53.4808, -2.2426], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/JerryValdes/saferoute/main/manchester.geojson',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[53.481, -2.235], [53.491, -2.22], [53.470, -2.250]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [53.56, -2.45, 53.38, -2.05],
+    baseline: 300,
+    dataSource: 'data.police.uk (Greater Manchester Police)',
+    zoneDefs: MANCHESTER_ZONE_DEFS,
+  },
+  'liverpool': {
+    label: 'Liverpool, UK', center: [53.4084, -2.9916], zoom: 12,
+    geoURL: 'https://raw.githubusercontent.com/JerryValdes/saferoute/main/liverpool.geojson',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[53.408, -2.988], [53.420, -2.975], [53.395, -2.970]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [53.48, -3.05, 53.33, -2.85],
+    baseline: 250,
+    dataSource: 'data.police.uk (Merseyside Police)',
+    zoneDefs: LIVERPOOL_ZONE_DEFS,
   },
   'tucson': {
     label: 'Tucson, AZ',
