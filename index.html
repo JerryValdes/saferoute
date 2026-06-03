@@ -2000,6 +2000,7 @@ const CITIES = {
     label: 'Albuquerque, NM',
     center: [35.0844, -106.6504], zoom: 11,
     geoURL: 'https://coageo.cabq.gov/cabqgeo/rest/services/agis/Neighborhood_Associations/MapServer/0/query?where=1%3D1&outFields=AssociationName&outSR=4326&f=geojson',
+    nameField: 'AssociationName',
     crimeEndpoint: 'https://coageo.cabq.gov/cabqgeo/rest/services/Incidents/MapServer/0/query',
     apiType: 'arcgis',
     dateField: 'ReportDateTime',
@@ -2476,7 +2477,7 @@ let activeZone = null;
 // ── Build and draw zones from GeoJSON ─────────────────────────────────────────
 function buildAndDrawZones(geoJSON, city, cityId) {
   const cityZones = geoJSON.features.map(feature => {
-    const name = feature.properties.name || feature.properties.neighborhood || '';
+    const name = feature.properties[city.nameField] || feature.properties.name || feature.properties.neighborhood || '';
     const key  = name.replace(/\s+/g, ' ');
     const defs = city.zoneDefs;
     const def  = defs[name] || defs[key] || defaultDef(cityId, name);
