@@ -2702,7 +2702,7 @@ async function fetchTractGeoJSON(bounds) {
 // Census API via corsproxy.io — 1 request per county covers all tracts (vs 1 per tract with Census Reporter)
 async function fetchACSForCounty(stateCode, countyCode) {
   const ACS_TTL = 30 * 24 * 60 * 60 * 1000;
-  const cacheKey = `saferoute_acs3_${stateCode}_${countyCode}`;
+  const cacheKey = `saferoute_acs4_${stateCode}_${countyCode}`;
   const cached = getCached(cacheKey, ACS_TTL);
   if (cached) return cached;
   const res = await fetch(`https://api.census.gov/data/2022/acs/acs5?get=B19013_001E,B17001_002E,B17001_001E&for=tract:*&in=state:${stateCode}&in=county:${countyCode}&key=6f40113c1e1bd9bd1784637176039eba443f4e4b`);
@@ -2712,29 +2712,44 @@ async function fetchACSForCounty(stateCode, countyCode) {
   const iInc = hdr.indexOf('B19013_001E'), iPovPop = hdr.indexOf('B17001_002E');
   const iPovTot = hdr.indexOf('B17001_001E'), iSt = hdr.indexOf('state');
   const iCo = hdr.indexOf('county'), iTr = hdr.indexOf('tract');
+  const iLF = hdr.indexOf('B23025_003E'), iUnemp = hdr.indexOf('B23025_005E');
+  const iHU = hdr.indexOf('B25002_001E'), iVac = hdr.indexOf('B25002_003E');
   const acsMap = {};
   rows.slice(1).forEach(row => {
     const geoid = row[iSt] + row[iCo] + row[iTr];
     const income = parseInt(row[iInc]);
     const povPop = parseInt(row[iPovPop]) || 0;
     const povTot = parseInt(row[iPovTot]) || 1;
-    acsMap[geoid] = { income: income > 0 ? income : -1, povertyRate: povPop / povTot };
+    const lf = parseInt(row[iLF]) || 0;
+    const unemp = parseInt(row[iUnemp]) || 0;
+    const hu = parseInt(row[iHU]) || 0;
+    const vac = parseInt(row[iVac]) || 0;
+    acsMap[geoid] = {
+      income: income > 0 ? income : -1,
+      povertyRate: povPop / Math.max(povTot, 1),
+      unemploymentRate: lf > 0 ? unemp / lf : -1,
+      vacancyRate: hu > 0 ? vac / hu : -1,
+    };
   });
   setCached(cacheKey, acsMap);
   return acsMap;
 }
 
-function computeTractScore(income, povertyRate) {
+function computeTractScore(income, povertyRate, unemploymentRate, vacancyRate) {
   const pov = Math.max(povertyRate * 100, 0.1);
   const povertyScore = Math.min(5, Math.max(1, 5 - 2 * Math.log10(pov / 3)));
-  if (income <= 0) {
-    const s = Math.round(povertyScore * 10) / 10;
-    return { score: s, level: s >= 3.5 ? 'safe' : s >= 2.5 ? 'caution' : 'avoid' };
-  }
-  const incomeScore = Math.min(5, Math.max(1,
-    1 + 4 * (Math.log10(income) - 4) / (Math.log10(200000) - 4)
-  ));
-  const raw = 0.6 * incomeScore + 0.4 * povertyScore;
+  const incomeScore = income > 0
+    ? Math.min(5, Math.max(1, 1 + 4 * (Math.log10(income) - 4) / (Math.log10(200000) - 4)))
+    : 3;
+  const unempScore = unemploymentRate >= 0
+    ? Math.min(5, Math.max(1, 5 - 2 * Math.log10(Math.max(unemploymentRate * 100, 0.1) / 2)))
+    : 3.5;
+  const vacScore = vacancyRate >= 0
+    ? Math.min(5, Math.max(1, 5 - 2 * Math.log10(Math.max(vacancyRate * 100, 0.1) / 3)))
+    : 3.5;
+  const w = income > 0 ? 0.35 : 0;
+  const total = w + 0.30 + 0.20 + 0.15;
+  const raw = (w * incomeScore + 0.30 * povertyScore + 0.20 * unempScore + 0.15 * vacScore) / total;
   const s = Math.round(raw * 10) / 10;
   return { score: s, level: s >= 3.5 ? 'safe' : s >= 2.5 ? 'caution' : 'avoid' };
 }
@@ -2760,7 +2775,9 @@ function buildCensusTractZones(features, acsMap) {
     const acs = acsMap[geoid] || {};
     const income = acs.income ?? -1;
     const povertyRate = acs.povertyRate ?? 0.12;
-    const { score, level } = computeTractScore(income, povertyRate);
+    const unemploymentRate = acs.unemploymentRate ?? -1;
+    const vacancyRate = acs.vacancyRate ?? -1;
+    const { score, level } = computeTractScore(income, povertyRate, unemploymentRate, vacancyRate);
     const name = props.NAME || `Census Tract ${parseInt(geoid.slice(5), 10) / 100}`;
     const st = STYLES[level];
     const geoLayer = L.geoJSON(geoFeature, { style: () => ({ ...st, weight: 0.5 }) }).addTo(censusLayerGroup);
@@ -2772,12 +2789,14 @@ function buildCensusTractZones(features, acsMap) {
       dataSource: 'ACS 5-Year 2022',
       level, score,
       desc: income > 0
-        ? `Census tract with a median household income of $${income.toLocaleString()} and a poverty rate of ${(povertyRate * 100).toFixed(1)}%.`
-        : `Census tract with a poverty rate of ${(povertyRate * 100).toFixed(1)}%.`,
+        ? `Census tract — median income $${income.toLocaleString()}, poverty ${(povertyRate * 100).toFixed(1)}%${unemploymentRate >= 0 ? ', unemployment ' + (unemploymentRate * 100).toFixed(1) + '%' : ''}.`
+        : `Census tract — poverty ${(povertyRate * 100).toFixed(1)}%${unemploymentRate >= 0 ? ', unemployment ' + (unemploymentRate * 100).toFixed(1) + '%' : ''}.`,
       tips: [
         ...(income > 0 ? [{ icon: '💰', text: `Median income: $${income.toLocaleString()}` }] : []),
         { icon: '📊', text: `Poverty rate: ${(povertyRate * 100).toFixed(1)}%` },
-        { icon: 'ℹ️', text: `GEOID: ${geoid} · US Census Bureau ACS 2022` },
+        ...(unemploymentRate >= 0 ? [{ icon: '💼', text: `Unemployment: ${(unemploymentRate * 100).toFixed(1)}%` }] : []),
+        ...(vacancyRate >= 0 ? [{ icon: '🏠', text: `Housing vacancy: ${(vacancyRate * 100).toFixed(1)}%` }] : []),
+        { icon: 'ℹ️', text: `GEOID: ${geoid} · US Census ACS 2022` },
       ],
       crimeScore: null, qolScore: null, amenityScore: null, crimeCount: null,
       geometry: feature.geometry,
