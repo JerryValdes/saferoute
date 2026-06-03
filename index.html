@@ -6,7 +6,7 @@
   <title>SafeRoute — Tourist Safety Map</title>
   <meta name="description" content="Interactive tourist safety map with live crime data and neighborhood-by-neighborhood safety scores.">
   <meta property="og:title" content="SafeRoute — Tourist Safety Map">
-  <meta property="og:description" content="Live neighborhood safety scores for 20 major US cities, powered by open police data. Know before you go.">
+  <meta property="og:description" content="Live neighborhood safety scores for 100+ cities across the US and UK, powered by open police data. Know before you go.">
   <meta property="og:url" content="https://jerryvaldes.github.io/saferoute/">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary">
@@ -774,7 +774,10 @@
       <tr><td>Portland</td><td>Portland PD (ArcGIS REST)</td></tr>
       <tr><td>Baltimore</td><td>Open Baltimore (Socrata)</td></tr>
       <tr><td>Detroit</td><td>Detroit Open Data (Socrata)</td></tr>
-      <tr><td>All other areas (census tracts)</td><td>County Health Rankings 2022 (FBI UCR violent crime) + ACS 5-Year 2022</td></tr>
+      <tr><td>All other US areas (census tracts)</td><td>County Health Rankings 2022 (FBI UCR violent crime) + ACS 5-Year 2022</td></tr>
+      <tr><td>England (all areas)</td><td>English Indices of Multiple Deprivation 2019 (ONS) — 32,844 LSOAs</td></tr>
+      <tr><td>Wales (all areas)</td><td>Welsh Index of Multiple Deprivation 2019 (StatsWales) — 1,909 LSOAs</td></tr>
+      <tr><td>Scotland (all areas)</td><td>Scottish Index of Multiple Deprivation 2020 (Scottish Government) — 6,976 Data Zones</td></tr>
     </table>
 
     <div class="modal-h">About the descriptions</div>
@@ -2537,6 +2540,211 @@ const AMSTERDAM_ZONE_DEFS = {
   'Nieuw-West':{ level:'caution', score:2.9, desc:"Large post-war neighbourhood with the most diverse population in Amsterdam. Some elevated crime in parts.", tips:[{icon:'⚠️',text:'Elevated crime in some areas — exercise caution'},{icon:'🌳',text:'Het Amsterdamse Bos (Amsterdam Forest) — one of Europe\'s largest urban forests — is excellent and very safe'},{icon:'🚗',text:'Car or bike recommended'},{icon:'🌙',text:'Use caution after dark on residential streets'}] },
 };
 
+// ── Edinburgh zone definitions (ward names) ───────────────────────────────────
+const EDINBURGH_ZONE_DEFS = {
+  'City Centre':{ level:'safe', score:3.9, desc:"Edinburgh's historic heart — the Royal Mile, Edinburgh Castle, the Scottish Parliament, and Princes Street. Very safe for tourists; pickpockets operate in the tourist crush.", tips:[{icon:'✅',text:'Very safe — heavily policed and visited'},{icon:'🏰',text:'Edinburgh Castle is Scotland\'s most visited attraction — spectacular views over the city'},{icon:'🎭',text:'Edinburgh Fringe (August) is the world\'s largest arts festival — book ahead'},{icon:'⚠️',text:'Watch for pickpockets on the Royal Mile and at the Castle — keep valuables secure'}] },
+  'Southside/Newington':{ level:'safe', score:4.2, desc:"Student and cultural neighbourhood south of the Old Town — good restaurants along Clerk Street, the Meadows park, and the famous Meadows festivals. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌳',text:'The Meadows is Edinburgh\'s most beloved park — great walking and cycling'},{icon:'🍽️',text:'Clerk Street and South Clerk Street have excellent independent restaurants'},{icon:'🎓',text:'Near Edinburgh University campus and Royal Infirmary'}] },
+  'Morningside':{ level:'safe', score:4.5, desc:"Edinburgh's most desirable residential neighbourhood — Victorian tenements, excellent independent restaurants along Morningside Road, and Bruntsfield Links golf course. Very safe.", tips:[{icon:'✅',text:'Very safe and beautiful'},{icon:'🍽️',text:'Morningside Road has outstanding independent restaurants and cafes'},{icon:'⛳',text:'Bruntsfield Links is one of the oldest public golf courses in the world'},{icon:'☕',text:'Excellent independent coffee shops — this is a great neighbourhood to wander'}] },
+  'Leith':{ level:'safe', score:3.9, desc:"Edinburgh's revitalized port district — the Shore's restaurant row, The Royal Yacht Britannia, and an authentic working-class character. Generally safe.", tips:[{icon:'✅',text:'Generally safe — rapidly gentrifying'},{icon:'🚢',text:'The Royal Yacht Britannia is an extraordinary museum of royal life at sea'},{icon:'🍽️',text:'The Shore has some of Edinburgh\'s best seafood and international restaurants'},{icon:'🍺',text:'Excellent craft beer pubs and wine bars throughout'}] },
+  'Leith Walk':{ level:'caution', score:3.2, desc:"Main artery from the city centre to Leith — some elevated crime but improving rapidly as the area gentrifies.", tips:[{icon:'⚠️',text:'Some elevated crime — exercise caution at night'},{icon:'🍽️',text:'Good independent restaurants and multicultural food shops'},{icon:'🚇',text:'Tram and bus connections along the Walk'},{icon:'🌙',text:'Use caution after dark on quieter side streets'}] },
+  'Inverleith':{ level:'safe', score:4.5, desc:"Elegant north Edinburgh neighbourhood with the Royal Botanic Garden and Inverleith Park — some of Edinburgh's finest Georgian and Victorian houses. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌿',text:'Royal Botanic Garden Edinburgh is world-class and free'},{icon:'🏡',text:'Beautiful Georgian houses around Inverleith Row'},{icon:'🌳',text:'Inverleith Park has great skyline views of the Old Town'}] },
+  'Fountainbridge/Craiglockhart':{ level:'safe', score:4.1, desc:"West Edinburgh neighbourhood with Fountainbridge canal and the Water of Leith walkway. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌊',text:'Union Canal towpath — excellent cycling and walking to the Pentland Hills'},{icon:'🌳',text:'Water of Leith Walkway is one of Edinburgh\'s great natural assets'},{icon:'🏛️',text:'Edinburgh College of Art nearby'}] },
+  'Portobello/Craigmillar':{ level:'caution', score:3.1, desc:"East Edinburgh — Portobello Beach (Edinburgh's seaside resort) is lovely; Craigmillar has elevated crime. Use judgement.", tips:[{icon:'🏖️',text:'Portobello Beach is Edinburgh\'s sandy seaside retreat — great on a sunny day'},{icon:'⚠️',text:'Craigmillar (inland) has elevated crime — stick to the seafront'},{icon:'🌊',text:'Portobello promenade is excellent for walking'},{icon:'🚗',text:'Rideshare recommended for Craigmillar areas'}] },
+};
+
+// ── Glasgow zone definitions (ward names) ─────────────────────────────────────
+const GLASGOW_ZONE_DEFS = {
+  'Anderston/City/Yorkhill':{ level:'safe', score:3.8, desc:"Glasgow's city centre and riverside — George Square, the Merchant City, SEC Armadillo, and Kelvingrove Museum. Generally safe in the main tourist areas.", tips:[{icon:'✅',text:'Generally safe in the main tourist areas'},{icon:'🏛️',text:'Kelvingrove Art Gallery is free and one of Scotland\'s best museums'},{icon:'🎵',text:'SEC Centre hosts major concerts and events'},{icon:'🛍️',text:'Buchanan Street and Argyle Street for shopping'}] },
+  'Hillhead':{ level:'safe', score:4.4, desc:"Glasgow's West End — Byres Road restaurants and bars, the Botanic Gardens, Oran Mor, and the University of Glasgow. Very safe and beloved.", tips:[{icon:'✅',text:'Very safe — Glasgow\'s most visited neighbourhood'},{icon:'🌿',text:'Glasgow Botanic Gardens is lovely and free'},{icon:'🍽️',text:'Byres Road and Ashton Lane are Glasgow\'s best dining and bar streets'},{icon:'🎭',text:'Oran Mor converted church is one of Glasgow\'s best live music and arts venues'}] },
+  'Glasgow Kelvin':{ level:'safe', score:4.2, desc:"Kelvinside and Hyndland — elegant Victorian tenements, the Kelvin Walkway, and excellent local restaurants. Very safe.", tips:[{icon:'✅',text:'Very safe and beautiful'},{icon:'🌊',text:'Kelvin Walkway along the River Kelvin is excellent'},{icon:'🏡',text:'Beautiful red sandstone tenements throughout'},{icon:'🍽️',text:'Good independent restaurants on Great Western Road'}] },
+  'Partick East/Kelvindale':{ level:'safe', score:4.1, desc:"Partick and Dumbarton Road — a lively neighbourhood with good pubs, the Kelvin Hall, and easy West End access. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏟️',text:'Kelvin Hall has a major sports facility and soft play'},{icon:'🍺',text:'Great traditional pubs along Dumbarton Road'},{icon:'🚇',text:'Partick subway and rail station for easy city connections'}] },
+  'Southside Central':{ level:'safe', score:3.9, desc:"Glasgow South Side including Shawlands and Pollokshields — good restaurants, Pollok Country Park, and the Burrell Collection. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏛️',text:'Burrell Collection at Pollok Park is extraordinary — free and world-class'},{icon:'🌳',text:'Pollok Country Park has Highland cattle and fine gardens'},{icon:'🍽️',text:'Shawlands has excellent independent restaurants'}] },
+  'Calton':{ level:'caution', score:2.8, desc:"East Glasgow neighbourhood with significant socioeconomic challenges. Limited tourist attractions; the Barras market is nearby.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🛒',text:'The Barras market (weekends) is a famous Glasgow institution'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+  'Shettleston':{ level:'caution', score:2.7, desc:"East Glasgow residential area with elevated crime. Limited tourist attractions.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🌙',text:'Not recommended after dark'}] },
+};
+
+// ── Bristol zone definitions ───────────────────────────────────────────────────
+const BRISTOL_ZONE_DEFS = {
+  'Clifton':{ level:'safe', score:4.4, desc:"Bristol's most famous neighbourhood — the Clifton Suspension Bridge, elegant Georgian terraces, and the best restaurants and shops in the city. Very safe.", tips:[{icon:'✅',text:'Very safe and beautiful'},{icon:'🌉',text:'Clifton Suspension Bridge is Brunel\'s masterpiece — free to walk, toll to drive'},{icon:'🌿',text:'Clifton Down has beautiful clifftop walks above the Avon Gorge'},{icon:'🍽️',text:'Excellent restaurants and cafes throughout the village'}] },
+  'Clifton Down':{ level:'safe', score:4.5, desc:"The wider Clifton Down area — leafy streets, Whiteladies Road restaurants, and excellent independent shops. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🍽️',text:'Whiteladies Road has some of Bristol\'s best independent restaurants'},{icon:'🛍️',text:'Excellent independent shops and boutiques'},{icon:'🌳',text:'Clifton Down itself has beautiful walks'}] },
+  'Harbourside and Hotwells':{ level:'safe', score:4.1, desc:"Bristol's revitalized waterfront — the SS Great Britain, the Watershed arts centre, M Shed museum, and excellent restaurants. Very safe.", tips:[{icon:'✅',text:'Very safe — Bristol\'s main tourist waterfront'},{icon:'⛵',text:'SS Great Britain is Brunel\'s revolutionary iron steamship — a world-class museum'},{icon:'🏛️',text:'M Shed is an excellent free Bristol museum'},{icon:'🎭',text:'Watershed cinema and arts centre is a Bristol institution'}] },
+  "Stokes Croft and St Michael's":{ level:'caution', score:3.3, desc:"Bristol's countercultural hub — famous for Banksy murals, independent shops, and a strong arts community. Some elevated crime but deeply local and creative.", tips:[{icon:'🎨',text:'Stokes Croft has outstanding street art — this is Banksy\'s home territory'},{icon:'☕',text:'PRSC (People\'s Republic of Stokes Croft) shop and community events'},{icon:'⚠️',text:'Some elevated crime, particularly at night'},{icon:'🍺',text:'Great independent bars and late-night spots'}] },
+  'Redland':{ level:'safe', score:4.4, desc:"Gracious residential neighbourhood with beautiful Victorians and excellent cafes along Chandos Road. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'☕',text:'Chandos Road has excellent independent cafes'},{icon:'🏡',text:'Beautiful Victorian villas and Edwardian houses'},{icon:'🌳',text:'Redland Green is a beautiful park'}] },
+  'Bedminster':{ level:'safe', score:3.9, desc:"South Bristol neighbourhood with North Street's independent food and drink scene, North Street Standard market. Generally safe and increasingly popular.", tips:[{icon:'✅',text:'Generally safe and increasingly popular'},{icon:'🍽️',text:'North Street has one of Bristol\'s best independent food and drink strips'},{icon:'🛒',text:'Bedminster market days'},{icon:'🎨',text:'Good street art and independent galleries'}] },
+  'Southville':{ level:'safe', score:4.2, desc:"South Bristol's most desirable residential neighbourhood — beautiful Victorian terraces and excellent restaurants along East Street. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🍽️',text:'East Street and North Street have excellent independent restaurants'},{icon:'🏡',text:'Beautiful Victorian terraces throughout'},{icon:'🌊',text:'Short walk to the Harbourside'}] },
+  'Henleaze and Westbury-on-Trym':{ level:'safe', score:4.5, desc:"Upscale north Bristol suburb with the historic Westbury village, Durdham Down, and excellent local shops. Very safe.", tips:[{icon:'✅',text:'Very safe — one of Bristol\'s safest suburbs'},{icon:'🌳',text:'Durdham Down is a large open common popular with dog walkers and cyclists'},{icon:'🛍️',text:'Westbury village has good independent shops'},{icon:'☕',text:'Good cafes along Henleaze Road'}] },
+  'Knowle':{ level:'safe', score:3.8, desc:"South Bristol residential neighbourhood. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌳',text:'Knowle Park is pleasant'},{icon:'🛒',text:'Local shops along Wells Road'},{icon:'🚗',text:'Car or bus recommended'}] },
+};
+
+// ── Bath zone definitions ─────────────────────────────────────────────────────
+const BATH_ZONE_DEFS = {
+  'Bath City Centre':{ level:'safe', score:4.3, desc:"The Roman Baths, the Pump Room, Bath Abbey, and Royal Crescent — the entire city centre is a UNESCO World Heritage Site. Very safe.", tips:[{icon:'✅',text:'Very safe — one of the safest city centres in England'},{icon:'🏛️',text:'Roman Baths are extraordinary — book timed entry online'},{icon:'🌿',text:'Royal Crescent and The Circus are Georgian architecture at its most beautiful'},{icon:'🎭',text:'Theatre Royal Bath is one of the oldest working theatres in Britain'}] },
+  'Bath City Outer':{ level:'safe', score:4.2, desc:"The elegant outer districts of Bath — Bathwick, Larkhall, and Lansdown. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌳',text:'Bath Skyline Walk has stunning views over the city and surrounding hills'},{icon:'🏡',text:'Beautiful Georgian crescents and terraces throughout'},{icon:'🌿',text:'Prior Park Landscape Garden (National Trust) is outstanding'}] },
+  'Bath City South':{ level:'safe', score:4.1, desc:"Widcombe, Twerton, and Odd Down — south Bath with good local restaurants and canal access. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌊',text:'Kennet and Avon Canal is beautiful for cycling or walking'},{icon:'🍽️',text:'Widcombe has good local restaurants and pubs'},{icon:'🏃',text:'Two Tunnels Greenway cycling route starts here'}] },
+  'Bath City West':{ level:'safe', score:4.2, desc:"Weston and Oldfield Park — residential west Bath. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌳',text:'Victoria Park has the Botanical Gardens and a great children\'s area'},{icon:'🏡',text:'Beautiful Victorian and Edwardian housing'},{icon:'🚗',text:'Good transport connections into the city centre'}] },
+};
+
+// ── Leeds zone definitions ─────────────────────────────────────────────────────
+const LEEDS_ZONE_DEFS = {
+  'Leeds City':{ level:'safe', score:3.8, desc:"Leeds city centre — Trinity Leeds, the Victoria Quarter, Kirkgate Market, and the Corn Exchange. Generally safe with an improving restaurant and bar scene.", tips:[{icon:'✅',text:'Generally safe in the main commercial areas'},{icon:'🛍️',text:'Victoria Quarter\'s arcades are Leeds\'s finest shopping'},{icon:'🛒',text:'Kirkgate Market is one of Europe\'s largest indoor markets'},{icon:'🍽️',text:'Boar Lane and Briggate have good restaurants and bars'}] },
+  'Leeds North West':{ level:'safe', score:4.2, desc:"Headingley — Leeds's vibrant student neighbourhood with Headingley Cricket Ground and a great bar and restaurant scene. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏏',text:'Headingley Cricket Ground is a beautiful ground that hosts Test matches'},{icon:'🍽️',text:'Otley Run (Headingley to Hyde Park) is one of Britain\'s most famous pub crawls'},{icon:'🎵',text:'Outstanding live music venues'}] },
+  'Leeds North East':{ level:'safe', score:4.1, desc:"Chapel Allerton and Roundhay — leafy north Leeds with excellent independent restaurants and Roundhay Park. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌳',text:'Roundhay Park is one of the largest urban parks in Europe'},{icon:'🌊',text:'Tropical World at Roundhay Park is excellent'},{icon:'🍽️',text:'Chapel Allerton has great independent restaurants and bars'}] },
+  'Leeds West':{ level:'caution', score:3.0, desc:"West Leeds including Armley and Kirkstall — Kirkstall Abbey is a beautiful medieval ruin. Some elevated crime away from the main attractions.", tips:[{icon:'🏛️',text:'Kirkstall Abbey is a remarkably complete 12th-century Cistercian monastery'},{icon:'⚠️',text:'Some elevated crime on residential streets — stick to main areas'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+  'Leeds East':{ level:'caution', score:2.8, desc:"East Leeds with some elevated crime. Limited tourist attractions.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+  'Leeds South':{ level:'caution', score:2.9, desc:"South Leeds including Beeston and Hunslet. Some elevated crime.", tips:[{icon:'⚠️',text:'Some elevated crime — exercise caution'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+};
+
+// ── Sheffield zone definitions ────────────────────────────────────────────────
+const SHEFFIELD_ZONE_DEFS = {
+  'Sheffield City Centre':{ level:'safe', score:3.9, desc:"Sheffield's revitalized city centre — the Peace Gardens, the Crucible Theatre, Fargate shopping, and the Winter Gardens. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🎭',text:'Crucible Theatre is famous worldwide for the Snooker World Championship'},{icon:'🌿',text:'Winter Gardens is a beautiful Victorian-style glasshouse — free to enter'},{icon:'🍽️',text:'Devonshire Quarter and Division Street have excellent independent dining'}] },
+  'Sheffield North West':{ level:'safe', score:4.2, desc:"Broomhill and Crookes — Sheffield\'s student and professional areas with excellent restaurants and cafes. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🍽️',text:'Broomhill has good independent restaurants and cafes'},{icon:'🎓',text:'University of Sheffield campus is attractive'},{icon:'🌿',text:'Porter Valley parks for walking and cycling'}] },
+  'Sheffield South West':{ level:'safe', score:4.3, desc:"Ecclesall Road and Greystones — Sheffield\'s most upscale neighbourhood with outstanding restaurants and boutiques. Very safe.", tips:[{icon:'✅',text:'Very safe — Sheffield\'s most affluent area'},{icon:'🍽️',text:'Ecclesall Road has outstanding independent restaurants — Sheffield\'s best dining strip'},{icon:'🛍️',text:'Great boutiques and independent shops'},{icon:'🌳',text:'Endcliffe Park is beautiful — excellent for families'}] },
+  'Sheffield North East':{ level:'caution', score:3.0, desc:"Burngreave and parts of north Sheffield. Some elevated crime.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+  'Sheffield South East':{ level:'caution', score:3.1, desc:"Sharrow and parts of south-east Sheffield. Some elevated crime in certain pockets.", tips:[{icon:'⚠️',text:'Some elevated crime — exercise caution on residential streets'},{icon:'🌳',text:'Graves Park is one of Sheffield\'s largest parks'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+};
+
+// ── Newcastle zone definitions ────────────────────────────────────────────────
+const NEWCASTLE_ZONE_DEFS = {
+  'Newcastle Central':{ level:'safe', score:3.8, desc:"Newcastle's city centre — Grey Street, the Grainger Market, Eldon Square shopping, and the Quayside. Generally safe; Bigg Market gets rowdy at weekends.", tips:[{icon:'✅',text:'Generally safe in the main commercial areas'},{icon:'🏛️',text:'Grey Street is one of Britain\'s most beautiful city streets — the Theatre Royal and many Georgian buildings'},{icon:'🌉',text:'The Quayside with the Millennium Bridge and BALTIC art gallery is excellent'},{icon:'⚠️',text:'Bigg Market nightlife district gets rowdy on weekend nights'}] },
+  'Jesmond and Heaton':{ level:'safe', score:4.4, desc:"Newcastle's best neighbourhood — outstanding restaurants along Osborne Road, the Jesmond Dene park, and a vibrant young professional community. Very safe.", tips:[{icon:'✅',text:'Very safe — Newcastle\'s finest neighbourhood'},{icon:'🍽️',text:'Osborne Road has Newcastle\'s best independent restaurants and bars'},{icon:'🌳',text:'Jesmond Dene is an extraordinary wooded gorge right in the city'},{icon:'☕',text:'Excellent independent cafes throughout'}] },
+  'Gosforth and Great Park':{ level:'safe', score:4.5, desc:"Upscale north Newcastle suburb with the High Street and excellent local shops. Very safe.", tips:[{icon:'✅',text:'Very safe — one of the Tyne\'s safest suburbs'},{icon:'🛍️',text:'Gosforth High Street has good independent shops'},{icon:'🍽️',text:'Good restaurants and pubs'},{icon:'🌳',text:'Gosforth Park racecourse nearby'}] },
+  'Byker and Walker':{ level:'caution', score:2.8, desc:"East Newcastle with the famous Byker Wall housing estate. Some elevated crime.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🏛️',text:'Byker Wall is a famous 1970s social housing masterpiece by architect Ralph Erskine'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+  'Fenham and Scotswood':{ level:'caution', score:2.7, desc:"West Newcastle with elevated crime. Limited tourist attractions.", tips:[{icon:'⚠️',text:'Elevated crime — not recommended for tourists'},{icon:'🚗',text:'Car or rideshare only'},{icon:'🌙',text:'Avoid after dark'}] },
+  'Benwell and Elswick':{ level:'caution', score:2.7, desc:"Inner west Newcastle with elevated crime.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+};
+
+// ── Nottingham zone definitions ───────────────────────────────────────────────
+const NOTTINGHAM_ZONE_DEFS = {
+  'City Centre':{ level:'safe', score:3.7, desc:"Nottingham's city centre — Old Market Square, the Council House, and the Lace Market. Generally safe; the Broadmarsh area has some rough pockets.", tips:[{icon:'✅',text:'Generally safe in the main commercial areas'},{icon:'🏛️',text:'Old Market Square and the Council House are impressive civic landmarks'},{icon:'🛍️',text:'Victoria Centre and Bridlesmith Gate for shopping'},{icon:'⚠️',text:'Some elevated crime around Broadmarsh and late at night on main streets'}] },
+  'Lace Market':{ level:'safe', score:4.1, desc:"Nottingham's most atmospheric neighbourhood — Victorian lace factories converted into bars, restaurants, and galleries. Very safe.", tips:[{icon:'✅',text:'Very safe and excellent'},{icon:'🍽️',text:'Outstanding restaurants and cocktail bars in converted Victorian warehouses'},{icon:'🏛️',text:'National Justice Museum (former courts and gaol) is fascinating'},{icon:'🎵',text:'Good live music venues throughout'}] },
+  "St Ann's":{ level:'caution', score:2.8, desc:"Inner-city neighbourhood with elevated crime. Limited tourist attractions.", tips:[{icon:'⚠️',text:'Elevated crime — not recommended for tourists'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🌙',text:'Avoid after dark'}] },
+  'Meadows':{ level:'caution', score:2.7, desc:"South Nottingham with elevated crime near the river. Not recommended for tourists.", tips:[{icon:'⚠️',text:'Elevated crime — not recommended for tourists'},{icon:'🌊',text:'Trent Bridge and cricket ground are at the southern edge'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🌙',text:'Avoid after dark'}] },
+  'Arboretum':{ level:'safe', score:3.8, desc:"Victorian neighbourhood with the Nottingham Arboretum park and the University campus. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌳',text:'Nottingham Arboretum is one of the oldest public parks in England'},{icon:'🎓',text:'Nottingham Trent University campus nearby'},{icon:'🍽️',text:'Good independent cafes along Forest Road'}] },
+  'West Bridgford':{ level:'safe', score:4.4, desc:"Nottinghamshire's most desirable suburb — excellent restaurants along Bridgford Road and Central Avenue, and Trent Bridge cricket ground. Very safe.", tips:[{icon:'✅',text:'Very safe — consistently one of England\'s most desirable suburbs'},{icon:'🏏',text:'Trent Bridge Cricket Ground is a beautiful Test venue'},{icon:'🍽️',text:'Central Avenue has outstanding independent restaurants'},{icon:'🛍️',text:'Good independent shops and boutiques'}] },
+  'Sherwood':{ level:'safe', score:4.0, desc:"North Nottingham with the famous Sherwood Forest connection and excellent restaurants on Mansfield Road. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌳',text:'Near Sherwood Forest — Robin Hood connections throughout'},{icon:'🍽️',text:'Good restaurants along Mansfield Road'},{icon:'🎭',text:'Broadway Cinema is Nottingham\'s excellent independent cinema'}] },
+};
+
+// ── Oxford zone definitions ───────────────────────────────────────────────────
+const OXFORD_ZONE_DEFS = {
+  'Oxford Central':{ level:'safe', score:4.1, desc:"Oxford's historic heart — the Bodleian Library, the Radcliffe Camera, Christ Church College, and Broad Street. Very safe.", tips:[{icon:'✅',text:'Very safe — heavily visited'},{icon:'🎓',text:'University of Oxford colleges are architectural masterpieces — most open to visitors'},{icon:'🏛️',text:'Ashmolean Museum is world-class and free'},{icon:'🚶',text:'Punting on the Cherwell from Magdalen Bridge is quintessential Oxford'}] },
+  'Oxford Cowley':{ level:'safe', score:3.8, desc:"East Oxford — the Cowley Road with outstanding multicultural restaurants, the O2 Academy music venue, and a creative community. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🍽️',text:'Cowley Road has outstanding multicultural restaurants — Lebanese, Ethiopian, Indian, and more'},{icon:'🎵',text:'O2 Academy Oxford is a great mid-size music venue'},{icon:'☕',text:'Excellent independent cafes and second-hand bookshops'}] },
+  'Oxford North':{ level:'safe', score:4.2, desc:"Summertown and north Oxford — upscale residential area with excellent shops and restaurants on Banbury Road. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🍽️',text:'Banbury Road and South Parade have excellent dining'},{icon:'🛍️',text:'Summertown has good independent shops'},{icon:'🌳',text:'University Parks are beautiful — open to visitors'}] },
+  'Oxford East':{ level:'safe', score:3.8, desc:"East Oxford including Headington — the Oxford United stadium and good local shops. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'⛽',text:'Headington Shark (a real shark sticking out of a rooftop) is a quirky Oxford landmark'},{icon:'🏛️',text:'Oxford Brookes University campus'},{icon:'🍽️',text:'Good local restaurants in Headington village'}] },
+  'Oxford North East':{ level:'safe', score:4.3, desc:"Marston and New Marston — quiet residential north-east Oxford with great riverside pubs. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🍺',text:'Victoria Arms on the river is one of Oxford\'s most beautiful riverside pubs'},{icon:'🚣',text:'River Cherwell punting from Cherwell Boathouse'},{icon:'🌳',text:'Port Meadow and the River Thames are a short cycle away'}] },
+  'Oxford South East':{ level:'safe', score:3.9, desc:"Iffley and south-east Oxford — beautiful Iffley Village with a Norman church, and riverside walks. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🏛️',text:'Iffley Norman Church (1170) is one of the finest Romanesque churches in England'},{icon:'🌊',text:'Iffley Lock on the Thames is a beautiful riverside spot'},{icon:'🚣',text:'Excellent Thames riverside walks'}] },
+};
+
+// ── Cambridge zone definitions ────────────────────────────────────────────────
+const CAMBRIDGE_ZONE_DEFS = {
+  'Cambridge City Centre and West':{ level:'safe', score:4.2, desc:"Cambridge's historic heart — King's College Chapel, the Backs, the Market Square, and the Fitzwilliam Museum. Very safe.", tips:[{icon:'✅',text:'Very safe — one of England\'s safest cities'},{icon:'🎓',text:'King\'s College Chapel is one of the finest Gothic buildings in the world'},{icon:'🚣',text:'Punting on the Cam is essential Cambridge — hire from Scudamore\'s'},{icon:'🏛️',text:'Fitzwilliam Museum is world-class and free'}] },
+  'Cambridge North':{ level:'safe', score:4.1, desc:"North Cambridge including the Science Park and Arbury. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🔬',text:'Cambridge Science Park — the heart of Silicon Fen'},{icon:'🌳',text:'Stourbridge Common and the River Cam riverside walks'},{icon:'🚲',text:'Excellent cycling throughout'}] },
+  'Cambridge East':{ level:'safe', score:3.9, desc:"East Cambridge including Petersfield and Mill Road — excellent independent restaurants and the Cambridge Buddhist Centre. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🍽️',text:'Mill Road has outstanding multicultural restaurants — one of England\'s best food streets for its size'},{icon:'🛒',text:'Mill Road winter fair is a beloved Cambridge event'},{icon:'☕',text:'Excellent independent coffee shops along Mill Road'}] },
+  'Cambridge South':{ level:'safe', score:4.3, desc:"South Cambridge including Newnham and Trumpington — beautiful riverside meadows, Grantchester, and punting. Very safe.", tips:[{icon:'✅',text:'Very safe and beautiful'},{icon:'🌳',text:'Grantchester Meadows — walk or punt to Grantchester village for tea'},{icon:'🌊',text:'The Backs riverside meadows are beautiful for walks'},{icon:'🏡',text:'Beautiful Victorian and Arts and Crafts architecture throughout Newnham'}] },
+};
+
+// ── Brighton zone definitions ─────────────────────────────────────────────────
+const BRIGHTON_ZONE_DEFS = {
+  'North Laine':{ level:'safe', score:4.3, desc:"Brighton's most charismatic neighbourhood — hundreds of independent shops, cafes, and restaurants in a labyrinth of Victorian streets. Very safe.", tips:[{icon:'✅',text:'Very safe and exceptionally vibrant'},{icon:'🛍️',text:'The best concentration of independent shops in England — vintage, vinyl, antiques, everything'},{icon:'☕',text:'Outstanding independent cafes'},{icon:'🎨',text:'Excellent street art and a genuinely creative community'}] },
+  'Regency Seafront':{ level:'safe', score:4.0, desc:"Brighton seafront — the Palace Pier, the i360 observation tower, Brighton Beach, and the West Pier ruins. Generally safe; the pier area gets crowded and rowdy in summer.", tips:[{icon:'✅',text:'Generally safe during the day'},{icon:'🎡',text:'Brighton Palace Pier is a Victorian pleasure pier — free to walk, rides extra'},{icon:'🌊',text:'Brighton Beach (pebble) is surprisingly lovely — great swimming in summer'},{icon:'⚠️',text:'Get rowdy on summer evenings — exercise caution in large crowds at night'}] },
+  'Seven Dials':{ level:'safe', score:4.2, desc:"Elegant neighbourhood around the Seven Dials junction with excellent restaurants and boutiques. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🍽️',text:'Excellent independent restaurants around the junction'},{icon:'🛍️',text:'Good independent boutiques'},{icon:'🎭',text:'Brighton Dome arts complex is nearby'}] },
+  'Kemp Town':{ level:'safe', score:4.1, desc:"Brighton's LGBTQ+ hub and eastern seafront — Marine Parade, Kemp Town village, and the St James Street bars. Very safe.", tips:[{icon:'✅',text:'Very safe and very welcoming'},{icon:'🌈',text:'Kemp Town is the heart of Brighton\'s famous LGBTQ+ scene'},{icon:'🍽️',text:'St James Street has good independent restaurants and bars'},{icon:'🎭',text:'Brighton Pride in August is one of the UK\'s best Pride events'}] },
+  'Hanover':{ level:'safe', score:4.3, desc:"Brighton's bohemian residential neighbourhood on the hill — excellent pubs, a community spirit, and beautiful Victorian terraces. Very safe.", tips:[{icon:'✅',text:'Very safe and charming'},{icon:'🍺',text:'Excellent independent pubs — the Hanover is a local favourite'},{icon:'🏡',text:'Beautiful painted Victorian terraces throughout'},{icon:'🌳',text:'Queen\'s Park is nearby and excellent'}] },
+  'Preston Park':{ level:'safe', score:4.2, desc:"North Brighton with the beautiful Preston Park, the Preston Manor, and excellent residential streets. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌳',text:'Preston Park is beautiful — excellent for cycling and walking'},{icon:'🏛️',text:'Preston Manor is a fascinating Edwardian house museum'},{icon:'🌹',text:'Preston Park Walled Garden has a beautiful rose garden'}] },
+};
+
+// ── York zone definitions ─────────────────────────────────────────────────────
+const YORK_ZONE_DEFS = {
+  'York Inner':{ level:'safe', score:4.2, desc:"York's magnificent walled city — the Shambles, York Minster, the Roman walls, the Jorvik Viking Centre, and the Castle Museum. One of England's finest historic cities. Very safe.", tips:[{icon:'✅',text:'Very safe — one of England\'s safest and most beautiful cities'},{icon:'⛪',text:'York Minster is one of the greatest Gothic cathedrals in Northern Europe'},{icon:'🏘️',text:'The Shambles is the best-preserved medieval street in Europe'},{icon:'🌳',text:'The City Walls (3.4km) are free to walk — outstanding views of the Minster'}] },
+  'York Outer (North)':{ level:'safe', score:4.3, desc:"North York suburbs including Clifton — pleasant residential areas with easy access to the city centre. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌳',text:'Bootham Park and the Eye of York are nearby'},{icon:'🏡',text:'Beautiful suburban streets'},{icon:'🚲',text:'Easy cycling into the city centre'}] },
+  'York Outer (East)':{ level:'safe', score:4.2, desc:"East York suburbs including Heworth — the York Racecourse is nearby. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🏇',text:'York Racecourse is one of England\'s finest flat racing venues'},{icon:'🌳',text:'Knavesmire Park (home of the racecourse) is excellent for walking'},{icon:'🚲',text:'Easy cycling into York centre'}] },
+  'York Outer (West)':{ level:'safe', score:4.1, desc:"West York including Acomb — residential suburbs with the National Railway Museum nearby. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🚂',text:'National Railway Museum is the best railway museum in the world — free'},{icon:'🌳',text:'Rowntree Park is a beautiful riverside park'},{icon:'🚲',text:'Easy cycling into the city centre'}] },
+};
+
+// ── Cardiff zone definitions ──────────────────────────────────────────────────
+const CARDIFF_ZONE_DEFS = {
+  'Butetown':{ level:'safe', score:3.8, desc:"Cardiff Bay — Mermaid Quay, the Wales Millennium Centre, Senedd (Welsh Parliament), and the Norwegian Church arts centre. Generally safe.", tips:[{icon:'✅',text:'Generally safe — tourist waterfront area'},{icon:'🎭',text:'Wales Millennium Centre is an extraordinary building housing the Welsh National Opera'},{icon:'🏛️',text:'Senedd (Welsh Parliament) offers free tours'},{icon:'🌊',text:'Cardiff Bay boardwalk is a lovely walk'}] },
+  'Cathays':{ level:'safe', score:3.9, desc:"Cardiff's student neighbourhood — Cathays Park with the National Museum Cardiff, the civic buildings, and Roath Park lake. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏛️',text:'National Museum Cardiff has an outstanding art collection and natural history — free'},{icon:'🌳',text:'Roath Park Lake is beautiful — rowing boats for hire'},{icon:'🌿',text:'Bute Park is an extraordinary urban park right next to the Castle'}] },
+  'Canton':{ level:'safe', score:4.1, desc:"Cardiff's most desirable neighbourhood — Pontcanna conservation area, excellent restaurants along Pontcanna Street, and the Pontcanna Fields. Very safe.", tips:[{icon:'✅',text:'Very safe — Cardiff\'s most sought-after neighbourhood'},{icon:'🍽️',text:'Pontcanna Street and Canton\'s Wellfield Road have outstanding independent restaurants'},{icon:'🌳',text:'Pontcanna Fields (open parkland) and Llandaff Fields are excellent'},{icon:'☕',text:'Outstanding independent cafe culture'}] },
+  'Riverside':{ level:'safe', score:3.9, desc:"Inner Cardiff neighbourhood along the River Taff with Pontcanna meadows, the cricket ground, and Cardiff City Football Club. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'⚽',text:'Cardiff City Stadium is the home of Cardiff City FC'},{icon:'🌊',text:'River Taff riverside walk through Pontcanna Fields is beautiful'},{icon:'🍽️',text:'Good local restaurants along Cathedral Road'}] },
+  'Splott':{ level:'caution', score:3.0, desc:"East Cardiff with some elevated crime but gentrifying quickly. Some good independent bars and street art.", tips:[{icon:'⚠️',text:'Some elevated crime — exercise caution'},{icon:'🎨',text:'Emerging arts and independent bar scene'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+  'Adamsdown':{ level:'caution', score:2.9, desc:"Inner Cardiff east of the city centre with elevated crime.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+  'Heath':{ level:'safe', score:4.2, desc:"North Cardiff suburb with the University Hospital of Wales and good parks. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌳',text:'Roath Park is close by with the famous lighthouse and rose garden'},{icon:'🎓',text:'Cardiff University hospital and medical school'},{icon:'🏡',text:'Pleasant residential streets'}] },
+  'Llandaff':{ level:'safe', score:4.4, desc:"The historic village of Llandaff — Llandaff Cathedral, the green, and beautiful walks along the Taff. Very safe.", tips:[{icon:'✅',text:'Very safe and beautiful'},{icon:'⛪',text:'Llandaff Cathedral has an extraordinary Epstein sculpture of Christ'},{icon:'🌳',text:'The Cathedral Close and Llandaff Green are lovely'},{icon:'🌊',text:'Taff Trail cycling and walking along the river'}] },
+};
+
+// ── Leicester zone definitions ────────────────────────────────────────────────
+const LEICESTER_ZONE_DEFS = {
+  'City Centre':{ level:'safe', score:3.7, desc:"Leicester's city centre — the Richard III Visitor Centre, the Cathedral, Clock Tower, and the Highcross shopping centre. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'👑',text:'Richard III Visitor Centre is extraordinary — the king\'s remains were found under a car park here'},{icon:'⛪',text:'Leicester Cathedral is small but beautiful and historically significant'},{icon:'🛍️',text:'Highcross and Haymarket shopping centres'}] },
+  'Cultural Quarter':{ level:'safe', score:4.0, desc:"Leicester's arts district — the Curve theatre, the Haymarket Theatre, and the Secular Hall. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🎭',text:'Curve Theatre is one of the UK\'s most architecturally striking theatres'},{icon:'🎵',text:'De Montfort Hall is a beautiful venue for concerts'},{icon:'🍽️',text:'Good restaurants and bars in the quarter'}] },
+  'Riverside':{ level:'safe', score:3.9, desc:"Leicester waterfront neighbourhood along the Grand Union Canal with good restaurants and bars. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌊',text:'Grand Union Canal and the Mile Straight rowing course'},{icon:'🍽️',text:'Good restaurants and bars along Frog Island'},{icon:'🚴',text:'Good cycling along the canal towpath'}] },
+  'Westcotes':{ level:'safe', score:3.8, desc:"West Leicester including the Golden Mile — the UK's finest Indian restaurants along Belgrave Road and Melton Road. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🍛',text:'The Golden Mile has the UK\'s greatest concentration of Indian restaurants and sweet shops — extraordinary'},{icon:'🎊',text:'Diwali celebrations on the Golden Mile are the largest outside India'},{icon:'🛒',text:'Excellent Indian sweet shops and grocery stores'}] },
+  'Belgrave':{ level:'safe', score:3.8, desc:"North Leicester's Asian cultural hub — the Golden Mile continues here with outstanding vegetarian and South Asian cuisine. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🍽️',text:'Some of the best vegetarian Indian food in the UK'},{icon:'🎊',text:'Major Hindu cultural events throughout the year'},{icon:'🛒',text:'Excellent Asian grocery stores and fabric shops'}] },
+  'Stoneygate':{ level:'safe', score:4.4, desc:"Leicester's most desirable neighbourhood — leafy Victorian streets, excellent independent restaurants, and Victoria Park. Very safe.", tips:[{icon:'✅',text:'Very safe and beautiful'},{icon:'🌳',text:'Victoria Park is beautiful — events throughout the year'},{icon:'🍽️',text:'Excellent independent restaurants on Francis Street'},{icon:'🏡',text:'Outstanding Victorian and Edwardian houses'}] },
+};
+
+// ── Birmingham UK zone definitions ────────────────────────────────────────────
+const BIRMINGHAM_UK_ZONE_DEFS = {
+  'City Centre':{ level:'safe', score:3.8, desc:"Birmingham's revitalized city centre — Brindleyplace, the Bullring and BHAM, the Library of Birmingham, and Birmingham Museum & Art Gallery. Generally safe.", tips:[{icon:'✅',text:'Generally safe in the main commercial areas'},{icon:'🏛️',text:'Birmingham Museum & Art Gallery has the world\'s finest Pre-Raphaelite collection — free'},{icon:'🌊',text:'Brindleyplace and the canals — Birmingham has more canals than Venice'},{icon:'🛍️',text:'Selfridges at Bullring is spectacular'}] },
+  'Edgbaston':{ level:'safe', score:4.3, desc:"Birmingham's most prestigious suburb — Edgbaston Cricket Ground, the Botanical Gardens, and beautiful Victorian mansions. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🏏',text:'Edgbaston Cricket Ground is one of England\'s finest Test venues'},{icon:'🌿',text:'Birmingham Botanical Gardens are beautiful and very good'},{icon:'🏡',text:'Stunning Victorian and Edwardian mansions throughout'}] },
+  'Harborne':{ level:'safe', score:4.4, desc:"Birmingham's village-within-the-city — excellent independent restaurants along High Street, a genuine community feel. Very safe.", tips:[{icon:'✅',text:'Very safe and charming'},{icon:'🍽️',text:'Harborne High Street has outstanding independent restaurants'},{icon:'☕',text:'Excellent independent cafes'},{icon:'🏡',text:'Beautiful Victorian houses'}] },
+  'Moseley and Kings Heath':{ level:'safe', score:4.1, desc:"Birmingham's bohemian neighbourhood — excellent restaurants along Alcester Road, Moseley Park lake, and a vibrant arts scene. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🍽️',text:'Alcester Road and Kings Heath High Street have outstanding independent dining'},{icon:'🎵',text:'Moseley Folk and Arts Festival is one of the UK\'s best small festivals'},{icon:'🌳',text:'Moseley Park and Pool is a beautiful private park'}] },
+  'Aston':{ level:'caution', score:2.8, desc:"Inner north Birmingham with elevated crime. Aston Villa Football Club is here.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'⚽',text:'Aston Villa\'s Villa Park is a great stadium if you\'re attending a match'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+  'Small Heath and Highgate':{ level:'caution', score:2.7, desc:"Inner south-east Birmingham with elevated crime.", tips:[{icon:'⚠️',text:'Elevated crime — not recommended for tourists'},{icon:'🚗',text:'Car or rideshare only'},{icon:'🌙',text:'Avoid after dark'}] },
+  'Nechells':{ level:'caution', score:2.6, desc:"Inner east Birmingham with elevated crime.", tips:[{icon:'⚠️',text:'High crime — not recommended for tourists'},{icon:'🚗',text:'Car or rideshare only'}] },
+  'Erdington':{ level:'caution', score:3.0, desc:"North Birmingham suburb with some elevated crime. Limited tourist attractions.", tips:[{icon:'⚠️',text:'Some elevated crime — exercise caution'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+};
+
+// ── Southampton zone definitions ──────────────────────────────────────────────
+const SOUTHAMPTON_ZONE_DEFS = {
+  'Bargate':{ level:'safe', score:3.7, desc:"Southampton's city centre — the Bargate medieval gateway, the Old Town walls, the SeaCity Museum, and the Civic Centre. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏛️',text:'SeaCity Museum tells the story of the Titanic\'s departure from Southampton'},{icon:'🌊',text:'Southampton Water and the historic docks'},{icon:'🏛️',text:'The Bargate is a remarkable 13th-century city gate'}] },
+  'Bevois':{ level:'caution', score:3.1, desc:"Inner Southampton with some elevated crime. Home to the student area around the university.", tips:[{icon:'⚠️',text:'Some elevated crime — exercise caution'},{icon:'🎓',text:'University of Southampton area'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+  'Shirley and Freemantle':{ level:'safe', score:3.9, desc:"West Southampton suburbs — Winchester Road shopping strip and the Mayflower Park. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🛍️',text:'Winchester Road has good local shopping'},{icon:'🌊',text:'Mayflower Park has harbour views'},{icon:'🚗',text:'Car recommended'}] },
+};
+
+// ── Portsmouth zone definitions ───────────────────────────────────────────────
+const PORTSMOUTH_ZONE_DEFS = {
+  'Central Southsea and St Judes':{ level:'safe', score:3.8, desc:"Portsmouth's Victorian seafront and cultural quarter — the Albert Road restaurant strip and Southsea Castle. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🍽️',text:'Albert Road has Portsmouth\'s best independent restaurants'},{icon:'🏰',text:'Southsea Castle and D-Day Museum are excellent'},{icon:'🌊',text:'Southsea seafront and common are great for walking'}] },
+  'Charles Dickens and Nelson':{ level:'safe', score:3.7, desc:"Old Portsmouth and the Historic Dockyard — HMS Victory, the Mary Rose Museum, and Charles Dickens's birthplace. Very safe in the historic area.", tips:[{icon:'✅',text:'Very safe in the Historic Dockyard'},{icon:'⛵',text:'Historic Dockyard has HMS Victory, Mary Rose Museum, and HMS Warrior — outstanding'},{icon:'✍️',text:'Charles Dickens Birthplace Museum'},{icon:'🌊',text:'Gunwharf Quays waterfront shopping and restaurants'}] },
+  'Eastney and Milton':{ level:'safe', score:4.0, desc:"East Southsea and Eastney — the Royal Marines Museum and quiet residential beaches. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🏋️',text:'Royal Marines Museum (Eastney Barracks)'},{icon:'🏖️',text:'Eastney beach is quieter and more local than central Southsea'},{icon:'🌳',text:'Milton Lake nature reserve'}] },
+  'Fratton, Baffins':{ level:'caution', score:3.0, desc:"Central Portsmouth with elevated crime. Fratton Park (Portsmouth FC) is here.", tips:[{icon:'⚠️',text:'Some elevated crime — exercise caution'},{icon:'⚽',text:'Fratton Park for Portsmouth FC matches'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+};
+
+// ── Exeter zone definitions ───────────────────────────────────────────────────
+const EXETER_ZONE_DEFS = {
+  'Exeter City Centre':{ level:'safe', score:4.0, desc:"Exeter's compact historic centre — Exeter Cathedral, the Quayside, the Royal Albert Memorial Museum, and the underground passages. Very safe.", tips:[{icon:'✅',text:'Very safe — one of England\'s safest cities'},{icon:'⛪',text:'Exeter Cathedral is a magnificent Norman Gothic cathedral with the longest unbroken Gothic ceiling vault in the world'},{icon:'🌊',text:'The Quayside has excellent restaurants and the beautiful Exe estuary'},{icon:'🏛️',text:'Royal Albert Memorial Museum is excellent and free'}] },
+  'Heavitree & Polsloe':{ level:'safe', score:3.9, desc:"East Exeter residential area. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏡',text:'Good residential areas'},{icon:'🚗',text:'Car recommended'},{icon:'🌳',text:'Heavitree Park'}] },
+  'St James':{ level:'safe', score:4.0, desc:"St James — the student area near the University of Exeter. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🎓',text:'University of Exeter has a beautiful campus'},{icon:'🍽️',text:'Good student-oriented restaurants and bars'},{icon:'🌳',text:'Heavitree Road and St James Road area'}] },
+};
+
+// ── Plymouth zone definitions ─────────────────────────────────────────────────
+const PLYMOUTH_ZONE_DEFS = {
+  'Plymouth City Centre':{ level:'safe', score:3.7, desc:"Plymouth's post-war city centre — the Barbican, Drake Circus, and the stunning Hoe with Plymouth Sound views. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏛️',text:'The Barbican is Plymouth\'s medieval fishing quarter — charming'},{icon:'🌊',text:'Plymouth Hoe has extraordinary views of Plymouth Sound and Drake\'s Island'},{icon:'🏛️',text:'Mayflower Museum tells the story of the Pilgrim Fathers who departed from here'}] },
+  'Devonport':{ level:'caution', score:2.9, desc:"Plymouth's naval district with elevated crime. The historic Naval Base is here.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚢',text:'Royal Naval Base — largest naval base in Western Europe (restricted access)'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+  'Stoke':{ level:'caution', score:3.0, desc:"West Plymouth residential area with some elevated crime.", tips:[{icon:'⚠️',text:'Some elevated crime — exercise caution'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+  'Plymstock':{ level:'safe', score:4.0, desc:"South Plymouth suburb across the Laira — good residential area with coast access. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌊',text:'Bovisand and Wembury beaches are nearby'},{icon:'🚗',text:'Car required'},{icon:'🌳',text:'Beautiful South Hams countryside nearby'}] },
+};
+
+// ── Norwich zone definitions ──────────────────────────────────────────────────
+const NORWICH_ZONE_DEFS = {
+  'Norwich West':{ level:'safe', score:4.0, desc:"Norwich's city centre — Norwich Cathedral, Norwich Castle, the medieval Norwich Lanes, and the market. Very safe.", tips:[{icon:'✅',text:'Very safe — a beautiful historic city'},{icon:'⛪',text:'Norwich Cathedral is a Norman masterpiece — one of England\'s finest'},{icon:'🏰',text:'Norwich Castle Museum is excellent and has a large art gallery'},{icon:'🛍️',text:'Norwich Lanes have good independent shops'}] },
+  'Norwich North':{ level:'safe', score:4.0, desc:"North Norwich including Golden Triangle — quiet residential area with good cafes and restaurants. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'☕',text:'Golden Triangle has good independent cafes and restaurants'},{icon:'🌳',text:'Mousehold Heath is a large urban nature reserve with great views'},{icon:'🏡',text:'Beautiful Victorian houses throughout'}] },
+  'Norwich East':{ level:'caution', score:3.1, desc:"East Norwich with some elevated crime.", tips:[{icon:'⚠️',text:'Some elevated crime — exercise caution'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+  'Norwich South':{ level:'safe', score:3.9, desc:"South Norwich including the University of East Anglia campus and the Norwich Research Park. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🎓',text:'UEA campus has outstanding Denys Lasdun buildings and a good arts centre'},{icon:'🏛️',text:'Sainsbury Centre for Visual Arts at UEA is world-class and free'},{icon:'🌊',text:'Broads and Norfolk coast are easily accessible from here'}] },
+};
+
+// ── Aberdeen zone definitions (ONS wards) ─────────────────────────────────────
+const ABERDEEN_ZONE_DEFS = {
+  'George St/Harbour':{ level:'safe', score:3.8, desc:"Aberdeen city centre — the granite architecture of Union Street, Aberdeen Art Gallery, and the harbour. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏛️',text:'Aberdeen Art Gallery (reopened 2019) is excellent — free'},{icon:'🌊',text:'Aberdeen Harbour is one of the busiest in Europe — visible from the beach'},{icon:'⛺',text:'Aberdeen Beach is surprisingly good — golden sands'}] },
+  'Midstocket/Rosemount':{ level:'safe', score:4.2, desc:"Aberdeen's most elegant residential neighbourhood — beautiful granite villas and the Anderson Drive tree avenue. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🏡',text:'Stunning grey granite Victorian and Edwardian houses'},{icon:'🌳',text:'Hazlehead Park has beautiful walks and a maze'},{icon:'☕',text:'Good independent cafes along the avenue'}] },
+  'Torry/Ferryhill':{ level:'caution', score:3.1, desc:"South Aberdeen across the Dee — Ferryhill is upscale, Torry has some elevated crime.", tips:[{icon:'⚠️',text:'Torry has some elevated crime — stick to Ferryhill'},{icon:'🌊',text:'Footdee (Fittie) fishing village at the harbour mouth is charming'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark in Torry'}] },
+};
+
+// ── Coventry zone definitions ─────────────────────────────────────────────────
+const COVENTRY_ZONE_DEFS = {
+  'Coventry City Centre':{ level:'safe', score:3.7, desc:"Coventry city centre — the ruined Old Cathedral alongside the new Basil Spence Cathedral, the Herbert Art Gallery, and the Transport Museum. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'⛪',text:'Coventry Cathedral (old and new) is one of the most moving architectural experiences in England'},{icon:'🏎️',text:'Coventry Transport Museum is outstanding and free — the largest collection of British road transport'},{icon:'🏛️',text:'Herbert Art Gallery & Museum is free and very good'}] },
+  'Spon End':{ level:'safe', score:3.9, desc:"West Coventry — near the University of Warwick and good local restaurants. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🎓',text:'Warwick University campus is nearby'},{icon:'🌳',text:'War Memorial Park is large and beautiful'},{icon:'🍽️',text:'Good local restaurants along Holyhead Road'}] },
+};
+
 // ── City configurations ──────────────────────────────────────────────────────
 const CITIES = {
   'new-orleans': {
@@ -3196,6 +3404,320 @@ const CITIES = {
     label: 'West Linn, OR', center: [45.3648, -122.6407], zoom: 14,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/west-linn.geojson',
     bbox: [45.40, -122.68, 45.33, -122.60], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: WEST_LINN_ZONE_DEFS,
+  },
+
+  // ── UK cities ──────────────────────────────────────────────────────────────
+  'edinburgh': {
+    label: 'Edinburgh, Scotland',
+    center: [55.9533, -3.1883], zoom: 12,
+    geoURL: 'https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Wards_December_2022_Boundaries_UK_BGC/FeatureServer/0/query?where=LAD22NM%3D%27City+of+Edinburgh%27&outFields=WD22NM&outSR=4326&f=geojson&resultRecordCount=20',
+    nameField: 'WD22NM',
+    bbox: [56.00, -3.40, 55.86, -2.90],
+    noApi: true, dataSource: 'ONS Open Geography',
+    zoneDefs: EDINBURGH_ZONE_DEFS,
+  },
+  'glasgow': {
+    label: 'Glasgow, Scotland',
+    center: [55.8642, -4.2518], zoom: 12,
+    geoURL: 'https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Wards_December_2022_Boundaries_UK_BGC/FeatureServer/0/query?where=LAD22NM%3D%27Glasgow+City%27&outFields=WD22NM&outSR=4326&f=geojson&resultRecordCount=30',
+    nameField: 'WD22NM',
+    bbox: [55.92, -4.45, 55.78, -4.05],
+    noApi: true, dataSource: 'ONS Open Geography',
+    zoneDefs: GLASGOW_ZONE_DEFS,
+  },
+  'aberdeen': {
+    label: 'Aberdeen, Scotland',
+    center: [57.1497, -2.0943], zoom: 12,
+    geoURL: 'https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Wards_December_2022_Boundaries_UK_BGC/FeatureServer/0/query?where=LAD22NM%3D%27Aberdeen+City%27&outFields=WD22NM&outSR=4326&f=geojson&resultRecordCount=20',
+    nameField: 'WD22NM',
+    bbox: [57.22, -2.22, 57.09, -1.96],
+    noApi: true, dataSource: 'ONS Open Geography',
+    zoneDefs: ABERDEEN_ZONE_DEFS,
+  },
+  'bristol': {
+    label: 'Bristol, UK',
+    center: [51.4545, -2.5879], zoom: 12,
+    geoURL: 'police_uk_geo:avon-and-somerset',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[51.454, -2.588], [51.468, -2.601], [51.441, -2.574]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [51.55, -2.72, 51.37, -2.45],
+    baseline: 200,
+    dataSource: 'data.police.uk (Avon & Somerset)',
+    zoneDefs: BRISTOL_ZONE_DEFS,
+  },
+  'bath': {
+    label: 'Bath, UK',
+    center: [51.3811, -2.3590], zoom: 13,
+    geoURL: 'police_uk_geo:avon-and-somerset',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[51.381, -2.360], [51.388, -2.375]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [51.42, -2.44, 51.34, -2.28],
+    baseline: 80,
+    dataSource: 'data.police.uk (Avon & Somerset)',
+    zoneDefs: BATH_ZONE_DEFS,
+  },
+  'leeds': {
+    label: 'Leeds, UK',
+    center: [53.7975, -1.5490], zoom: 11,
+    geoURL: 'police_uk_geo:west-yorkshire',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[53.797, -1.549], [53.814, -1.562], [53.781, -1.536]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [53.92, -1.80, 53.68, -1.30],
+    baseline: 250,
+    dataSource: 'data.police.uk (West Yorkshire)',
+    zoneDefs: LEEDS_ZONE_DEFS,
+  },
+  'sheffield': {
+    label: 'Sheffield, UK',
+    center: [53.3811, -1.4701], zoom: 11,
+    geoURL: 'police_uk_geo:south-yorkshire',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[53.381, -1.470], [53.395, -1.484], [53.366, -1.456]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [53.46, -1.67, 53.29, -1.28],
+    baseline: 200,
+    dataSource: 'data.police.uk (South Yorkshire)',
+    zoneDefs: SHEFFIELD_ZONE_DEFS,
+  },
+  'newcastle': {
+    label: 'Newcastle, UK',
+    center: [54.9783, -1.6178], zoom: 12,
+    geoURL: 'police_uk_geo:northumbria',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[54.978, -1.618], [54.992, -1.604], [54.964, -1.633]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [55.07, -1.82, 54.89, -1.43],
+    baseline: 180,
+    dataSource: 'data.police.uk (Northumbria)',
+    zoneDefs: NEWCASTLE_ZONE_DEFS,
+  },
+  'nottingham': {
+    label: 'Nottingham, UK',
+    center: [52.9548, -1.1581], zoom: 12,
+    geoURL: 'police_uk_geo:nottinghamshire',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[52.954, -1.158], [52.967, -1.172], [52.942, -1.144]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [53.03, -1.32, 52.87, -0.99],
+    baseline: 180,
+    dataSource: 'data.police.uk (Nottinghamshire)',
+    zoneDefs: NOTTINGHAM_ZONE_DEFS,
+  },
+  'oxford': {
+    label: 'Oxford, UK',
+    center: [51.7520, -1.2577], zoom: 12,
+    geoURL: 'police_uk_geo:thames-valley',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[51.752, -1.258], [51.764, -1.271], [51.740, -1.244]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [51.83, -1.39, 51.69, -1.12],
+    baseline: 120,
+    dataSource: 'data.police.uk (Thames Valley)',
+    zoneDefs: OXFORD_ZONE_DEFS,
+  },
+  'cambridge': {
+    label: 'Cambridge, UK',
+    center: [52.2053, 0.1218], zoom: 12,
+    geoURL: 'police_uk_geo:cambridgeshire',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[52.205, 0.122], [52.218, 0.135], [52.192, 0.108]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [52.27, 0.02, 52.14, 0.24],
+    baseline: 120,
+    dataSource: 'data.police.uk (Cambridgeshire)',
+    zoneDefs: CAMBRIDGE_ZONE_DEFS,
+  },
+  'brighton': {
+    label: 'Brighton, UK',
+    center: [50.8279, -0.1368], zoom: 12,
+    geoURL: 'police_uk_geo:sussex',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[50.828, -0.137], [50.836, -0.151], [50.819, -0.123]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [50.90, -0.29, 50.78, 0.02],
+    baseline: 150,
+    dataSource: 'data.police.uk (Sussex)',
+    zoneDefs: BRIGHTON_ZONE_DEFS,
+  },
+  'york': {
+    label: 'York, UK',
+    center: [53.9590, -1.0815], zoom: 12,
+    geoURL: 'police_uk_geo:north-yorkshire',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[53.959, -1.082], [53.971, -1.095]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [54.03, -1.19, 53.88, -0.97],
+    baseline: 100,
+    dataSource: 'data.police.uk (North Yorkshire)',
+    zoneDefs: YORK_ZONE_DEFS,
+  },
+  'cardiff': {
+    label: 'Cardiff, Wales',
+    center: [51.4816, -3.1791], zoom: 12,
+    geoURL: 'police_uk_geo:south-wales',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[51.481, -3.179], [51.496, -3.193], [51.467, -3.165]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [51.57, -3.37, 51.39, -2.99],
+    baseline: 180,
+    dataSource: 'data.police.uk (South Wales)',
+    zoneDefs: CARDIFF_ZONE_DEFS,
+  },
+  'leicester': {
+    label: 'Leicester, UK',
+    center: [52.6369, -1.1398], zoom: 12,
+    geoURL: 'police_uk_geo:leicestershire',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[52.636, -1.140], [52.649, -1.153], [52.623, -1.126]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [52.71, -1.27, 52.56, -1.01],
+    baseline: 180,
+    dataSource: 'data.police.uk (Leicestershire)',
+    zoneDefs: LEICESTER_ZONE_DEFS,
+  },
+  'birmingham-uk': {
+    label: 'Birmingham, UK',
+    center: [52.4862, -1.8904], zoom: 11,
+    geoURL: 'police_uk_geo:west-midlands',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[52.486, -1.890], [52.499, -1.877], [52.473, -1.903], [52.490, -1.912]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [52.61, -2.07, 52.35, -1.71],
+    baseline: 350,
+    dataSource: 'data.police.uk (West Midlands)',
+    zoneDefs: BIRMINGHAM_UK_ZONE_DEFS,
+  },
+  'coventry': {
+    label: 'Coventry, UK',
+    center: [52.4068, -1.5197], zoom: 12,
+    geoURL: 'police_uk_geo:west-midlands',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[52.407, -1.520], [52.419, -1.507], [52.395, -1.533]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [52.48, -1.67, 52.33, -1.37],
+    baseline: 150,
+    dataSource: 'data.police.uk (West Midlands)',
+    zoneDefs: COVENTRY_ZONE_DEFS,
+  },
+  'southampton': {
+    label: 'Southampton, UK',
+    center: [50.9097, -1.4044], zoom: 12,
+    geoURL: 'police_uk_geo:hampshire',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[50.909, -1.404], [50.921, -1.418], [50.898, -1.390]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [50.99, -1.57, 50.84, -1.25],
+    baseline: 150,
+    dataSource: 'data.police.uk (Hampshire)',
+    zoneDefs: SOUTHAMPTON_ZONE_DEFS,
+  },
+  'portsmouth': {
+    label: 'Portsmouth, UK',
+    center: [50.8198, -1.0880], zoom: 12,
+    geoURL: 'police_uk_geo:hampshire',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[50.820, -1.088], [50.831, -1.074], [50.808, -1.101]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [50.87, -1.18, 50.76, -0.98],
+    baseline: 130,
+    dataSource: 'data.police.uk (Hampshire)',
+    zoneDefs: PORTSMOUTH_ZONE_DEFS,
+  },
+  'exeter': {
+    label: 'Exeter, UK',
+    center: [50.7260, -3.5275], zoom: 13,
+    geoURL: 'police_uk_geo:devon-and-cornwall',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[50.726, -3.528], [50.737, -3.541]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [50.79, -3.63, 50.67, -3.43],
+    baseline: 100,
+    dataSource: 'data.police.uk (Devon & Cornwall)',
+    zoneDefs: EXETER_ZONE_DEFS,
+  },
+  'plymouth': {
+    label: 'Plymouth, UK',
+    center: [50.3755, -4.1427], zoom: 12,
+    geoURL: 'police_uk_geo:devon-and-cornwall',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[50.376, -4.143], [50.388, -4.157], [50.364, -4.129]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [50.44, -4.27, 50.32, -4.02],
+    baseline: 130,
+    dataSource: 'data.police.uk (Devon & Cornwall)',
+    zoneDefs: PLYMOUTH_ZONE_DEFS,
+  },
+  'norwich': {
+    label: 'Norwich, UK',
+    center: [52.6309, 1.2974], zoom: 12,
+    geoURL: 'police_uk_geo:norfolk',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[52.631, 1.297], [52.642, 1.284], [52.620, 1.311]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [52.71, 1.17, 52.56, 1.41],
+    baseline: 120,
+    dataSource: 'data.police.uk (Norfolk)',
+    zoneDefs: NORWICH_ZONE_DEFS,
   },
 };
 
@@ -3864,13 +4386,69 @@ async function fetchCrimes(cityId, city, period = 0) {
 }
 
 // ── GeoJSON fetch ─────────────────────────────────────────────────────────────
+// Decode HTML entities embedded in data.police.uk neighbourhood names
+function decodeHtml(str) {
+  return str
+    .replace(/&amp;amp;/g, '&').replace(/&amp;/g, '&')
+    .replace(/&rsquo;/g, "'").replace(/&lsquo;/g, "'")
+    .replace(/&ndash;/g, '–').replace(/&mdash;/g, '—')
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(n));
+}
+
+// Build GeoJSON from data.police.uk neighbourhood boundary API, filtered to a bbox
+async function fetchPoliceUkGeo(force, bbox) {
+  const [north, west, south, east] = bbox;
+  setStatus('loading', `Loading ${force} neighbourhood boundaries…`);
+
+  const listRes = await fetch(`https://data.police.uk/api/${force}/neighbourhoods`);
+  if (!listRes.ok) throw new Error(`police.uk ${force} list ${listRes.status}`);
+  const list = await listRes.json();
+
+  // Batch boundary fetches (20 at a time) to avoid overwhelming the API
+  const BATCH = 20;
+  const features = [];
+  for (let i = 0; i < list.length; i += BATCH) {
+    const batch = list.slice(i, i + BATCH);
+    const results = await Promise.allSettled(
+      batch.map(async ({ id, name }) => {
+        const r = await fetch(`https://data.police.uk/api/${force}/${encodeURIComponent(id)}/boundary`);
+        if (!r.ok) return null;
+        const pts = await r.json();
+        if (!pts.length) return null;
+        const coords = pts.map(p => [parseFloat(p.longitude), parseFloat(p.latitude)]);
+        const first = coords[0], last = coords[coords.length - 1];
+        if (first[0] !== last[0] || first[1] !== last[1]) coords.push(first);
+        const cLat = coords.reduce((s, c) => s + c[1], 0) / coords.length;
+        const cLng = coords.reduce((s, c) => s + c[0], 0) / coords.length;
+        if (cLat < south || cLat > north || cLng < west || cLng > east) return null;
+        return {
+          type: 'Feature',
+          properties: { name: decodeHtml(name) },
+          geometry: { type: 'Polygon', coordinates: [coords] },
+        };
+      })
+    );
+    results.forEach(r => { if (r.status === 'fulfilled' && r.value) features.push(r.value); });
+    if (i + BATCH < list.length) await new Promise(r => setTimeout(r, 120));
+  }
+
+  if (!features.length) throw new Error(`No ${force} neighbourhoods found in city area`);
+  return { type: 'FeatureCollection', features };
+}
+
 async function fetchGeoJSON(cityId, city) {
   const key = `saferoute_geo_${cityId}_v3`;
   const cached = getCached(key, GEO_TTL);
   if (cached) return cached;
-  const res = await fetch(city.geoURL);
-  if (!res.ok) throw new Error(`GeoJSON fetch failed: HTTP ${res.status}`);
-  const data = await res.json();
+  let data;
+  if (city.geoURL?.startsWith('police_uk_geo:')) {
+    const force = city.geoURL.slice('police_uk_geo:'.length);
+    data = await fetchPoliceUkGeo(force, city.bbox);
+  } else {
+    const res = await fetch(city.geoURL);
+    if (!res.ok) throw new Error(`GeoJSON fetch failed: HTTP ${res.status}`);
+    data = await res.json();
+  }
   if (!data.features?.length) throw new Error('Empty GeoJSON');
   setCached(key, data);
   return data;
@@ -4055,7 +4633,8 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 map.on('click', resetPanel);
 
 const censusLayerGroup = L.layerGroup().addTo(map); // below city neighborhoods
-const zonesLayerGroup = L.layerGroup().addTo(map);
+const lsoaLayerGroup   = L.layerGroup().addTo(map); // UK LSOA / Data Zone coverage
+const zonesLayerGroup  = L.layerGroup().addTo(map);
 const cityMarkersLayer = L.layerGroup().addTo(map);
 
 function buildCityMarkers() {
@@ -4370,10 +4949,11 @@ function fetchVisibleCityData() {
     loadVisibleCity(cityId);
   }
   loadCensusTracts();
+  loadUkCoverage();
 }
 
-map.on('zoomend', fetchVisibleCityData);
-map.on('moveend', fetchVisibleCityData);
+map.on('zoomend', () => { fetchVisibleCityData(); loadUkCoverage(); });
+map.on('moveend', () => { fetchVisibleCityData(); loadUkCoverage(); });
 
 // ── Census tract coverage (Phase 2) ──────────────────────────────────────────
 const tractGeoCache = {};
@@ -4708,6 +5288,228 @@ async function _doLoadCensusTracts() {
   }
 }
 
+// ── UK countryside coverage: England/Wales LSOA + Scotland Data Zone ─────────
+const ukGeoCache   = {};
+const imdCache     = {};
+const ukRendered   = new Set();
+
+function isUkViewport(lat, lng) {
+  return lat >= 49.5 && lat <= 61.0 && lng >= -8.2 && lng <= 2.0;
+}
+function isScotlandViewport(lat, lng) {
+  return lat >= 54.6 && lat <= 61.0 && lng >= -7.8 && lng <= -0.7;
+}
+function isNIViewport(lat, lng) {
+  return lat >= 54.0 && lat <= 55.4 && lng >= -8.3 && lng <= -5.4;
+}
+
+async function fetchUkGeoJSON(url, cacheKey) {
+  if (ukGeoCache[cacheKey]) return ukGeoCache[cacheKey];
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`UK geo HTTP ${res.status}`);
+  const data = await res.json();
+  ukGeoCache[cacheKey] = data;
+  return data;
+}
+
+async function fetchImdBatch(codes, serviceUrl, codeField, scoreField, total) {
+  const uncached = codes.filter(c => !(c in imdCache));
+  // Batch in chunks of 200 to stay under URL limits
+  for (let i = 0; i < uncached.length; i += 200) {
+    const chunk = uncached.slice(i, i + 200);
+    try {
+      const url = new URL(serviceUrl);
+      url.searchParams.set('where', `${codeField} IN (${chunk.map(c => `'${c}'`).join(',')})`);
+      url.searchParams.set('outFields', `${codeField},${scoreField}`);
+      url.searchParams.set('returnGeometry', 'false');
+      url.searchParams.set('resultRecordCount', '2000');
+      url.searchParams.set('f', 'json');
+      const res = await fetch(url.toString());
+      if (res.ok) {
+        const data = await res.json();
+        (data.features || []).forEach(f => {
+          const code = f.attributes?.[codeField];
+          const rank = f.attributes?.[scoreField];
+          if (code && rank) imdCache[code] = { rank, total };
+        });
+      }
+    } catch {}
+  }
+  const result = {};
+  codes.forEach(c => { if (c in imdCache) result[c] = imdCache[c]; });
+  return result;
+}
+
+function ukScore(rank, total) {
+  if (!rank || rank <= 0) return { score: 3.0, level: 'caution' };
+  const pct = rank / total;
+  const raw = 1 + 4 * pct;
+  const score = Math.round(Math.min(5, Math.max(1, raw)) * 10) / 10;
+  return { score, level: score >= 3.5 ? 'safe' : score >= 2.5 ? 'caution' : 'avoid' };
+}
+
+function buildUkLsoaZone(feature, imdMap) {
+  const props = feature.properties || {};
+  const code  = props.LSOA11CD;
+  const name  = props.LSOA11NM || code;
+  if (!code || !feature.geometry || ukRendered.has(code)) return;
+
+  const layerKey  = `lsoa:${code}`;
+  if (polyLayers[layerKey]) return;
+
+  const geoFeat = { type: 'Feature', geometry: feature.geometry };
+  const bounds  = L.geoJSON(geoFeat).getBounds();
+  const center  = bounds.getCenter();
+  if (isCoveredByCity(center.lat, center.lng)) { ukRendered.add(code); return; }
+
+  const imd    = imdMap[code];
+  const isWales = code.startsWith('W');
+  const { score, level } = ukScore(imd?.rank, imd?.total);
+  const decile = imd ? Math.ceil(imd.rank / (imd.total / 10)) : null;
+  const pctile = imd ? Math.round((imd.rank / imd.total) * 100) : null;
+  const indexName = isWales ? 'Welsh IMD 2019' : 'English IMD 2019';
+  const country   = isWales ? 'Wales' : 'England';
+
+  const st = { ...STYLES[level], weight: 0.5 };
+  const geoLayer = L.geoJSON(geoFeat, { style: () => ({ ...st }) }).addTo(lsoaLayerGroup);
+  polyLayers[layerKey] = geoLayer;
+  ukRendered.add(code);
+
+  const zone = {
+    name, lsoaCode: code,
+    cityId: `lsoa-${code}`,
+    cityLabel: country,
+    dataSource: indexName,
+    level, score, curatedScore: score,
+    desc: imd
+      ? `${name.replace(/ \d+\w*$/, '')} — ${indexName} decile ${decile}/10 (${pctile}th percentile). ${pctile <= 20 ? `Among the most deprived 20% of areas in ${country}.` : pctile >= 80 ? `Among the least deprived (most affluent) areas in ${country}.` : `Average deprivation for ${country}.`}`
+      : `${name} — deprivation data not available for this area.`,
+    tips: [
+      ...(imd ? [{ icon: '📊', text: `${indexName}: decile ${decile}/10 (${pctile}th percentile)` }] : []),
+      ...(imd && decile <= 2 ? [{ icon: '⚠️', text: `Top 20% most deprived areas in ${country}` }] : []),
+      ...(imd && decile >= 9 ? [{ icon: '✅', text: `Among the least deprived areas in ${country}` }] : []),
+      { icon: 'ℹ️', text: `LSOA: ${code}` },
+    ],
+    crimeScore: null, qolScore: null, amenityScore: null, crimeCount: null,
+    geometry: feature.geometry, _center: center,
+    _area: estimateZoneAreaKm2(feature.geometry),
+  };
+  ZONES.push(zone);
+
+  geoLayer.on('mouseover', () => geoLayer.setStyle({ fillOpacity: HOVER_OPACITY[level], weight: 1.5 }));
+  geoLayer.on('mouseout',  () => geoLayer.setStyle({ ...st }));
+  geoLayer.on('click', e => { L.DomEvent.stopPropagation(e); showZone(zone); });
+}
+
+function buildScotDZZone(feature) {
+  const props = feature.properties || {};
+  const code  = props.datazone;
+  const name  = props.dzname || code;
+  if (!code || !feature.geometry || ukRendered.has(code)) return;
+
+  const layerKey = `lsoa:${code}`;
+  if (polyLayers[layerKey]) return;
+
+  const geoFeat = { type: 'Feature', geometry: feature.geometry };
+  const bounds  = L.geoJSON(geoFeat).getBounds();
+  const center  = bounds.getCenter();
+  if (isCoveredByCity(center.lat, center.lng)) { ukRendered.add(code); return; }
+
+  const rank   = props.rankv2;
+  const decile = props.decilev2;
+  const { score, level } = ukScore(rank, 6976);
+  const pctile = rank ? Math.round((rank / 6976) * 100) : null;
+
+  const st = { ...STYLES[level], weight: 0.5 };
+  const geoLayer = L.geoJSON(geoFeat, { style: () => ({ ...st }) }).addTo(lsoaLayerGroup);
+  polyLayers[layerKey] = geoLayer;
+  ukRendered.add(code);
+
+  const zone = {
+    name, lsoaCode: code,
+    cityId: `lsoa-${code}`,
+    cityLabel: 'Scotland',
+    dataSource: 'Scottish SIMD 2020',
+    level, score, curatedScore: score,
+    desc: rank
+      ? `${name.replace(/ - \d+$/, '')} — Scottish SIMD 2020 decile ${decile}/10 (${pctile}th percentile). ${pctile <= 20 ? 'Among the most deprived 20% of areas in Scotland.' : pctile >= 80 ? 'Among the least deprived (most affluent) areas in Scotland.' : 'Average deprivation for Scotland.'}`
+      : `${name} — deprivation data not available.`,
+    tips: [
+      ...(rank ? [{ icon: '📊', text: `Scottish SIMD 2020: decile ${decile}/10 (${pctile}th percentile)` }] : []),
+      ...(rank && decile <= 2 ? [{ icon: '⚠️', text: 'Top 20% most deprived areas in Scotland' }] : []),
+      ...(rank && decile >= 9 ? [{ icon: '✅', text: 'Among the least deprived areas in Scotland' }] : []),
+      { icon: 'ℹ️', text: `Data Zone: ${code}` },
+    ],
+    crimeScore: null, qolScore: null, amenityScore: null, crimeCount: null,
+    geometry: feature.geometry, _center: center,
+    _area: estimateZoneAreaKm2(feature.geometry),
+  };
+  ZONES.push(zone);
+
+  geoLayer.on('mouseover', () => geoLayer.setStyle({ fillOpacity: HOVER_OPACITY[level], weight: 1.5 }));
+  geoLayer.on('mouseout',  () => geoLayer.setStyle({ ...st }));
+  geoLayer.on('click', e => { L.DomEvent.stopPropagation(e); showZone(zone); });
+}
+
+let _ukTimer = null;
+function loadUkCoverage() {
+  clearTimeout(_ukTimer);
+  _ukTimer = setTimeout(_doLoadUkCoverage, 400);
+}
+
+async function _doLoadUkCoverage() {
+  if (map.getZoom() < 10) return;
+  const bounds = map.getBounds();
+  const center = bounds.getCenter();
+  if (!isUkViewport(center.lat, center.lng)) return;
+  if (isNIViewport(center.lat, center.lng)) return; // NI not yet covered
+
+  const s = bounds.getSouth().toFixed(2), w = bounds.getWest().toFixed(2);
+  const n = bounds.getNorth().toFixed(2), e = bounds.getEast().toFixed(2);
+
+  if (isScotlandViewport(center.lat, center.lng)) {
+    // Scotland: combined boundary + SIMD score in one request
+    const url = `https://maps.gov.scot/server/rest/services/ScotGov/PeopleSociety/MapServer/7/query`
+      + `?geometry=${w}%2C${s}%2C${e}%2C${n}&geometryType=esriGeometryEnvelope`
+      + `&spatialRel=esriSpatialRelIntersects&inSR=4326`
+      + `&outFields=datazone%2Cdzname%2Crankv2%2Cdecilev2&outSR=4326&f=geojson&resultRecordCount=500`;
+    try {
+      const geoJSON = await fetchUkGeoJSON(url, `scotdz_${w}_${s}_${e}_${n}`);
+      (geoJSON.features || []).forEach(f => buildScotDZZone(f));
+    } catch(err) { console.warn('SafeRoute: Scotland DZ failed:', err); }
+    return;
+  }
+
+  // England or Wales: boundaries then IMD lookup
+  const lsoaUrl = `https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services`
+    + `/LSOA_2011_Boundaries_Super_Generalised_Clipped_BSC_EW_V4/FeatureServer/0/query`
+    + `?geometry=${w}%2C${s}%2C${e}%2C${n}&geometryType=esriGeometryEnvelope`
+    + `&spatialRel=esriSpatialRelIntersects&inSR=4326`
+    + `&outFields=LSOA11CD%2CLSOA11NM&outSR=4326&f=geojson&resultRecordCount=500`;
+  let geoJSON;
+  try {
+    geoJSON = await fetchUkGeoJSON(lsoaUrl, `lsoa_${w}_${s}_${e}_${n}`);
+  } catch(err) { console.warn('SafeRoute: LSOA fetch failed:', err); return; }
+
+  if (!geoJSON.features?.length) return;
+  const newFeatures = geoJSON.features.filter(f => f.properties?.LSOA11CD && !ukRendered.has(f.properties.LSOA11CD));
+  if (!newFeatures.length) return;
+
+  const engCodes = newFeatures.map(f => f.properties.LSOA11CD).filter(c => c.startsWith('E'));
+  const walCodes = newFeatures.map(f => f.properties.LSOA11CD).filter(c => c.startsWith('W'));
+
+  const [engMap, walMap] = await Promise.all([
+    engCodes.length ? fetchImdBatch(engCodes,
+      'https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Index_of_Multiple_Deprivation_Dec_2019_Lookup_in_England_2022/FeatureServer/0/query',
+      'LSOA11CD', 'IMD19', 32844) : Promise.resolve({}),
+    walCodes.length ? fetchImdBatch(walCodes,
+      'https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Index_of_Multiple_Deprivation_Dec_2019_Lookup_in_Wales_2022/FeatureServer/0/query',
+      'lsoa11cd', 'wimd_2019', 1909) : Promise.resolve({}),
+  ]);
+  const imdMap = { ...engMap, ...walMap };
+  newFeatures.forEach(f => buildUkLsoaZone(f, imdMap));
+}
+
 document.getElementById('map-loading').classList.add('done');
 setStatus('ready');
 resetPanel();
@@ -4726,6 +5528,7 @@ async function geocodeAndFly(query) {
     const { lat, lon, display_name } = results[0];
     map.setView([parseFloat(lat), parseFloat(lon)], 12);
     fetchVisibleCityData();
+    loadUkCoverage();
   } catch(e) { console.warn('Geocode failed:', e); }
 }
 
