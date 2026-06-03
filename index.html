@@ -507,6 +507,93 @@
     .rt-bar-unknown { background: #cbd5e1; }
     .rt-legend { font-size: 11px; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; }
 
+    /* ─── Trip button ─── */
+    #trip-btn {
+      display: flex; align-items: center; gap: 5px;
+      background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.2);
+      border-radius: 99px; color: #94a3b8; cursor: pointer;
+      font-size: 12px; font-weight: 600; padding: 3px 11px;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    #trip-btn:hover  { background: rgba(255,255,255,.16); color: #e2e8f0; }
+    #trip-btn.active { background: #8b5cf6; border-color: #8b5cf6; color: #fff; }
+
+    /* ─── Trip panel ─── */
+    #trip-panel {
+      padding: 10px 14px 12px;
+      border-bottom: 1px solid var(--border);
+      display: none; flex-shrink: 0;
+    }
+    #trip-panel.open { display: block; }
+    .tp-stop-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 0;
+    }
+    .tp-dot {
+      width: 22px; height: 22px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .tp-connector {
+      padding: 2px 0 2px 10px;
+    }
+    .tp-connector-line {
+      width: 2px; height: 14px; background: var(--border); border-radius: 1px;
+    }
+    .tp-del-btn {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: none; background: none; color: var(--muted);
+      cursor: pointer; font-size: 16px; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; padding: 0;
+    }
+    .tp-del-btn:hover { background: var(--border); color: var(--text); }
+    #trip-add-btn {
+      width: 100%; margin-top: 8px; padding: 5px; border-radius: 6px;
+      border: 1px dashed var(--border); background: none;
+      color: var(--muted); font-size: 12px; cursor: pointer; font-family: inherit;
+    }
+    #trip-add-btn:hover { background: var(--bg); color: var(--text); }
+    #trip-go-btn {
+      width: 100%; padding: 7px; border-radius: 6px; margin-top: 6px;
+      background: #8b5cf6; color: #fff; border: none;
+      font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+    }
+    #trip-go-btn:hover { background: #7c3aed; }
+    #trip-go-btn:disabled { background: var(--border); color: var(--muted); cursor: default; }
+    #trip-status { font-size: 12px; color: var(--muted); margin-top: 6px; min-height: 16px; }
+    /* results */
+    .tp-edit-bar {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+    }
+    .tp-edit-btn {
+      padding: 3px 9px; border-radius: 6px;
+      border: 1px solid var(--border); background: var(--bg);
+      font-size: 12px; color: var(--muted); cursor: pointer; font-family: inherit;
+    }
+    .tp-edit-btn:hover { background: var(--border); }
+    .tp-result-stop { padding: 8px 0 4px; }
+    .tp-result-header { display: flex; align-items: flex-start; gap: 8px; }
+    .tp-result-name { font-size: 12.5px; font-weight: 600; color: var(--text); line-height: 1.3; }
+    .tp-result-zone { font-size: 11px; color: var(--muted); margin-top: 2px; display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+    .tp-result-seg {
+      display: flex; gap: 8px;
+      border-left: 2px solid var(--border);
+      margin-left: 10px; padding: 6px 0 6px 12px;
+    }
+    .tp-seg-info { font-size: 12px; }
+    .tp-seg-dist { font-weight: 600; color: var(--text); }
+    .tp-seg-bar {
+      height: 5px; border-radius: 3px; width: 100%; margin: 5px 0 3px;
+    }
+    .tp-seg-pcts { font-size: 10.5px; color: var(--muted); }
+    .tp-totals {
+      border-top: 1px solid var(--border); margin-top: 8px; padding-top: 10px;
+    }
+    .tp-total-row {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12.5px; color: #334155; margin-bottom: 6px;
+    }
+
     /* ─── Nearby panel ─── */
     .nearby-section { margin-top: 18px; }
     .nearby-heading {
@@ -539,8 +626,8 @@
       #status-pill { display: none; }
       #info-btn, #settings-btn { width: 30px; height: 30px; font-size: 14px; }
       #info-modal { padding: 20px 16px; }
-      /* compact route panel */
-      #route-panel { padding: 8px 12px 10px; }
+      /* compact route + trip panels */
+      #route-panel, #trip-panel { padding: 8px 12px 10px; }
       .rt-row { margin-bottom: 4px; }
       .rt-input { padding: 5px 8px; font-size: 12px; }
       /* compact time toggle */
@@ -582,6 +669,10 @@
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M6 9v3a6 6 0 0 0 6 6h1"/><path d="M18 15v-3a6 6 0 0 0-6-6h-1"/></svg>
     <span class="rt-label">Route</span>
   </button>
+  <button id="trip-btn" onclick="toggleTripMode()" aria-label="Plan a multi-stop trip">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/><path d="M5 20h14"/></svg>
+    <span class="rt-label">Trip</span>
+  </button>
   <button id="settings-btn" onclick="openSettings()" aria-label="Settings">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
   </button>
@@ -607,6 +698,13 @@
       <button id="route-go-btn" onclick="computeRoute()">Get walking route</button>
       <div id="route-status"></div>
       <div id="route-summary"></div>
+    </div>
+    <div id="trip-panel">
+      <div id="trip-stops"></div>
+      <button id="trip-add-btn" onclick="addTripStop()">+ Add stop</button>
+      <button id="trip-go-btn" onclick="planTrip()">Plan my trip →</button>
+      <div id="trip-status"></div>
+      <div id="trip-results"></div>
     </div>
     <div id="time-toggle">
       <button class="tt-btn active" onclick="setTimeMode('all')">All hours</button>
@@ -4534,6 +4632,7 @@ const routeMarkers = L.layerGroup().addTo(map);
 let routeActive = false;
 
 function toggleRouteMode() {
+  if (tripActive) toggleTripMode(); // close trip mode first
   routeActive = !routeActive;
   document.getElementById('route-btn').classList.toggle('active', routeActive);
   document.getElementById('route-panel').classList.toggle('open', routeActive);
@@ -4547,6 +4646,218 @@ function toggleRouteMode() {
     document.getElementById('route-summary').innerHTML = '';
     resetPanel();
   }
+}
+
+// ── Trip planner ──────────────────────────────────────────────────────────────
+let tripActive = false;
+let tripStops = ['', ''];
+const STOP_COLORS = ['#3b82f6','#8b5cf6','#f59e0b','#ef4444','#10b981','#f97316','#ec4899','#06b6d4'];
+
+function toggleTripMode() {
+  if (routeActive) toggleRouteMode(); // close route mode first
+  tripActive = !tripActive;
+  document.getElementById('trip-btn').classList.toggle('active', tripActive);
+  document.getElementById('trip-panel').classList.toggle('open', tripActive);
+  document.getElementById('time-toggle').style.display = tripActive ? 'none' : '';
+  if (!tripActive) {
+    routeLayer.clearLayers();
+    routeMarkers.clearLayers();
+    tripStops = ['', ''];
+    document.getElementById('trip-results').innerHTML = '';
+    document.getElementById('trip-status').textContent = '';
+    resetPanel();
+  } else {
+    renderTripStops();
+  }
+}
+
+function renderTripStops() {
+  const container = document.getElementById('trip-stops');
+  // Preserve any typed values before re-rendering
+  container.querySelectorAll('.tp-input').forEach((el, i) => {
+    if (i < tripStops.length) tripStops[i] = el.value;
+  });
+  const canDel = tripStops.length > 2;
+  container.innerHTML = tripStops.map((val, i) => {
+    const color = STOP_COLORS[i] || '#64748b';
+    const ph = i === 0 ? 'Start — address or place' : i === tripStops.length - 1 ? 'End — address or place' : `Stop ${i + 1} — address or place`;
+    const del = canDel
+      ? `<button class="tp-del-btn" onclick="removeTripStop(${i})" title="Remove">×</button>`
+      : `<div style="width:22px"></div>`;
+    const connector = i < tripStops.length - 1
+      ? `<div class="tp-connector"><div class="tp-connector-line"></div></div>` : '';
+    return `<div class="tp-stop-row">
+        <div class="tp-dot" style="background:${color}">${i + 1}</div>
+        <input class="rt-input tp-input" placeholder="${ph}"
+               value="${val.replace(/"/g, '&quot;')}" autocomplete="off"
+               oninput="tripStops[${i}]=this.value">
+        ${del}
+      </div>${connector}`;
+  }).join('');
+}
+
+function addTripStop() {
+  if (tripStops.length >= 8) return;
+  document.querySelectorAll('.tp-input').forEach((el, i) => { tripStops[i] = el.value; });
+  tripStops.push('');
+  renderTripStops();
+  const inputs = document.querySelectorAll('.tp-input');
+  inputs[inputs.length - 1].focus();
+}
+
+function removeTripStop(idx) {
+  if (tripStops.length <= 2) return;
+  document.querySelectorAll('.tp-input').forEach((el, i) => { tripStops[i] = el.value; });
+  tripStops.splice(idx, 1);
+  renderTripStops();
+}
+
+async function planTrip() {
+  document.querySelectorAll('.tp-input').forEach((el, i) => { tripStops[i] = el.value.trim(); });
+  const filled = tripStops.filter(s => s.length > 0);
+  if (filled.length < 2) {
+    document.getElementById('trip-status').textContent = 'Enter at least 2 stops.';
+    return;
+  }
+  const btn = document.getElementById('trip-go-btn');
+  const status = document.getElementById('trip-status');
+  btn.disabled = true;
+  routeLayer.clearLayers();
+  routeMarkers.clearLayers();
+  document.getElementById('trip-results').innerHTML = '';
+
+  try {
+    status.textContent = 'Finding locations…';
+    const geocode = async q => {
+      const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1`);
+      const d = await r.json();
+      if (!d.length) throw new Error(`Could not find "${q}"`);
+      return { lat: parseFloat(d[0].lat), lng: parseFloat(d[0].lon),
+               name: d[0].display_name.split(',').slice(0, 2).join(', ') };
+    };
+    const coords = await Promise.all(tripStops.filter(s => s).map(geocode));
+
+    status.textContent = 'Planning routes…';
+    const segments = [];
+    for (let i = 0; i < coords.length - 1; i++) {
+      const { lat: lat1, lng: lng1 } = coords[i];
+      const { lat: lat2, lng: lng2 } = coords[i + 1];
+      const url = `https://router.project-osrm.org/route/v1/foot/${lng1},${lat1};${lng2},${lat2}?geometries=geojson&overview=full`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Routing service unavailable');
+      const json = await res.json();
+      if (!json.routes?.length) throw new Error(`No route from stop ${i + 1} to stop ${i + 2}`);
+      segments.push(json.routes[0]);
+    }
+
+    status.textContent = 'Loading safety data…';
+    const allCoords = segments.flatMap(s => s.geometry.coordinates);
+    await loadRouteCorridor(allCoords);
+
+    const segSummaries = segments.map(seg => ({
+      route: seg,
+      summary: colorRoute(seg.geometry.coordinates),
+    }));
+
+    coords.forEach((c, i) => {
+      const color = STOP_COLORS[i] || '#64748b';
+      L.circleMarker([c.lat, c.lng], {
+        radius: 8, color, fillColor: color, fillOpacity: 1, weight: 2.5,
+      }).addTo(routeMarkers);
+    });
+
+    map.fitBounds(L.latLngBounds(coords.map(c => [c.lat, c.lng])), { padding: [60, 60] });
+    const stopZones = coords.map(c => getZoneForCoord(c.lat, c.lng));
+    showTripResults(coords, stopZones, segSummaries);
+    status.textContent = '';
+  } catch (e) {
+    status.textContent = `⚠ ${e.message}`;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function showTripResults(coords, zones, segSummaries) {
+  let html = '<div class="tp-edit-bar"><button class="tp-edit-btn" onclick="showTripInputs()">← Edit</button>'
+           + '<span style="font-size:13px;font-weight:600">Your Trip</span></div>';
+
+  coords.forEach((coord, i) => {
+    const color = STOP_COLORS[i] || '#64748b';
+    const zone = zones[i];
+    html += `<div class="tp-result-stop">
+      <div class="tp-result-header">
+        <div class="tp-dot" style="background:${color};flex-shrink:0">${i + 1}</div>
+        <div style="min-width:0">
+          <div class="tp-result-name">${coord.name}</div>
+          <div class="tp-result-zone">
+            ${zone
+              ? `${zone.name} · ${zone.cityLabel}&nbsp;<span class="badge badge-${zone.level}" style="font-size:10px;padding:2px 7px"><span class="badge-dot"></span>${zone.score}/5</span>`
+              : '<span style="font-style:italic">Zoom in to score this stop</span>'}
+          </div>
+        </div>
+      </div></div>`;
+
+    if (i < segSummaries.length) {
+      const { route, summary } = segSummaries[i];
+      const distStr = fmtDistM(route.distance);
+      const mins = Math.round(route.duration / 60);
+      const timeStr = mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins} min`;
+      const tot = summary.total || 1;
+      const sp = Math.round((summary.counts.safe    || 0) / tot * 100);
+      const cp = Math.round((summary.counts.caution || 0) / tot * 100);
+      const ap = Math.round((summary.counts.avoid   || 0) / tot * 100);
+      const up = 100 - sp - cp - ap;
+      const parts = [sp > 0 && `${sp}% safe`, cp > 0 && `${cp}% caution`, ap > 0 && `${ap}% avoid`].filter(Boolean).join(' · ');
+
+      html += `<div class="tp-result-seg">
+        <div style="flex:1">
+          <span class="tp-seg-dist">${distStr} · ${timeStr} walk</span>
+          <div class="tp-seg-bar" style="background:linear-gradient(to right,
+            var(--safe) 0% ${sp}%,
+            var(--caution) ${sp}% ${sp + cp}%,
+            var(--avoid) ${sp + cp}% ${sp + cp + ap}%,
+            #cbd5e1 ${sp + cp + ap}% 100%)"></div>
+          <div class="tp-seg-pcts">${parts || 'No data'}</div>
+        </div>
+      </div>`;
+    }
+  });
+
+  let totalM = 0, totalSec = 0, allCounts = {}, allTotal = 0;
+  segSummaries.forEach(({ route, summary }) => {
+    totalM   += route.distance;
+    totalSec += route.duration;
+    Object.entries(summary.counts).forEach(([k, v]) => { allCounts[k] = (allCounts[k] || 0) + v; });
+    allTotal += summary.total;
+  });
+  const totalDist = fmtDistM(totalM);
+  const totalMin  = Math.round(totalSec / 60);
+  const totalTime = totalMin >= 60 ? `${Math.floor(totalMin / 60)}h ${totalMin % 60}m` : `${totalMin} min`;
+  const tot2 = allTotal || 1;
+  const osp = Math.round((allCounts.safe    || 0) / tot2 * 100);
+  const ocp = Math.round((allCounts.caution || 0) / tot2 * 100);
+  const oap = Math.round((allCounts.avoid   || 0) / tot2 * 100);
+  const oup = 100 - osp - ocp - oap;
+  const rScore = (osp * 5 + ocp * 3 + oap * 1 + oup * 3.5) / 100;
+  const rLevel = rScore >= 3.5 ? 'safe' : rScore >= 2.5 ? 'caution' : 'avoid';
+  const rLabel = { safe: 'Mostly safe', caution: 'Use caution', avoid: 'High risk' }[rLevel];
+
+  html += `<div class="tp-totals">
+    <div class="tp-total-row"><span>Total walking</span><strong>${totalDist} · ${totalTime}</strong></div>
+    <div class="tp-total-row"><span>Overall safety</span>
+      <span class="badge badge-${rLevel}" style="font-size:11px;padding:3px 8px">${rLabel}</span>
+    </div>
+  </div>`;
+
+  document.getElementById('trip-results').innerHTML = html;
+  if (window.innerWidth <= 700) {
+    document.getElementById('sidebar').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function showTripInputs() {
+  document.getElementById('trip-results').innerHTML = '';
+  renderTripStops();
 }
 
 function getZoneForCoord(lat, lng) {
