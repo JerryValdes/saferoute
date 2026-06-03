@@ -2052,6 +2052,295 @@ const SALT_LAKE_ZONE_DEFS = {
   'Glendale':{ level:'caution', score:2.8, desc:"West SLC neighborhood with elevated crime. Not a tourist area.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🌙',text:'Avoid after dark'}] },
 };
 
+// ── San Diego zone definitions ────────────────────────────────────────────────
+const SAN_DIEGO_ZONE_DEFS = {
+  'Gaslamp Quarter':{ level:'safe', score:4.1, desc:"San Diego's entertainment heart — Victorian-era buildings turned restaurants, bars, and clubs, steps from Petco Park and the Convention Center. Generally safe; busy on weekend nights.", tips:[{icon:'✅',text:'Generally safe — heavily visited tourist district'},{icon:'⚾',text:'Petco Park (Padres) is one of the most beautiful ballparks in baseball'},{icon:'🍽️',text:'Over 100 restaurants and bars in a 16-block historic district'},{icon:'⚠️',text:'Very rowdy on Saturday nights — use common sense and watch your belongings'}] },
+  'Little Italy':{ level:'safe', score:4.4, desc:"San Diego's most walkable neighborhood — excellent restaurants, an incredible Saturday farmers market, and beautiful bay views. Very safe.", tips:[{icon:'✅',text:'Very safe and beautiful'},{icon:'🛒',text:'Little Italy Mercato (Saturday) is one of the best farmers markets in California'},{icon:'🍝',text:'Outstanding Italian and broader Mediterranean restaurants throughout'},{icon:'🌊',text:'Bay views from Date Street and the waterfront'}] },
+  'Old Town':{ level:'safe', score:4.0, desc:"The historic birthplace of California — Mexican and Spanish heritage, Old Town State Historic Park, and great Mexican restaurants. Very safe.", tips:[{icon:'✅',text:'Very safe — popular tourist district'},{icon:'🏛️',text:'Old Town State Historic Park preserves California\'s Spanish/Mexican heritage — free'},{icon:'🌮',text:'Excellent authentic Mexican restaurants throughout'},{icon:'🎭',text:'Casa de Pico and other restaurants have mariachi and folk dance performances'}] },
+  'Balboa Park':{ level:'safe', score:4.5, desc:"The cultural heart of San Diego — the world-famous San Diego Zoo, 17 museums, performance venues, and stunning 1915 architecture. Very safe.", tips:[{icon:'✅',text:'Very safe — heavily visited park'},{icon:'🦁',text:'San Diego Zoo is widely regarded as the best zoo in the world'},{icon:'🏛️',text:'Free Tuesday museum admission on a rotating schedule'},{icon:'🌳',text:'Beautiful Spanish Colonial Revival buildings from the 1915 Panama-California Exposition'}] },
+  'North Park':{ level:'safe', score:4.3, desc:"San Diego's most vibrant local neighborhood — craft breweries, excellent independent restaurants, and eclectic bars along 30th St and University Ave. Very safe.", tips:[{icon:'✅',text:'Very safe and authentic'},{icon:'🍺',text:'Craft beer capital of San Diego — Modern Times, Thorn Brewing, and many more'},{icon:'🍽️',text:'Outstanding independent restaurants on 30th Street'},{icon:'🎨',text:'Monthly art walks and a creative independent character'}] },
+  'Hillcrest':{ level:'safe', score:4.2, desc:"San Diego's LGBTQ+ hub and one of its most walkable neighborhoods — great brunch spots, farmers market, and independent shops. Very safe.", tips:[{icon:'✅',text:'Very safe and welcoming'},{icon:'🌈',text:'Heart of San Diego\'s LGBTQ+ community'},{icon:'🛒',text:'Hillcrest Farmers Market (Sunday) is excellent'},{icon:'🍽️',text:'Outstanding brunch and casual dining scene'}] },
+  'Mission Hills':{ level:'safe', score:4.4, desc:"Quiet, historic neighborhood with craftsman bungalows and great restaurants. Very safe.", tips:[{icon:'✅',text:'Very safe and beautiful'},{icon:'🏡',text:'Beautiful 1920s craftsman and bungalow architecture'},{icon:'🍽️',text:'Great independent restaurants along Washington and Fort Stockton'},{icon:'🌳',text:'Pioneer Park has great neighborhood views'}] },
+  'Ocean Beach':{ level:'safe', score:4.0, desc:"San Diego's laid-back beach community — OB Pier, a great farmers market, independent shops and bars. Generally safe.", tips:[{icon:'✅',text:'Generally safe — casual beach town vibe'},{icon:'🏖️',text:'Beautiful beach with good surfing and a long fishing pier'},{icon:'🛒',text:'OB Farmers Market (Wednesday night) is one of San Diego\'s best'},{icon:'🐾',text:'Dog Beach — one of the few off-leash beaches in the city'}] },
+  'Mission Valley':{ level:'safe', score:3.8, desc:"Commercial corridor with Fashion Valley Mall and Snapdragon Stadium. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🛍️',text:'Fashion Valley is the best mall in San Diego'},{icon:'🏈',text:'Snapdragon Stadium hosts Aztecs football and concerts'},{icon:'🚇',text:'Trolley connections throughout'}] },
+  'East Village':{ level:'caution', score:3.2, desc:"Urban neighborhood adjacent to Petco Park and downtown — major redevelopment underway but still some elevated crime on certain blocks.", tips:[{icon:'⚠️',text:'Some elevated crime on residential streets away from Petco Park'},{icon:'⚾',text:'Walking distance from Petco Park and the Gaslamp'},{icon:'🍽️',text:'New restaurants and development opening regularly'},{icon:'🌙',text:'Use caution at night away from main commercial areas'}] },
+};
+
+// ── Oakland zone definitions ──────────────────────────────────────────────────
+const OAKLAND_ZONE_DEFS = {
+  'Grand Lake':{ level:'safe', score:4.0, desc:"Upscale neighborhood around Lake Merritt's grand lake — a beautiful Saturday farmers market, excellent restaurants on Grand Ave, and the Grand Lake Theatre. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🛒',text:'Grand Lake Farmers Market (Saturday) is one of Oakland\'s best'},{icon:'🎬',text:'Grand Lake Theatre is a spectacular 1926 movie palace'},{icon:'🌳',text:'Grand Lake has a beautiful paved path around the water'}] },
+  'Temescal':{ level:'safe', score:4.1, desc:"Oakland's hippest neighborhood — Temescal Alley boutiques, excellent restaurants along Telegraph Ave, and a creative local character. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🛍️',text:'Temescal Alley is a charming Victorian-era alley with small boutiques and barbershops'},{icon:'🍽️',text:'Telegraph Ave between 40th and 51st has outstanding food'},{icon:'☕',text:'Great independent coffee shops throughout'}] },
+  'Rockridge':{ level:'safe', score:4.4, desc:"One of Oakland's safest and most desirable neighborhoods — excellent restaurants and shops along College Ave, beautiful homes, and BART access. Very safe.", tips:[{icon:'✅',text:'Very safe — one of the East Bay\'s best neighborhoods'},{icon:'🍽️',text:'College Ave has some of Oakland\'s finest dining'},{icon:'🛍️',text:'Great independent bookstores and boutiques'},{icon:'🚇',text:'Rockridge BART station for easy Bay Area access'}] },
+  'Piedmont Ave':{ level:'safe', score:4.2, desc:"Charming neighborhood corridor with independent restaurants and the historic Mountain View Cemetery. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🍽️',text:'Good independent restaurants along Piedmont Ave'},{icon:'🌳',text:'Mountain View Cemetery (by Frederick Law Olmsted) is beautiful — free to walk'},{icon:'☕',text:'Good local cafes'}] },
+  'Uptown':{ level:'safe', score:3.8, desc:"Oakland's arts and nightlife hub — the Fox Theater, Paramount Theatre, and a growing restaurant scene along Telegraph Ave. Generally safe in the evening.", tips:[{icon:'✅',text:'Generally safe in main entertainment areas'},{icon:'🎭',text:'Fox Theater and Paramount Theatre are stunning Art Deco venues with great programming'},{icon:'🎵',text:'Excellent live music scene along Telegraph Ave'},{icon:'⚠️',text:'Use caution on quieter blocks away from main entertainment areas'}] },
+  'Jack London Square':{ level:'safe', score:3.7, desc:"Oakland's revitalized waterfront — farmers market, restaurants, a bookstore honoring Jack London, and ferry access to San Francisco. Generally safe.", tips:[{icon:'✅',text:'Generally safe during the day and evening'},{icon:'⛴️',text:'Ferry to San Francisco is a beautiful way to commute or sightsee'},{icon:'🛒',text:'Sunday farmers market'},{icon:'📚',text:'Jack London\'s First and Last Chance Saloon is a landmark dive bar from 1883'}] },
+  'Fruitvale':{ level:'caution', score:3.0, desc:"Oakland's Latino cultural heart — excellent taquerias and a vibrant community along International Blvd. Some elevated crime.", tips:[{icon:'⚠️',text:'Elevated crime on some streets — stay on main commercial corridors'},{icon:'🌮',text:'Fruitvale has the best tacos and Mexican food in the Bay Area'},{icon:'🚇',text:'Fruitvale BART station'},{icon:'🌙',text:'Use caution after dark on residential streets'}] },
+  'East Oakland':{ level:'avoid', score:1.9, desc:"Deep East Oakland has some of the highest crime rates in the Bay Area. Not recommended for tourists.", tips:[{icon:'🚫',text:'High violent crime — not recommended for tourists'},{icon:'🚗',text:'Rideshare only'},{icon:'🌙',text:'Avoid after dark'},{icon:'📞',text:'Emergency: 911'}] },
+};
+
+// ── Sacramento zone definitions ───────────────────────────────────────────────
+const SACRAMENTO_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:3.9, desc:"Sacramento's walkable core — the Golden 1 Center (Kings), the Capitol Mall, and the new waterfront development. Generally safe.", tips:[{icon:'✅',text:'Generally safe — active downtown'},{icon:'🏛️',text:'California State Capitol has excellent free tours and a beautiful rose garden'},{icon:'🏒',text:'Golden 1 Center hosts Kings games and major concerts'},{icon:'🌊',text:'Sacramento River waterfront is undergoing exciting redevelopment'}] },
+  'Midtown':{ level:'safe', score:4.1, desc:"Sacramento's creative hub — a grid of walkable streets with outstanding restaurants, bars, and galleries. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🍽️',text:'Midtown has Sacramento\'s best independent restaurant scene'},{icon:'🎨',text:'2nd Saturday Art Walk draws thousands on the second Saturday of each month'},{icon:'🚲',text:'Very bikeable — the Sacramento grid is flat and easy to navigate'}] },
+  'East Sacramento':{ level:'safe', score:4.4, desc:"Upscale residential neighborhood with the Fab 40s historic district and McKinley Park. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌳',text:'McKinley Park has a beautiful rose garden'},{icon:'🏡',text:'The Fab 40s (38th-48th Streets) have some of California\'s finest early 20th-century homes'},{icon:'🍽️',text:'Good restaurants on J Street and Folsom Blvd'}] },
+  'Land Park':{ level:'safe', score:4.3, desc:"Family neighborhood surrounding William Land Park and the Sacramento Zoo. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🦁',text:'Sacramento Zoo is a good mid-size city zoo'},{icon:'⛳',text:'William Land Golf Course is a classic public course'},{icon:'🌳',text:'Fairy-tale town children\'s park'}] },
+  'River Park':{ level:'safe', score:4.2, desc:"Neighborhood along the American River with bike trail access and good local dining. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🚴',text:'American River Bike Trail (32 miles to Folsom) starts nearby'},{icon:'🌊',text:'American River beach access'},{icon:'🍽️',text:'Good local restaurants along Fair Oaks Blvd'}] },
+  'Del Paso Heights':{ level:'caution', score:2.7, desc:"North Sacramento neighborhood with elevated crime. Not a tourist area.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚗',text:'Car or rideshare only'},{icon:'🌙',text:'Avoid after dark'}] },
+};
+
+// ── St. Louis zone definitions ─────────────────────────────────────────────────
+const ST_LOUIS_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:3.7, desc:"St. Louis's urban core — Busch Stadium (Cardinals), the Gateway Arch National Park, and the Old Courthouse. Generally safe in the tourist corridor.", tips:[{icon:'✅',text:'Generally safe in the main tourist areas'},{icon:'🏟️',text:'Busch Stadium is one of baseball\'s best atmospheres'},{icon:'🗼',text:'Gateway Arch is a stunning architectural achievement — take the tram to the top'},{icon:'⚠️',text:'Some blocks east of the Arch can be elevated crime — stick to the tourist core'}] },
+  'Soulard':{ level:'safe', score:3.9, desc:"St. Louis's oldest neighborhood and home to its best Saturday farmers market, the Anheuser-Busch Brewery, and great blues bars. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🛒',text:'Soulard Farmers Market (est. 1779) is one of the oldest in the US and excellent'},{icon:'🍺',text:'Anheuser-Busch Brewery tours are free and fascinating'},{icon:'🎵',text:'Broadway in Soulard has excellent live blues bars'}] },
+  'Lafayette Square':{ level:'safe', score:4.0, desc:"Historic neighborhood surrounding beautiful Lafayette Park — Victorian-era homes and great restaurants. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌳',text:'Lafayette Park is beautiful — the oldest public park west of the Mississippi'},{icon:'🏛️',text:'Stunning 19th-century homes surrounding the park'},{icon:'🍽️',text:'Good restaurants along Missouri Ave'}] },
+  'Tower Grove South':{ level:'safe', score:4.0, desc:"Diverse, eclectic neighborhood south of Tower Grove Park with outstanding restaurants. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🍽️',text:'Some of St. Louis\'s best ethnic and independent restaurants along Arsenal and Grand'},{icon:'🌳',text:'Tower Grove Park is a stunning Victorian-era landscape park'},{icon:'☕',text:'Great independent coffee shops'}] },
+  'The Hill':{ level:'safe', score:4.4, desc:"St. Louis's beloved Italian-American neighborhood — Toasted Ravioli (invented here), world-class Italian restaurants, and immaculate streets. Very safe.", tips:[{icon:'✅',text:'Very safe and very charming'},{icon:'🍝',text:'Toasted ravioli was invented here — order it at almost every restaurant'},{icon:'🍕',text:'Zia\'s, Charlie Gitto\'s, and Cunetto\'s are St. Louis institutions'},{icon:'⚽',text:'Birthplace of Yogi Berra and Joe Garagiola — a baseball landmark'}] },
+  'Forest Park Southeast':{ level:'safe', score:3.8, desc:"The Grove entertainment district — LGBTQ+ bars, craft cocktail spots, and great restaurants. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌈',text:'The Grove is St. Louis\'s LGBTQ+ entertainment hub'},{icon:'🍽️',text:'Excellent restaurants along Manchester Ave'},{icon:'🎵',text:'Good live music venues'}] },
+  'Central West End':{ level:'safe', score:4.3, desc:"St. Louis's most elegant neighborhood — Forest Park, the St. Louis Art Museum, the Zoo, and upscale restaurants along Euclid Ave. Very safe.", tips:[{icon:'✅',text:'Very safe and beautiful'},{icon:'🏛️',text:'St. Louis Art Museum (free) is one of the best in the country'},{icon:'🦁',text:'St. Louis Zoo is free and ranked among the best in the US'},{icon:'🌳',text:'Forest Park is larger than Central Park — outstanding'}] },
+  'Clayton':{ level:'safe', score:4.5, desc:"St. Louis County's legal and financial hub with excellent restaurants. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🍽️',text:'Outstanding restaurants along Forsyth and Maryland Ave'},{icon:'🚇',text:'MetroLink light rail'},{icon:'🛍️',text:'Good shopping around Forsyth Blvd'}] },
+  'North St. Louis':{ level:'avoid', score:1.7, desc:"Large swath of North St. Louis has among the highest violent crime rates in the US. Not recommended for tourists.", tips:[{icon:'🚫',text:'Very high violent crime — not recommended for tourists'},{icon:'🚗',text:'Do not stop or exit your vehicle'},{icon:'📞',text:'Emergency: 911'}] },
+};
+
+// ── Cincinnati zone definitions ────────────────────────────────────────────────
+const CINCINNATI_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:3.9, desc:"Cincinnati's walkable urban core — the Great American Ball Park (Reds), Paycor Stadium (Bengals), the Convention Center, and the riverfront. Generally safe.", tips:[{icon:'✅',text:'Generally safe — active riverfront area'},{icon:'⚾',text:'Great American Ball Park has beautiful Ohio River views'},{icon:'🏈',text:'Paycor Stadium (Bengals) is right on the riverfront'},{icon:'🌊',text:'The Cincinnati waterfront and the Purple People Bridge to Kentucky'}] },
+  'Over-the-Rhine':{ level:'safe', score:4.1, desc:"One of America's greatest urban revival stories — 19th-century German Italianate buildings now housing outstanding restaurants, bars, and galleries. Generally safe.", tips:[{icon:'✅',text:'Generally safe in the main commercial areas'},{icon:'🍽️',text:'One of the densest restaurant and bar corridors in the Midwest'},{icon:'🎵',text:'Cincinnati Symphony Orchestra at Music Hall — a stunning National Historic Landmark'},{icon:'⚠️',text:'Some blocks away from Vine Street are still transitional — stay on main corridors'}] },
+  'Mount Adams':{ level:'safe', score:4.4, desc:"Cincinnati's hilltop arts neighborhood — the Cincinnati Art Museum, great bars, and spectacular city views. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🏛️',text:'Cincinnati Art Museum is excellent and free'},{icon:'🌆',text:'Spectacular views of downtown Cincinnati and the Ohio River'},{icon:'🍺',text:'Great bars along Celestial Street'}] },
+  'Hyde Park':{ level:'safe', score:4.6, desc:"Cincinnati's most affluent neighborhood — beautiful Tudor Revival homes, Hyde Park Square, and excellent restaurants. Very safe.", tips:[{icon:'✅',text:'Very safe and beautiful'},{icon:'🏛️',text:'Beautiful early 20th-century homes throughout'},{icon:'🍽️',text:'Hyde Park Square has excellent independent restaurants'},{icon:'🌳',text:'Beautiful tree-lined streets'}] },
+  'Clifton':{ level:'safe', score:4.3, desc:"University of Cincinnati neighborhood with Ludlow Ave's excellent restaurants, Clifton Court, and a vibrant local character. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🍽️',text:'Ludlow Ave has outstanding independent restaurants and bars'},{icon:'🎓',text:'University of Cincinnati has remarkable architecture including a new Zaha Hadid building'},{icon:'🌳',text:'Burnet Woods is a beautiful urban forest'}] },
+  'Northside':{ level:'safe', score:3.8, desc:"Cincinnati's most progressive and eclectic neighborhood — live music venues, great dive bars, and an authentic creative scene. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🎵',text:'Northside Tavern and other venues for live local music'},{icon:'🍺',text:'Great dive bars and casual spots'},{icon:'🎨',text:'Eclectic local character with murals and independent businesses'}] },
+  'East Price Hill':{ level:'caution', score:2.8, desc:"West Cincinnati neighborhood with elevated crime. Limited tourist attractions.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+};
+
+// ── Cleveland zone definitions ────────────────────────────────────────────────
+const CLEVELAND_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:3.8, desc:"Cleveland's revitalized core — Rocket Mortgage FieldHouse (Cavaliers), Progressive Field (Guardians), and the 9th Street restaurant corridor. Generally safe.", tips:[{icon:'✅',text:'Generally safe — busy entertainment district'},{icon:'🏀',text:'Rocket Mortgage FieldHouse is one of the NBA\'s best arenas'},{icon:'⚾',text:'Progressive Field (Guardians) has excellent lake views'},{icon:'🍽️',text:'East 4th Street has outstanding dining in a beautiful pedestrian alley'}] },
+  'Ohio City':{ level:'safe', score:4.2, desc:"Cleveland's best neighborhood — the West Side Market, excellent craft breweries, and outstanding restaurants. Very safe.", tips:[{icon:'✅',text:'Very safe and excellent'},{icon:'🛒',text:'West Side Market (est. 1912) is extraordinary — one of the great American markets'},{icon:'🍺',text:'Great Lakes Brewing Company, Saucy Brew Works, and many excellent craft breweries'},{icon:'🍽️',text:'Outstanding independent restaurants throughout'}] },
+  'Tremont':{ level:'safe', score:4.1, desc:"Cleveland's arts neighborhood — galleries, outstanding restaurants, and the Cleveland Buddhist Temple. Very safe.", tips:[{icon:'✅',text:'Very safe and creative'},{icon:'🎨',text:'Walk around galleries during Second Friday Art Walk'},{icon:'🍽️',text:'Tremont has some of Cleveland\'s best restaurants'},{icon:'🌳',text:'Lincoln Park and the steel bridges are photogenic'}] },
+  'Little Italy':{ level:'safe', score:4.4, desc:"Cleveland's historic Italian neighborhood adjacent to University Circle and the Cleveland Museum of Art. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🍝',text:'Presti\'s Bakery, Michaelangelo\'s, and Guarino\'s are Cleveland institutions'},{icon:'🏛️',text:'Walking distance from the Cleveland Museum of Art (free)'},{icon:'🎓',text:'Case Western Reserve University and Museum of Natural History are adjacent'}] },
+  'University Circle':{ level:'safe', score:4.3, desc:"Cleveland's cultural crown — the Cleveland Museum of Art, Cleveland Orchestra, Cleveland Museum of Natural History, the Botanical Garden, and Case Western. Very safe.", tips:[{icon:'✅',text:'Very safe — cultural campus'},{icon:'🏛️',text:'Cleveland Museum of Art is one of the top art museums in the US — free'},{icon:'🎵',text:'Cleveland Orchestra at Severance Hall is world-class'},{icon:'🌿',text:'Cleveland Botanical Garden'}] },
+  'Detroit-Shoreway':{ level:'safe', score:3.8, desc:"Cleveland's arts and entertainment district along Detroit Ave — excellent restaurants, bars, and the Gordon Square Arts District. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🎭',text:'Cleveland Public Theatre and Capitol Theatre in Gordon Square'},{icon:'🍽️',text:'Good restaurants and bars along Detroit Ave'},{icon:'🌊',text:'Near Edgewater Park on Lake Erie — excellent summer swimming'}] },
+  'Slavic Village':{ level:'caution', score:2.6, desc:"Southeast Cleveland neighborhood with elevated crime. Not a tourist area.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚗',text:'Car or rideshare only'},{icon:'🌙',text:'Not recommended after dark'}] },
+};
+
+// ── Columbus zone definitions ─────────────────────────────────────────────────
+const COLUMBUS_ZONE_DEFS = {
+  'Short North':{ level:'safe', score:4.3, desc:"Columbus's most vibrant arts district — galleries, outstanding restaurants, bars, and boutiques along High Street. Very safe.", tips:[{icon:'✅',text:'Very safe — one of Columbus\'s best neighborhoods'},{icon:'🎨',text:'Gallery Hop on the first Saturday of each month is excellent'},{icon:'🍽️',text:'Outstanding independent restaurants throughout'},{icon:'🛍️',text:'Great independent boutiques along High Street'}] },
+  'German Village':{ level:'safe', score:4.6, desc:"One of the finest historic preservation projects in the US — 19th-century German brick houses, Schiller Park, and the iconic Book Loft. Very safe.", tips:[{icon:'✅',text:'Very safe and extraordinary'},{icon:'📚',text:'The Book Loft of German Village — 32 rooms of books in a historic building — a must-visit'},{icon:'🍽️',text:'Schmidt\'s Sausage Haus (est. 1886) is a Columbus institution — get the cream puffs'},{icon:'🌳',text:'Schiller Park is beautiful and frequently has free Shakespeare performances'}] },
+  'Downtown':{ level:'safe', score:3.8, desc:"Columbus's business and entertainment core — Nationwide Arena (Blue Jackets), the Convention Center, and an improving nightlife scene. Generally safe.", tips:[{icon:'✅',text:'Generally safe — improving rapidly'},{icon:'🏒',text:'Nationwide Arena hosts Blue Jackets games and major concerts'},{icon:'🍽️',text:'Gay Street and High Street downtown have good restaurants'},{icon:'🏛️',text:'Ohio Statehouse has free tours'}] },
+  'Victorian Village':{ level:'safe', score:4.4, desc:"Adjacent to the Short North — beautiful Victorian-era homes, great restaurants, and a quiet residential feel. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🏡',text:'Beautifully preserved Victorian homes from the 1870s-1900s'},{icon:'🍽️',text:'Good restaurants adjacent to the Short North'},{icon:'🌳',text:'Goodale Park has a beautiful fountain and is great for picnics'}] },
+  'Italian Village':{ level:'safe', score:4.1, desc:"North of the Short North — transitioning neighborhood with excellent new restaurants and a creative character. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🍽️',text:'Increasingly excellent restaurants and coffee roasters'},{icon:'🎨',text:'Creative community with galleries and studios'},{icon:'🚶',text:'Walking distance from the Short North'}] },
+  'Clintonville':{ level:'safe', score:4.3, desc:"North Columbus neighborhood with great locally-owned restaurants along High Street and a strong community feel. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🍽️',text:'High Street in Clintonville has excellent local dining'},{icon:'🛒',text:'North Market (branch of the original) is excellent'},{icon:'🌳',text:'Whetstone Park and Park of Roses'}] },
+  'Franklinton':{ level:'caution', score:2.9, desc:"West Columbus arts district with some elevated crime. Good murals and emerging venues but exercise caution.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🎨',text:'Emerging arts district with good murals and galleries'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+};
+
+// ── Milwaukee zone definitions ─────────────────────────────────────────────────
+const MILWAUKEE_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:3.7, desc:"Milwaukee's urban core — Fiserv Forum (Bucks), the Riverwalk, and the Milwaukee Art Museum. Generally safe.", tips:[{icon:'✅',text:'Generally safe — active downtown'},{icon:'🏀',text:'Fiserv Forum is one of the NBA\'s most impressive new arenas'},{icon:'🏛️',text:'Milwaukee Art Museum (the Calatrava wing) is world-renowned architecture — and the collection is excellent'},{icon:'🌊',text:'Milwaukee Riverwalk is a beautiful 3-mile waterfront path'}] },
+  'Historic Third Ward':{ level:'safe', score:4.3, desc:"Milwaukee's arts and dining district — the Public Market, excellent restaurants, and galleries in a historic warehouse district. Very safe.", tips:[{icon:'✅',text:'Very safe — Milwaukee\'s best neighborhood for visitors'},{icon:'🛒',text:'Milwaukee Public Market is excellent — great local food and vendors'},{icon:'🍽️',text:'Outstanding restaurants throughout the brick warehouse district'},{icon:'🎭',text:'Milwaukee Rep and Broadway Across Milwaukee are here'}] },
+  'Brady Street':{ level:'safe', score:4.1, desc:"Milwaukee's bohemian neighborhood — independent restaurants, great bars, and an eclectic local character. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🍽️',text:'Outstanding independent restaurants along Brady Street'},{icon:'🍺',text:'Great bars from dive to craft'},{icon:'🎵',text:'Good live music venues'}] },
+  'Walker\'s Point':{ level:'safe', score:3.9, desc:"Milwaukee's LGBTQ+ and arts hub — great cocktail bars, restaurants, and galleries. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌈',text:'Milwaukee\'s LGBTQ+ bar and nightlife district'},{icon:'🍽️',text:'Good restaurants along 2nd and National Ave'},{icon:'🎨',text:'Galleries and creative businesses throughout'}] },
+  'Bay View':{ level:'safe', score:4.3, desc:"Milwaukee's most beloved neighborhood — great restaurants and bars along KK Ave, excellent lakefront access, and a strong community character. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌊',text:'Bay View Park has a beautiful stretch of Lake Michigan shoreline'},{icon:'🍽️',text:'Excellent independent restaurants along Kinnickinnic Ave'},{icon:'🍺',text:'Great bars and taverns — Milwaukee\'s bar culture is genuine here'}] },
+  'Riverwest':{ level:'safe', score:3.8, desc:"Diverse, creative neighborhood north of downtown with great bars and a cooperative spirit. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🍺',text:'Riverwest Co-op, the Uptowner, and other unique local spots'},{icon:'🎵',text:'DIY music venues and a creative community'},{icon:'🌊',text:'Milwaukee River access'}] },
+  'North Side':{ level:'caution', score:2.3, desc:"Much of Milwaukee's North Side has significantly elevated crime rates. Not recommended for tourists.", tips:[{icon:'🚫',text:'High crime — not recommended for tourists'},{icon:'🚗',text:'Car or rideshare only'},{icon:'🌙',text:'Avoid after dark'},{icon:'📞',text:'Emergency: 911'}] },
+};
+
+// ── Louisville zone definitions ────────────────────────────────────────────────
+const LOUISVILLE_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:3.8, desc:"Louisville's entertainment core — KFC Yum! Center (Cards), 4th Street Live!, and the Museum Row on Main Street. Generally safe.", tips:[{icon:'✅',text:'Generally safe in the main entertainment district'},{icon:'🏀',text:'KFC Yum! Center for UofL and AHL hockey'},{icon:'🎭',text:'4th Street Live! entertainment district'},{icon:'🏛️',text:'Louisville Slugger Museum — watch bats being made — is genuinely great'}] },
+  'NuLu':{ level:'safe', score:4.2, desc:"Louisville's arts district on East Market Street — outstanding restaurants, galleries, and bars in a revitalized warehouse corridor. Very safe.", tips:[{icon:'✅',text:'Very safe — Louisville\'s best neighborhood'},{icon:'🍽️',text:'East Market Street has outstanding farm-to-table and chef-driven restaurants'},{icon:'🥃',text:'Several bourbon bars with extraordinary selections'},{icon:'🎨',text:'Galleries and street art throughout'}] },
+  'Old Louisville':{ level:'safe', score:4.0, desc:"America's largest Victorian neighborhood — stunning gingerbread mansions and a well-preserved 19th-century streetscape. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏛️',text:'The largest contiguous Victorian neighborhood in the United States'},{icon:'🌳',text:'Central Park is a beautiful Victorian landscape'},{icon:'🏡',text:'Walking tours available — the architecture is extraordinary'}] },
+  'Highlands':{ level:'safe', score:4.4, desc:"Louisville's most vibrant neighborhood — Bardstown Road with excellent restaurants, bars, and shops, and Cherokee Park. Very safe.", tips:[{icon:'✅',text:'Very safe — one of Louisville\'s best areas'},{icon:'🍽️',text:'Bardstown Road has outstanding independent dining'},{icon:'🍺',text:'Great bars from craft cocktail to neighborhood dives'},{icon:'🌳',text:'Cherokee Park (by Frederick Law Olmsted) is beautiful'}] },
+  'Butchertown':{ level:'safe', score:4.0, desc:"Historic meatpacking district turned restaurant and bar hub adjacent to NuLu. Generally safe.", tips:[{icon:'✅',text:'Generally safe and improving'},{icon:'🍽️',text:'Good restaurants and bars'},{icon:'🏛️',text:'Historic 19th-century architecture'},{icon:'🚶',text:'Walking distance from NuLu'}] },
+  'Germantown':{ level:'safe', score:4.1, desc:"Louisville's affordable creative neighborhood with excellent local restaurants along Goss Ave and a strong community. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🍽️',text:'Outstanding local restaurants along Goss Ave'},{icon:'☕',text:'Great independent coffee shops'},{icon:'🏡',text:'Affordable bungalows and a genuine neighborhood feel'}] },
+  'Russell':{ level:'avoid', score:2.0, desc:"West Louisville neighborhood with very high crime rates. Not recommended for tourists.", tips:[{icon:'🚫',text:'High crime — not recommended for tourists'},{icon:'🚗',text:'Rideshare only'},{icon:'📞',text:'Emergency: 911'}] },
+};
+
+// ── Charlottesville zone definitions ──────────────────────────────────────────
+const CHARLOTTESVILLE_ZONE_DEFS = {
+  'Downtown Mall':{ level:'safe', score:4.5, desc:"One of the finest pedestrian malls in America — eight blocks of shops, restaurants, and live music on a beautiful brick pedestrian zone. Very safe.", tips:[{icon:'✅',text:'Very safe and beautiful'},{icon:'🍽️',text:'Outstanding restaurants and cafes — one of the best dining scenes in the South for its size'},{icon:'🎵',text:'Regular live music on the mall and at the pavilion'},{icon:'🛍️',text:'Great independent bookstores (New Dominion and others) and boutiques'}] },
+  'University Area':{ level:'safe', score:4.3, desc:"The University of Virginia — Jefferson's 'Academical Village,' one of the great architectural achievements of the United States, and a UNESCO World Heritage Site. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🏛️',text:'The Rotunda and Lawn are among the most beautiful buildings in America — free to visit'},{icon:'🎓',text:'UVA campus is extraordinary — take a self-guided walking tour'},{icon:'🍽️',text:'The Corner (University Ave) has good restaurants and cafes'}] },
+  'Belmont':{ level:'safe', score:4.2, desc:"Charlottesville's most sought-after neighborhood — charming streets, excellent restaurants on Belmont Ave, and a strong community feel. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🍽️',text:'Belmont Ave has outstanding independent restaurants'},{icon:'☕',text:'Excellent independent coffee shops'},{icon:'🏡',text:'Beautiful early 20th-century homes'}] },
+  'Fry\'s Spring':{ level:'safe', score:4.3, desc:"Quiet residential neighborhood near Monticello and the Blue Ridge Mountains trailheads. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🏛️',text:'Monticello (Jefferson\'s home) is nearby — book tours in advance, worth every penny'},{icon:'🌳',text:'Good trailhead access to Shenandoah and Blue Ridge'},{icon:'🏡',text:'Quiet residential streets'}] },
+};
+
+// ── Williamsburg zone definitions ──────────────────────────────────────────────
+const WILLIAMSBURG_ZONE_DEFS = {
+  'Colonial Williamsburg':{ level:'safe', score:4.8, desc:"The largest living history museum in the world — 301 acres preserving 18th-century colonial America with costumed interpreters. Extraordinarily safe and extremely well-managed.", tips:[{icon:'✅',text:'Extremely safe — one of America\'s best-managed tourist attractions'},{icon:'🏛️',text:'The Capitol, Governor\'s Palace, and 88 original 18th-century buildings'},{icon:'🎭',text:'Costumed interpreters bring colonial life to vivid reality'},{icon:'🐴',text:'Horse-drawn carriages, blacksmiths, and militia musters throughout the day'}] },
+  'Merchants Square':{ level:'safe', score:4.6, desc:"The commercial heart adjacent to Colonial Williamsburg — boutiques, restaurants, and galleries. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🍽️',text:'Excellent restaurants including the historic Chowning\'s Tavern'},{icon:'🛍️',text:'Quality boutiques and Colonial Williamsburg gift shops'},{icon:'🎓',text:'Adjacent to the College of William & Mary (est. 1693)'}] },
+  'Kingsmill':{ level:'safe', score:4.5, desc:"Upscale resort community near Busch Gardens with a golf course and the Williamsburg Winery nearby. Very safe.", tips:[{icon:'✅',text:'Very safe gated resort community'},{icon:'⛳',text:'Kingsmill Resort golf courses are excellent'},{icon:'🍷',text:'Williamsburg Winery is one of Virginia\'s best'},{icon:'🎢',text:'Busch Gardens Williamsburg is nearby — one of the best theme parks on the East Coast'}] },
+};
+
+// ── Richmond zone definitions ─────────────────────────────────────────────────
+const RICHMOND_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:3.9, desc:"Richmond's revitalized urban core — the Virginia State Capitol (designed by Thomas Jefferson), the Dominion Energy Center, and a growing restaurant scene. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏛️',text:'Virginia State Capitol was designed by Thomas Jefferson — free tours'},{icon:'🎵',text:'Dominion Energy Center hosts Richmond Symphony and touring shows'},{icon:'🍽️',text:'Improving restaurant scene along Grace and Broad Streets'}] },
+  'The Fan District':{ level:'safe', score:4.4, desc:"One of the finest intact Victorian neighborhoods in America — Fan-shaped streets of beautiful row houses and Monument Avenue. Very safe.", tips:[{icon:'✅',text:'Very safe and beautiful'},{icon:'🏛️',text:'Monument Avenue has extraordinary Beaux-Arts monuments (subject of ongoing cultural discussion)'},{icon:'🍽️',text:'Outstanding restaurants along Park Ave and Cary Street'},{icon:'🏡',text:'Beautiful 1890s-1920s row houses throughout'}] },
+  'Carytown':{ level:'safe', score:4.5, desc:"Richmond's best commercial strip — independent boutiques, restaurants, the Byrd Theatre, and a genuine neighborhood feel. Very safe.", tips:[{icon:'✅',text:'Very safe — Richmond\'s best neighborhood for visitors'},{icon:'🎬',text:'Byrd Theatre (1928) shows classic films for $2 — an unmissable Richmond institution'},{icon:'🛍️',text:'Outstanding independent boutiques, bookstores, and specialty shops'},{icon:'🍽️',text:'Excellent independent restaurants and cafes'}] },
+  'Scott\'s Addition':{ level:'safe', score:4.2, desc:"Richmond's booming former industrial district — the highest concentration of craft breweries in Virginia, plus distilleries and a cider house. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🍺',text:'The best craft brewery corridor in Virginia — Veil, Ardent, Isley, and many more'},{icon:'🥃',text:'Reservoir Distillery and other craft spirits'},{icon:'🌙',text:'Active on weekend evenings — generally safe but lively'}] },
+  'Church Hill':{ level:'safe', score:4.0, desc:"Richmond's oldest neighborhood — Patrick Henry gave his 'Give me liberty' speech here, and the views are stunning. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏛️',text:'St. John\'s Church (1741) where Patrick Henry made his famous speech — free historic reenactments in summer'},{icon:'🌆',text:'Spectacular views of downtown Richmond from the hilltop'},{icon:'🍽️',text:'Excellent restaurants along 25th Street'}] },
+  'Oregon Hill':{ level:'caution', score:3.1, desc:"Small neighborhood adjacent to the James River and Belle Isle. Generally safe near the river access.", tips:[{icon:'✅',text:'Generally safe near James River access'},{icon:'🌊',text:'Belle Isle is accessible from here — outstanding rapids, trails, and swimming'},{icon:'🚗',text:'Car recommended'},{icon:'⚠️',text:'Use caution on residential streets away from the river'}] },
+};
+
+// ── Norfolk zone definitions ───────────────────────────────────────────────────
+const NORFOLK_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:3.8, desc:"Norfolk's revitalized core — the Chrysler Museum of Art, the National Maritime Center, and the Granby Street entertainment corridor. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏛️',text:'Chrysler Museum of Art is world-class and free — extraordinary glass collection'},{icon:'⛴️',text:'Nauticus, the National Maritime Center, includes the Battleship Wisconsin'},{icon:'🍽️',text:'Granby Street has improving restaurants and bars'}] },
+  'Ghent':{ level:'safe', score:4.3, desc:"Norfolk's best neighborhood — beautiful 19th-century homes, excellent restaurants, and the NARO Cinema. Very safe.", tips:[{icon:'✅',text:'Very safe and walkable'},{icon:'🍽️',text:'Outstanding independent restaurants along Colley Ave'},{icon:'🎬',text:'NARO Cinema is a beloved independent movie house'},{icon:'☕',text:'Good coffee shops and local businesses'}] },
+  'Ocean View':{ level:'safe', score:3.9, desc:"Norfolk's beach community on the Chesapeake Bay — calmer waters than Virginia Beach and a local feel. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏖️',text:'The Bay side beaches are calm and good for families'},{icon:'🦀',text:'Fresh seafood restaurants along the waterfront'},{icon:'🌊',text:'Chesapeake Bay sunsets are spectacular'}] },
+};
+
+// ── New Haven zone definitions ────────────────────────────────────────────────
+const NEW_HAVEN_ZONE_DEFS = {
+  'Downtown/Yale':{ level:'safe', score:4.0, desc:"New Haven's compact city center — Yale University's extraordinary Gothic campus, the Green, and the Yale University Art Gallery. Generally safe.", tips:[{icon:'✅',text:'Generally safe in the Yale and Green area'},{icon:'🏛️',text:'Yale University Art Gallery and Peabody Museum are both free and world-class'},{icon:'🎓',text:'Free campus tours showcase stunning Gothic and modern architecture'},{icon:'🍕',text:'New Haven has an extraordinary pizza culture — Frank Pepe\'s and Sally\'s are pilgrimage-worthy'}] },
+  'Wooster Square':{ level:'safe', score:4.3, desc:"New Haven's Italian neighborhood — Frank Pepe's, Wooster Square Park (the best cherry blossoms in Connecticut), and great restaurants. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🍕',text:'Frank Pepe\'s white clam pizza is a New Haven religious experience'},{icon:'🌸',text:'Wooster Square Park has stunning cherry blossoms every April'},{icon:'🍝',text:'Many excellent Italian and broader restaurants'}] },
+  'East Rock':{ level:'safe', score:4.4, desc:"Beautiful residential neighborhood with East Rock Park — hiking, rock climbing, and city views. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🧗',text:'East Rock Park has great hiking and the famous summit view of Long Island Sound'},{icon:'🍽️',text:'Grand Ave has good independent restaurants'},{icon:'🌳',text:'Beautiful Victorian homes and tree-lined streets'}] },
+  'Whalley-Edgewood':{ level:'caution', score:2.8, desc:"West Haven neighborhood with elevated crime. Exercise caution.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+};
+
+// ── Providence zone definitions ───────────────────────────────────────────────
+const PROVIDENCE_ZONE_DEFS = {
+  'College Hill':{ level:'safe', score:4.4, desc:"Providence's most beautiful neighborhood — Brown University and RISD's stunning campuses on the hill above the city, with excellent restaurants on Thayer Street. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🎓',text:'Brown University has a beautiful campus — free to walk the main green'},{icon:'🎨',text:'RISD Museum is one of the finest art and design museums in the country — underrated'},{icon:'🍽️',text:'Thayer Street and Wickenden Street have excellent independent restaurants'}] },
+  'Downtown/Financial District':{ level:'safe', score:3.9, desc:"Providence's walkable urban core — WaterFire, the Providence Performing Arts Center, and an improving restaurant scene. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🔥',text:'WaterFire (summertime) is extraordinary — 100 bonfires on the rivers'},{icon:'🎭',text:'Providence Performing Arts Center has Broadway touring shows'},{icon:'🍽️',text:'Downcity has great restaurants along Westminster Street'}] },
+  'Federal Hill':{ level:'safe', score:4.3, desc:"Providence's Italian neighborhood — outstanding red-sauce Italian restaurants, DePasquale Square, and a genuine community feel. Very safe.", tips:[{icon:'✅',text:'Very safe and excellent'},{icon:'🍝',text:'Federal Hill is one of the great Italian restaurant corridors in New England — Cassarino\'s, Siena, Camille\'s'},{icon:'🥖',text:'DePasquale Square has a beautiful Italian market atmosphere'},{icon:'☕',text:'Excellent espresso bars and pastry shops'}] },
+  'Jewelry District':{ level:'safe', score:4.0, desc:"Former jewelry manufacturing hub now home to RISD, Brown Medical School, and new restaurants. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🎨',text:'RISD campus and student work displayed throughout'},{icon:'🍽️',text:'Good new restaurants along South Main'},{icon:'🏛️',text:'Providence Children\'s Museum nearby'}] },
+  'South Providence':{ level:'caution', score:2.6, desc:"South Providence has elevated crime. Not recommended for tourists.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚗',text:'Car or rideshare only'},{icon:'🌙',text:'Not recommended after dark'}] },
+};
+
+// ── Birmingham, AL zone definitions ───────────────────────────────────────────
+const BIRMINGHAM_AL_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:3.8, desc:"Birmingham's urban core — the BJCC, Railroad Park, Regions Field (Barons), and an improving restaurant scene. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌳',text:'Railroad Park is a beautiful linear park along the railroad cut — one of the South\'s best urban parks'},{icon:'⚾',text:'Regions Field (Birmingham Barons AA) is an outstanding minor league park'},{icon:'🍽️',text:'Good restaurants along 20th Street and the Uptown entertainment district'}] },
+  'Lakeview District':{ level:'safe', score:4.1, desc:"Birmingham's entertainment hub — the best bars, restaurants, and music venues in the city around 1st Ave South. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🎵',text:'Iron City, Saturn, and other excellent music venues'},{icon:'🍺',text:'Cahaba Brewing and other craft beer spots'},{icon:'🍽️',text:'Outstanding restaurants along 29th Street and Lakeview Ave'}] },
+  'Avondale':{ level:'safe', score:4.0, desc:"Birmingham's creative neighborhood — Avondale Brewing, great restaurants, and the beautiful Avondale Park. Generally safe.", tips:[{icon:'✅',text:'Generally safe and improving'},{icon:'🍺',text:'Avondale Brewing Company has an excellent taproom and regular events'},{icon:'🌳',text:'Avondale Park is a beautiful Victorian-era park'},{icon:'🍽️',text:'Good independent restaurants along 41st Street'}] },
+  'Five Points South':{ level:'safe', score:4.2, desc:"Longtime entertainment district with great restaurants and bars near UAB and Samford University. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🍽️',text:'Highlands Bar and Grill (Frank Stitt) is one of the great restaurants in the South'},{icon:'🎵',text:'Good live music venues'},{icon:'🏥',text:'Near UAB Medical Center — world-class research hospital'}] },
+  'Southside':{ level:'safe', score:4.0, desc:"UAB and medical district with great restaurants and bars. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏥',text:'UAB is among the top medical research universities in the Southeast'},{icon:'🍽️',text:'Good restaurants along University Blvd'},{icon:'🎓',text:'UAB campus walks'}] },
+  'Civil Rights District':{ level:'safe', score:4.1, desc:"The heart of the American Civil Rights Movement — Kelly Ingram Park, 16th Street Baptist Church, and the Birmingham Civil Rights Institute. Very safe and an essential American experience.", tips:[{icon:'✅',text:'Very safe — important historic site'},{icon:'🏛️',text:'Birmingham Civil Rights Institute is extraordinary — one of the most important museums in America'},{icon:'⛪',text:'16th Street Baptist Church, bombed in 1963 — still holds services; tours available'},{icon:'🌳',text:'Kelly Ingram Park\'s sculptures depict the 1963 demonstrations with unforgettable power'}] },
+};
+
+// ── Fort Lauderdale zone definitions ──────────────────────────────────────────
+const FORT_LAUDERDALE_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:3.9, desc:"Fort Lauderdale's revitalized core — the Riverwalk, the NSU Art Museum, Las Olas Blvd, and the Brightline station. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏛️',text:'NSU Art Museum Fort Lauderdale is excellent'},{icon:'🌊',text:'Riverwalk along the New River is beautiful'},{icon:'🚂',text:'Brightline high-speed train to Miami and Orlando'}] },
+  'Las Olas':{ level:'safe', score:4.3, desc:"Fort Lauderdale's premier shopping and dining boulevard — excellent restaurants, boutiques, and galleries. Very safe.", tips:[{icon:'✅',text:'Very safe and walkable'},{icon:'🍽️',text:'Las Olas Blvd has outstanding restaurants from casual to upscale'},{icon:'🛍️',text:'Great boutiques and galleries'},{icon:'⛵',text:'Las Olas Isles — canals with beautiful homes'}] },
+  'Fort Lauderdale Beach':{ level:'safe', score:4.1, desc:"Fort Lauderdale's famous beach strip — cleaner and more relaxed than Miami Beach, with good restaurants and watersports. Generally safe.", tips:[{icon:'✅',text:'Generally safe — popular tourist beach'},{icon:'🏖️',text:'Wide, clean beach — more relaxed than Miami Beach'},{icon:'🏄',text:'Good surfing and watersports'},{icon:'🍽️',text:'Good restaurant options along A1A'}] },
+  'Victoria Park':{ level:'safe', score:4.4, desc:"Upscale residential neighborhood near downtown — beautiful streets, small parks, and walking distance from Las Olas. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🏡',text:'Beautiful 1950s-70s homes on quiet canals'},{icon:'🌳',text:'Holiday Park has excellent tennis and recreational facilities'},{icon:'🚶',text:'Walking distance from Las Olas restaurants'}] },
+  'Flagler Village':{ level:'safe', score:4.0, desc:"Fort Lauderdale's emerging arts and dining district with galleries, food trucks, and the NSU Art Museum nearby. Generally safe.", tips:[{icon:'✅',text:'Generally safe and improving'},{icon:'🎨',text:'Galleria of art galleries and studios'},{icon:'🍽️',text:'Good restaurants and food halls opening regularly'},{icon:'🚂',text:'Near Brightline station'}] },
+};
+
+// ── Tucson zone definitions ────────────────────────────────────────────────────
+const TUCSON_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:3.8, desc:"Tucson's revitalized urban core — the 4th Avenue shopping district, Congress Street nightlife, and the Rialto Theatre. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🎵',text:'Rialto Theatre and Club Congress are Tucson\'s best live music venues'},{icon:'🍽️',text:'Congress Street has good restaurants and bars'},{icon:'🚃',text:'Sun Link streetcar runs through here'}] },
+  '4th Avenue':{ level:'safe', score:4.0, desc:"Tucson's bohemian shopping strip — vintage stores, independent restaurants, bars, and the University of Arizona nearby. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🛍️',text:'Outstanding vintage and thrift stores along 4th Ave'},{icon:'🍽️',text:'Good independent restaurants and bars'},{icon:'🎓',text:'Near the University of Arizona campus'}] },
+  'Sam Hughes':{ level:'safe', score:4.4, desc:"Beautiful historic neighborhood adjacent to the University of Arizona — Craftsman bungalows, great local restaurants, and a walkable character. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🏡',text:'Beautiful 1920s-40s bungalows'},{icon:'🍽️',text:'Excellent local restaurants along Speedway and Campbell'},{icon:'🎓',text:'University of Arizona Museum of Art is excellent and free'}] },
+  'Barrio Viejo':{ level:'safe', score:4.1, desc:"Tucson's oldest neighborhood — colorful adobe homes, the historic Barrio, and the excellent Mercado San Agustín. Very safe.", tips:[{icon:'✅',text:'Very safe and beautiful'},{icon:'🏛️',text:'Historic adobe homes with beautiful painted facades'},{icon:'🛒',text:'Mercado San Agustín has excellent local vendors and restaurants'},{icon:'🎨',text:'Walking distance from the Tucson Museum of Art'}] },
+  'Catalina Foothills':{ level:'safe', score:4.6, desc:"Upscale desert neighborhood in the Catalina Mountains foothills — the Ventana Canyon area, Sabino Canyon, and stunning mountain views. Very safe.", tips:[{icon:'✅',text:'Very safe — affluent residential area'},{icon:'🌵',text:'Sabino Canyon Recreation Area has outstanding desert hiking'},{icon:'⛳',text:'World-class golf resorts'},{icon:'🌄',text:'Stunning Sonoran Desert and mountain scenery'}] },
+  'South Tucson':{ level:'caution', score:2.9, desc:"Independent city within Tucson's city limits with elevated crime. Some excellent authentic Mexican food.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🌮',text:'Some of Tucson\'s most authentic Mexican restaurants on 6th Ave'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+};
+
+// ── Albuquerque zone definitions ──────────────────────────────────────────────
+const ALBUQUERQUE_ZONE_DEFS = {
+  'Old Town':{ level:'safe', score:4.1, desc:"Albuquerque's historic center — a beautiful 17th-century Spanish plaza, excellent galleries, and the New Mexico Museum of Natural History. Very safe.", tips:[{icon:'✅',text:'Very safe — tourist-oriented historic district'},{icon:'🏛️',text:'San Felipe de Neri Church (1793) anchors the beautiful central plaza'},{icon:'🦖',text:'New Mexico Museum of Natural History has world-class dinosaur exhibits'},{icon:'🎨',text:'Outstanding Native American and Southwest art galleries throughout'}] },
+  'Nob Hill':{ level:'safe', score:4.2, desc:"Albuquerque's most walkable commercial district — Central Ave (Route 66) lined with vintage signs, excellent restaurants, and independent shops. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🛣️',text:'Nob Hill is on the Mother Road — Route 66 — with classic neon signage'},{icon:'🍽️',text:'Outstanding restaurants serving New Mexican cuisine'},{icon:'🛍️',text:'Good independent boutiques and record stores'}] },
+  'Downtown':{ level:'safe', score:3.7, desc:"Albuquerque's urban core with the KiMo Theatre, developing nightlife, and Route 66 heritage. Generally safe in main areas.", tips:[{icon:'✅',text:'Generally safe in main commercial areas'},{icon:'🎭',text:'KiMo Theatre (1927) is a stunning Pueblo Deco masterpiece'},{icon:'🍽️',text:'Good restaurants and bars along Central Ave'},{icon:'⚠️',text:'Some elevated crime on residential streets — stay on Central Ave'}] },
+  'North Valley':{ level:'safe', score:4.3, desc:"Agricultural valley along the Rio Grande with horse properties, the Albuquerque Bosque, and a peaceful rural feel. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌊',text:'Rio Grande Bosque is an extraordinary cottonwood forest — excellent wildlife watching'},{icon:'🐤',text:'Rio Grande Nature Center State Park'},{icon:'🌄',text:'Hot air balloon rides depart from here — ABQ is the balloon capital of the world'}] },
+  'International District':{ level:'caution', score:2.8, desc:"East Central neighborhood with one of the most diverse immigrant communities in New Mexico and some elevated crime.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🍽️',text:'Excellent authentic international food'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+  'South Valley':{ level:'caution', score:2.7, desc:"South Albuquerque with elevated crime. Not a tourist area.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+};
+
+// ── Anchorage zone definitions ────────────────────────────────────────────────
+const ANCHORAGE_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:3.8, desc:"Anchorage's main commercial district — the Tony Knowles Coastal Trail, the Anchorage Museum, and a compact but good restaurant scene. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏛️',text:'Anchorage Museum is excellent — strong Alaska Native and natural history collections'},{icon:'🚶',text:'Tony Knowles Coastal Trail (11 miles) starts downtown — stunning views of the Alaska Range'},{icon:'🌺',text:'Saturday Market in summer is a great Alaska craft and food market'}] },
+  'Midtown':{ level:'safe', score:3.8, desc:"Anchorage's suburban commercial core — big-box stores, good restaurants, and access to Chugach State Park trailheads. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🍽️',text:'Good variety of restaurants'},{icon:'⛷️',text:'Hilltop Ski Area is a short drive — beginner/intermediate skiing'},{icon:'🌲',text:'Chugach State Park trailheads are accessible — half a million acres of wilderness'}] },
+  'South Anchorage':{ level:'safe', score:4.3, desc:"Upscale residential Anchorage with stunning Turnagain Arm views and Flattop Mountain trailhead. Very safe.", tips:[{icon:'✅',text:'Very safe — affluent area'},{icon:'🏔️',text:'Flattop Mountain is the most-climbed peak in Alaska — stunning 360° views'},{icon:'🌊',text:'Turnagain Arm tidal bore is a natural phenomenon — world\'s largest waves from tidal action'},{icon:'🦌',text:'Moose and Dall sheep are commonly seen from the road'}] },
+  'Sand Lake':{ level:'safe', score:4.0, desc:"West Anchorage neighborhood with lake access and a quiet suburban character. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏞️',text:'Sand Lake and Jewel Lake for fishing and recreation'},{icon:'🚴',text:'Coastal Trail access nearby'},{icon:'🛒',text:'Good local shopping and dining'}] },
+  'Mountain View':{ level:'caution', score:2.8, desc:"East Anchorage neighborhood with elevated crime. Limited tourist attractions.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+};
+
+// ── Lexington, KY zone definitions ────────────────────────────────────────────
+const LEXINGTON_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:4.0, desc:"Lexington's walkable core — Main Street restaurants, the Lexington Opera House, Rupp Arena (Wildcats), and Cheapside Park. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏀',text:'Rupp Arena is the cathedral of Kentucky basketball — UK Wildcats are religion here'},{icon:'🎭',text:'Lexington Opera House (1886) is a beautiful venue'},{icon:'🍽️',text:'Good restaurants along Main and Short Streets'}] },
+  'Chevy Chase':{ level:'safe', score:4.5, desc:"Lexington's most elegant neighborhood — beautiful homes, Chevy Chase shopping district, and excellent restaurants. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🍽️',text:'Excellent restaurants along Romany Road'},{icon:'🛍️',text:'Chevy Chase shopping district has quality independent shops'},{icon:'🏡',text:'Beautiful Tudor and Colonial homes on winding streets'}] },
+  'Southland':{ level:'safe', score:4.2, desc:"South Lexington residential neighborhood near Keeneland Race Course. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🏇',text:'Keeneland Race Course is a legendary Kentucky Thoroughbred racing venue — beautiful and accessible'},{icon:'🍽️',text:'Good dining along Nicholasville Road'},{icon:'🌳',text:'Jacobson Park'}] },
+  'Woodland Park':{ level:'safe', score:4.3, desc:"Historic neighborhood adjacent to the University of Kentucky with beautiful homes and Woodland Park. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌳',text:'Woodland Park has a beautiful historic pool'},{icon:'🎓',text:'University of Kentucky campus and Arboretum are nearby'},{icon:'🏛️',text:'University of Kentucky Art Museum'}] },
+  'North Limestone':{ level:'caution', score:3.0, desc:"Urban neighborhood north of downtown with emerging restaurants and some elevated crime.", tips:[{icon:'⚠️',text:'Exercise caution on residential streets'},{icon:'🍽️',text:'Emerging restaurant scene along North Limestone'},{icon:'🚗',text:'Car recommended at night'},{icon:'🌙',text:'Use caution after dark'}] },
+};
+
+// ── Rochester, NY zone definitions ────────────────────────────────────────────
+const ROCHESTER_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:3.7, desc:"Rochester's urban core — the Eastman School of Music, the Strong National Museum of Play, Blue Cross Arena, and Midtown Plaza. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🎹',text:'Eastman School of Music has excellent free concerts'},{icon:'🎮',text:'The Strong National Museum of Play is extraordinary for families'},{icon:'🍽️',text:'Good restaurants along East and Alexander Streets'}] },
+  'Park Avenue':{ level:'safe', score:4.4, desc:"Rochester's best neighborhood — beautiful homes, outstanding restaurants and bars along Park Ave, and excellent access to Highland Park. Very safe.", tips:[{icon:'✅',text:'Very safe — Rochester\'s most visited neighborhood'},{icon:'🌸',text:'Lilac Festival at Highland Park (May) draws 500,000 visitors — magnificent'},{icon:'🍽️',text:'Excellent independent restaurants and bars'},{icon:'☕',text:'Outstanding coffee shops and bakeries'}] },
+  'South Wedge':{ level:'safe', score:4.1, desc:"Hip neighborhood with craft breweries, excellent restaurants, and the 1872 High Falls Gorge. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌊',text:'High Falls on the Genesee River — 96-foot waterfall in the middle of the city'},{icon:'🍺',text:'Swiftwater Brewing, Good Luck, and other excellent spots'},{icon:'🍽️',text:'Excellent independent restaurants'}] },
+  'Corn Hill':{ level:'safe', score:4.0, desc:"Rochester's oldest neighborhood — 19th-century homes, the Genesee River, and excellent canal access. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏛️',text:'Beautiful Greek Revival and Italianate homes from the 1820s-1870s'},{icon:'🌊',text:'Erie Canal and Genesee River paths'},{icon:'🎪',text:'Corn Hill Arts Festival each July is one of Western NY\'s best'}] },
+  'North Clinton':{ level:'caution', score:2.5, desc:"Northeast Rochester neighborhood with elevated crime. Not recommended for tourists.", tips:[{icon:'⚠️',text:'Elevated crime — not recommended for tourists'},{icon:'🚗',text:'Car or rideshare only'},{icon:'🌙',text:'Avoid after dark'}] },
+};
+
+// ── Silicon Valley / San Jose zone definitions ────────────────────────────────
+const SAN_JOSE_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:3.9, desc:"San Jose's urban core — SAP Center (Sharks), Diridon Station, the Tech Interactive museum, and the San Jose Museum of Art. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏒',text:'SAP Center hosts Sharks games and major concerts'},{icon:'🔬',text:'The Tech Interactive is an excellent hands-on science museum'},{icon:'🚂',text:'Diridon Station is the major transit hub for Caltrain, VTA, and future BART'}] },
+  'Japantown':{ level:'safe', score:4.2, desc:"One of only three remaining Japantowns in the US — excellent Japanese restaurants, cultural center, and a walkable character. Very safe.", tips:[{icon:'✅',text:'Very safe and charming'},{icon:'🍣',text:'Outstanding authentic Japanese restaurants'},{icon:'🎋',text:'Cultural events throughout the year including the Obon Festival'},{icon:'🛍️',text:'Japanese groceries, bakeries, and gift shops'}] },
+  'Willow Glen':{ level:'safe', score:4.5, desc:"San Jose's most charming neighborhood — beautiful tree-lined Lincoln Ave with excellent restaurants and boutiques. Very safe.", tips:[{icon:'✅',text:'Very safe and beautiful'},{icon:'🍽️',text:'Lincoln Ave has excellent independent restaurants and cafes'},{icon:'🛍️',text:'Good boutiques and specialty shops'},{icon:'🏡',text:'Beautiful Craftsman and Colonial Revival homes'}] },
+  'Rose Garden':{ level:'safe', score:4.4, desc:"Upscale residential neighborhood with the Municipal Rose Garden (world-class) and beautiful mid-century homes. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌹',text:'San Jose Municipal Rose Garden has 3,500 rose bushes — stunning in May-June and free'},{icon:'🏡',text:'Beautiful 1930s-50s homes'},{icon:'🌳',text:'Neighboring Naglee Park has similar character'}] },
+  'Santana Row':{ level:'safe', score:4.4, desc:"San Jose's upscale outdoor shopping and dining district — excellent restaurants, hotels, and walkable streets. Very safe.", tips:[{icon:'✅',text:'Very safe — well-managed retail district'},{icon:'🍽️',text:'Outstanding restaurants from casual to upscale'},{icon:'🛍️',text:'Quality shopping with major and independent retailers'},{icon:'🌳',text:'Good people-watching in an architecturally interesting outdoor mall'}] },
+  'East San Jose':{ level:'caution', score:2.7, desc:"East San Jose has elevated crime rates in many neighborhoods. Not recommended for tourists.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+};
+
+// ── Albany zone definitions ────────────────────────────────────────────────────
+const ALBANY_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:3.7, desc:"Albany's state government and business district — the New York State Capitol, the Empire State Plaza, and the Albany Institute of History & Art. Generally safe during business hours.", tips:[{icon:'✅',text:'Generally safe during the day'},{icon:'🏛️',text:'NY State Capitol is architecturally extraordinary — free tours'},{icon:'🏛️',text:'Empire State Plaza\'s brutal concrete architecture and the Egg performing arts center'},{icon:'🎨',text:'Albany Institute of History & Art is excellent and free'}] },
+  'Center Square':{ level:'safe', score:4.1, desc:"Albany's most vibrant neighborhood — beautiful rowhouses on quiet streets and great bars and restaurants along Lark Street. Very safe.", tips:[{icon:'✅',text:'Very safe and charming'},{icon:'🍽️',text:'Lark Street has excellent independent restaurants and bars'},{icon:'🏛️',text:'Beautiful 19th-century brownstone rowhouses'},{icon:'☕',text:'Good coffee shops and an active neighborhood community'}] },
+  'Washington Park':{ level:'safe', score:4.2, desc:"Beautiful park neighborhood with one of the finest urban parks in the Northeast and elegant historic rowhouses. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌳',text:'Washington Park is beautiful — the tulip festival in May draws huge crowds'},{icon:'🏡',text:'Stunning brownstones surrounding the park'},{icon:'🎭',text:'Albany TulipFest and summertime Shakespeare in the park'}] },
+};
+
+// ── Hartford zone definitions ─────────────────────────────────────────────────
+const HARTFORD_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:3.5, desc:"Connecticut's state capital — the Wadsworth Atheneum (America's oldest public art museum), the Mark Twain House, and the Bushnell performing arts center. Generally safe at tourist sites.", tips:[{icon:'✅',text:'Generally safe at major tourist attractions'},{icon:'🏛️',text:'Wadsworth Atheneum Museum of Art is extraordinary — first public art museum in the US, free on Thursdays'},{icon:'✍️',text:'Mark Twain House is an outstanding Victorian Gothic mansion and museum'},{icon:'⚠️',text:'Some elevated crime on blocks away from tourist areas — stay on main corridors'}] },
+  'West End':{ level:'safe', score:4.0, desc:"Hartford's most walkable residential neighborhood with beautiful Victorian homes and good restaurants. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏡',text:'Beautiful Victorian homes — Elizabeth Park neighborhood is lovely'},{icon:'🌹',text:'Elizabeth Park has the oldest municipal rose garden in the US'},{icon:'🍽️',text:'Good restaurants along New Britain Ave'}] },
+};
+
+// ── Macon, GA zone definitions ────────────────────────────────────────────────
+const MACON_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:3.7, desc:"Macon's revitalized core — the Allman Brothers Band Museum, the Hargray Capitol Theatre, and beautiful Antebellum architecture. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🎸',text:'Allman Brothers Band Museum at The Big House is a pilgrimage for rock fans'},{icon:'🏛️',text:'The Ocmulgee Mounds National Historical Park preserves 17,000 years of history'},{icon:'🌸',text:'Cherry Blossom Festival in March is one of the South\'s best events — 300,000 cherry trees'}] },
+  'Ingleside':{ level:'safe', score:4.1, desc:"Beautiful historic neighborhood near Mercer University with impressive antebellum homes. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏛️',text:'Some of Georgia\'s finest antebellum architecture'},{icon:'🎓',text:'Mercer University campus'},{icon:'🌳',text:'Beautiful tree-lined streets'}] },
+};
+
+// ── Des Moines zone definitions ────────────────────────────────────────────────
+const DES_MOINES_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:4.0, desc:"Des Moines's surprisingly vibrant downtown — the Iowa State Capitol, the Principal Park (Iowa Cubs), the Des Moines Art Center, and good restaurants. Generally safe.", tips:[{icon:'✅',text:'Generally safe — one of the safest downtowns in the Midwest'},{icon:'🏛️',text:'Iowa State Capitol has the most beautiful interior of any state capitol — free tours'},{icon:'🎨',text:'Des Moines Art Center has an extraordinary collection in a beautiful building — free'},{icon:'🍽️',text:'Court Avenue entertainment district has good restaurants and bars'}] },
+  'East Village':{ level:'safe', score:4.3, desc:"Des Moines's best neighborhood — independent restaurants, boutiques, and the Iowa State Capitol views. Very safe.", tips:[{icon:'✅',text:'Very safe and walkable'},{icon:'🍽️',text:'Outstanding independent restaurants along E Grand Ave'},{icon:'🛍️',text:'Great boutiques and independent shops'},{icon:'📸',text:'Spectacular Iowa State Capitol views from the district'}] },
+  'Drake Neighborhood':{ level:'safe', score:4.2, desc:"Drake University neighborhood with excellent restaurants along Ingersoll Ave. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🍽️',text:'Ingersoll Ave has some of Des Moines\'s best independent dining'},{icon:'🎓',text:'Drake University campus'},{icon:'☕',text:'Good coffee shops and local businesses'}] },
+  'Beaverdale':{ level:'safe', score:4.4, desc:"Des Moines's most charming neighborhood — beautiful Tudor Revival homes and good local restaurants. Very safe.", tips:[{icon:'✅',text:'Very safe and beautiful'},{icon:'🏡',text:'Beautiful 1920s-30s Tudor Revival and English Cottage homes'},{icon:'🍽️',text:'Good local restaurants along Beaver Ave'},{icon:'☕',text:'Beaverdale Books is a beloved independent bookstore'}] },
+};
+
+// ── Akron zone definitions ─────────────────────────────────────────────────────
+const AKRON_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:3.8, desc:"Akron's revitalized core — the Akron Art Museum, Lock 3 Park, Inventure Place, and the Rubber Duck Festival. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏛️',text:'Akron Art Museum is excellent and free'},{icon:'🎨',text:'Lock 3 Park hosts free outdoor concerts in summer'},{icon:'🏭',text:'Inventure Place (National Inventors Hall of Fame) is fascinating'}] },
+  'Highland Square':{ level:'safe', score:4.1, desc:"Akron's most vibrant neighborhood — excellent restaurants, bars, and indie shops along W Market Street. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🍽️',text:'Good independent restaurants and bars along Market Street'},{icon:'🎵',text:'Musica and other live music venues'},{icon:'☕',text:'Great independent coffee shops'}] },
+  'Merriman Valley':{ level:'safe', score:4.2, desc:"Natural area with the Cuyahoga Valley National Park on the doorstep and good restaurants. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌲',text:'Cuyahoga Valley National Park access — excellent hiking along the Ohio & Erie Canal Towpath'},{icon:'🍽️',text:'Good restaurants along Merriman Road'},{icon:'🚴',text:'Excellent cycling on the Towpath Trail'}] },
+};
+
+// ── Providence, RI / Fairbanks, AK / Chapel Hill zone definitions added above
+// ── Chapel Hill zone definitions ──────────────────────────────────────────────
+const CHAPEL_HILL_ZONE_DEFS = {
+  'Downtown/Franklin Street':{ level:'safe', score:4.5, desc:"The heart of UNC-Chapel Hill — Franklin Street with its restaurants, bars, and bookstores, and the beautiful Carolina campus. Very safe.", tips:[{icon:'✅',text:'Very safe — college main street'},{icon:'🎓',text:'UNC-Chapel Hill campus is one of the most beautiful in the South — the Old Well is iconic'},{icon:'🍽️',text:'Franklin Street has good restaurants for every budget'},{icon:'🏛️',text:'Morehead Planetarium and Science Center'}] },
+  'Carrboro':{ level:'safe', score:4.4, desc:"Progressive adjacent town to Chapel Hill with excellent restaurants and the Weaver Street Market co-op. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🛒',text:'Weaver Street Market is one of the great food co-ops in the South'},{icon:'🍽️',text:'Outstanding independent restaurants — some of the best in the Triangle area'},{icon:'🎵',text:'Cat\'s Cradle is one of the best mid-size music venues in North Carolina'}] },
+  'Southern Village':{ level:'safe', score:4.3, desc:"New Urbanist neighborhood south of campus with good restaurants and a pleasant town-center feel. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🍽️',text:'Good restaurants in the village center'},{icon:'🌳',text:'Beautiful wooded surroundings'},{icon:'🏡',text:'Well-designed walkable neighborhood'}] },
+};
+
+// ── Olympia, WA zone definitions ──────────────────────────────────────────────
+const OLYMPIA_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:4.0, desc:"Washington's state capital — the stunning Capitol Campus, Percival Landing, and a vibrant arts scene. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏛️',text:'Washington State Capitol Campus is spectacular — grand Romanesque dome with beautiful grounds'},{icon:'🌊',text:'Percival Landing waterfront park on Budd Inlet'},{icon:'🍽️',text:'Good restaurants and coffee shops along 4th and 5th Avenues'}] },
+  'Eastside':{ level:'safe', score:4.2, desc:"Olympia's residential eastside with good restaurants and Watershed Park. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌲',text:'Watershed Park has excellent old-growth forest trails'},{icon:'🍽️',text:'Good local restaurants along Pacific Ave'},{icon:'☕',text:'Great independent coffee culture — this is western Washington after all'}] },
+};
+
+// ── West Linn zone definitions ─────────────────────────────────────────────────
+const WEST_LINN_ZONE_DEFS = {
+  'Willamette':{ level:'safe', score:4.3, desc:"Charming neighborhood along the Willamette River with historic Willamette Falls and good restaurants. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌊',text:'Willamette Falls (second largest waterfall by volume in the US) is here'},{icon:'🍽️',text:'Good local restaurants'},{icon:'🌳',text:'Beautiful river access and trails'}] },
+  'Bolton':{ level:'safe', score:4.4, desc:"West Linn residential neighborhood with excellent schools and beautiful homes. Very safe.", tips:[{icon:'✅',text:'Very safe — one of the Portland metro\'s safest suburbs'},{icon:'🏡',text:'Beautiful homes with wooded lots'},{icon:'🌳',text:'Tualatin River National Wildlife Refuge nearby'},{icon:'🚗',text:'Car required'}] },
+};
+
+// ── Springfield, MA zone definitions ──────────────────────────────────────────
+const SPRINGFIELD_ZONE_DEFS = {
+  'Downtown':{ level:'safe', score:3.5, desc:"Springfield's urban core — the Basketball Hall of Fame (the sport was invented here), the Springfield Museums campus, and the Naismith court. Generally safe at tourist attractions.", tips:[{icon:'✅',text:'Generally safe at major attractions'},{icon:'🏀',text:'Basketball Hall of Fame is essential — and Springfield is the birthplace of the sport'},{icon:'🎨',text:'Springfield Museums campus includes the Dr. Seuss National Memorial Sculpture Garden'},{icon:'⚠️',text:'Use caution on streets away from museum campus'}] },
+  'Forest Park':{ level:'safe', score:4.1, desc:"Springfield's most beautiful neighborhood surrounding Forest Park — an extraordinary urban park designed by Frederick Law Olmsted. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌳',text:'Forest Park (735 acres) was designed by Frederick Law Olmsted — stunning'},{icon:'🦁',text:'Forest Park Zoo (free for Springfield residents)'},{icon:'🏡',text:'Beautiful Victorian homes surrounding the park'}] },
+};
+
 // ── City configurations ──────────────────────────────────────────────────────
 const CITIES = {
   'new-orleans': {
@@ -2308,17 +2597,17 @@ const CITIES = {
   'henderson': {
     label: 'Henderson, NV', center: [36.0397, -114.9817], zoom: 13,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/henderson.geojson',
-    bbox: [36.13, -115.10, 35.96, -114.84], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [36.13, -115.10, 35.96, -114.84], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {'Henderson':{ level:'safe', score:4.2, desc:'Safe Las Vegas suburb with the Galleria Mall and quick access to the Strip. Very safe residential community.', tips:[{icon:'✅',text:'Very safe — one of the safest cities in Nevada'},{icon:'🎰',text:'10 minutes from the Las Vegas Strip by car'},{icon:'🛒',text:'Galleria at Sunset mall'},{icon:'🌵',text:'Lake Las Vegas resort area nearby'}] }},
   },
   'san-diego': {
     label: 'San Diego, CA', center: [32.7157, -117.1611], zoom: 11,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/san-diego.geojson',
-    bbox: [32.96, -117.39, 32.53, -116.91], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [32.96, -117.39, 32.53, -116.91], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: SAN_DIEGO_ZONE_DEFS,
   },
   'silicon-valley': {
     label: 'Silicon Valley / San Jose, CA', center: [37.3382, -121.8863], zoom: 11,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/silicon-valley.geojson',
-    bbox: [37.55, -122.30, 37.15, -121.80], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [37.55, -122.30, 37.15, -121.80], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: SAN_JOSE_ZONE_DEFS,
   },
   'oakland': {
     label: 'Oakland, CA', center: [37.8044, -122.2712], zoom: 12,
@@ -2326,17 +2615,17 @@ const CITIES = {
     crimeEndpoint: 'https://data.oaklandca.gov/resource/ym6k-rx7a.json',
     dateField: 'datetime', typeFields: ['crimetype', 'description'],
     bbox: [37.90, -122.38, 37.69, -122.11], bboxField: 'location_1',
-    noDateFilter: true, baseline: 12, dataSource: 'Oakland Open Data', zoneDefs: {},
+    noDateFilter: true, baseline: 12, dataSource: 'Oakland Open Data', zoneDefs: OAKLAND_ZONE_DEFS,
   },
   'sacramento': {
     label: 'Sacramento, CA', center: [38.5816, -121.4944], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/sacramento.geojson',
-    bbox: [38.70, -121.66, 38.46, -121.36], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [38.70, -121.66, 38.46, -121.36], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: SACRAMENTO_ZONE_DEFS,
   },
   'alameda': {
     label: 'Alameda, CA', center: [37.7652, -122.2416], zoom: 14,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/alameda.geojson',
-    bbox: [37.79, -122.28, 37.74, -122.21], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [37.79, -122.28, 37.74, -122.21], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {'Alameda':{ level:'safe', score:4.4, desc:'Safe island city across the estuary from Oakland with a beautiful Victorian downtown and waterfront. Very safe.', tips:[{icon:'✅',text:'Very safe — consistently one of the safest Bay Area cities'},{icon:'🏖️',text:'Crown Beach is a lovely East Bay swimming beach'},{icon:'🏛️',text:'Beautiful Victorian homes along Park Street'},{icon:'🍽️',text:'Good restaurants and shops on Park Street'}] }},
   },
   'minneapolis': {
     label: 'Minneapolis, MN', center: [44.9778, -93.2650], zoom: 12,
@@ -2351,7 +2640,7 @@ const CITIES = {
   'st-louis': {
     label: 'St. Louis, MO', center: [38.6270, -90.1994], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/st-louis.geojson',
-    bbox: [38.77, -90.37, 38.52, -90.06], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [38.77, -90.37, 38.52, -90.06], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: ST_LOUIS_ZONE_DEFS,
   },
   'kansas-city': {
     label: 'Kansas City, MO', center: [39.0997, -94.5786], zoom: 12,
@@ -2381,7 +2670,7 @@ const CITIES = {
     dateField: 'date_reported', typeFields: ['offense', 'ucr_group'],
     bbox: [39.25, -84.75, 39.00, -84.30], bboxField: null, noBbox: true,
     latField: 'latitude_x', lngField: 'longitude_x',
-    baseline: 50, dataSource: 'Cincinnati Open Data', zoneDefs: {},
+    baseline: 50, dataSource: 'Cincinnati Open Data', zoneDefs: CINCINNATI_ZONE_DEFS,
   },
   'cleveland': {
     label: 'Cleveland, OH', center: [41.4993, -81.6944], zoom: 12,
@@ -2391,37 +2680,37 @@ const CITIES = {
     dateField: 'ReportedDate', typeFields: ['UCRdesc', 'StatDesc'],
     bbox: [41.62, -81.88, 41.38, -81.53], bboxField: null,
     latField: 'LAT', lngField: 'LON',
-    baseline: 55, dataSource: 'Cleveland Open Data', zoneDefs: {},
+    baseline: 55, dataSource: 'Cleveland Open Data', zoneDefs: CLEVELAND_ZONE_DEFS,
   },
   'columbus': {
     label: 'Columbus, OH', center: [39.9612, -82.9988], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/columbus.geojson',
-    bbox: [40.16, -83.20, 39.83, -82.77], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [40.16, -83.20, 39.83, -82.77], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: COLUMBUS_ZONE_DEFS,
   },
   'akron': {
     label: 'Akron, OH', center: [41.0814, -81.5190], zoom: 13,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/akron.geojson',
-    bbox: [41.15, -81.65, 41.01, -81.43], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [41.15, -81.65, 41.01, -81.43], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: AKRON_ZONE_DEFS,
   },
   'milwaukee': {
     label: 'Milwaukee, WI', center: [43.0389, -87.9065], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/milwaukee.geojson',
-    bbox: [43.20, -88.07, 42.92, -87.78], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [43.20, -88.07, 42.92, -87.78], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: MILWAUKEE_ZONE_DEFS,
   },
   'louisville': {
     label: 'Louisville, KY', center: [38.2527, -85.7585], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/louisville.geojson',
-    bbox: [38.40, -85.98, 38.08, -85.55], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [38.40, -85.98, 38.08, -85.55], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: LOUISVILLE_ZONE_DEFS,
   },
   'lexington': {
     label: 'Lexington, KY', center: [38.0406, -84.5037], zoom: 13,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/lexington.geojson',
-    bbox: [38.18, -84.67, 37.92, -84.34], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [38.18, -84.67, 37.92, -84.34], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: LEXINGTON_ZONE_DEFS,
   },
   'des-moines': {
     label: 'Des Moines, IA', center: [41.5868, -93.6250], zoom: 13,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/des-moines.geojson',
-    bbox: [41.72, -93.79, 41.50, -93.48], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [41.72, -93.79, 41.50, -93.48], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: DES_MOINES_ZONE_DEFS,
   },
   'salt-lake-city': {
     label: 'Salt Lake City, UT', center: [40.7608, -111.8910], zoom: 12,
@@ -2431,12 +2720,12 @@ const CITIES = {
   'anchorage': {
     label: 'Anchorage, AK', center: [61.2181, -149.9003], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/anchorage.geojson',
-    bbox: [61.35, -150.30, 61.10, -149.60], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [61.35, -150.30, 61.10, -149.60], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: ANCHORAGE_ZONE_DEFS,
   },
   'fairbanks': {
     label: 'Fairbanks, AK', center: [64.8378, -147.7164], zoom: 13,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/fairbanks.geojson',
-    bbox: [64.90, -147.90, 64.78, -147.55], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [64.90, -147.90, 64.78, -147.55], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {'Downtown':{ level:'safe', score:3.8, desc:'Fairbanks city center — gateway to the aurora borealis, Denali National Park, and the Chena River. Generally safe.', tips:[{icon:'✅',text:'Generally safe'},{icon:'🌌',text:'One of the world\'s best places to see the Northern Lights (Sept–March)'},{icon:'🐻',text:'Gateway to Denali and the Alaska interior wilderness'},{icon:'❄️',text:'Ice sculpture world championships in March — spectacular'}] }},
   },
   'honolulu': {
     label: 'Honolulu, HI', center: [21.3069, -157.8583], zoom: 12,
@@ -2446,12 +2735,12 @@ const CITIES = {
   'birmingham': {
     label: 'Birmingham, AL', center: [33.5186, -86.8104], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/birmingham.geojson',
-    bbox: [33.65, -87.00, 33.40, -86.65], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [33.65, -87.00, 33.40, -86.65], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: BIRMINGHAM_AL_ZONE_DEFS,
   },
   'macon': {
     label: 'Macon, GA', center: [32.8407, -83.6324], zoom: 13,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/macon.geojson',
-    bbox: [32.93, -83.78, 32.76, -83.52], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [32.93, -83.78, 32.76, -83.52], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: MACON_ZONE_DEFS,
   },
   'orlando': {
     label: 'Orlando, FL', center: [28.5383, -81.3792], zoom: 12,
@@ -2466,7 +2755,7 @@ const CITIES = {
   'fort-lauderdale': {
     label: 'Fort Lauderdale, FL', center: [26.1224, -80.1373], zoom: 13,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/fort-lauderdale.geojson',
-    bbox: [26.24, -80.28, 26.05, -80.07], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [26.24, -80.28, 26.05, -80.07], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: FORT_LAUDERDALE_ZONE_DEFS,
   },
   'raleigh': {
     label: 'Raleigh, NC', center: [35.7796, -78.6382], zoom: 12,
@@ -2476,42 +2765,42 @@ const CITIES = {
   'chapel-hill': {
     label: 'Chapel Hill, NC', center: [35.9132, -79.0558], zoom: 14,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/chapel-hill.geojson',
-    bbox: [35.97, -79.12, 35.85, -79.00], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [35.97, -79.12, 35.85, -79.00], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: CHAPEL_HILL_ZONE_DEFS,
   },
   'norfolk': {
     label: 'Norfolk, VA', center: [36.8508, -76.2859], zoom: 13,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/norfolk.geojson',
-    bbox: [36.95, -76.40, 36.78, -76.18], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [36.95, -76.40, 36.78, -76.18], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: NORFOLK_ZONE_DEFS,
   },
   'chesapeake': {
     label: 'Chesapeake, VA', center: [36.7682, -76.2875], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/chesapeake.geojson',
-    bbox: [36.92, -76.47, 36.55, -76.08], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [36.92, -76.47, 36.55, -76.08], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {'Greenbrier':{ level:'safe', score:4.1, desc:'Upscale Chesapeake neighborhood with good shopping and restaurants. Very safe.', tips:[{icon:'✅',text:'Very safe suburban community'},{icon:'🛒',text:'Greenbrier Mall area has good shopping'},{icon:'🍽️',text:'Good restaurant options'},{icon:'🌊',text:'Chesapeake waterways nearby'}] }},
   },
   'richmond': {
     label: 'Richmond, VA', center: [37.5407, -77.4360], zoom: 13,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/richmond.geojson',
-    bbox: [37.64, -77.60, 37.44, -77.32], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [37.64, -77.60, 37.44, -77.32], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: RICHMOND_ZONE_DEFS,
   },
   'charlottesville': {
     label: 'Charlottesville, VA', center: [38.0293, -78.4767], zoom: 14,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/charlottesville.geojson',
-    bbox: [38.08, -78.55, 37.98, -78.42], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [38.08, -78.55, 37.98, -78.42], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: CHARLOTTESVILLE_ZONE_DEFS,
   },
   'hampton': {
     label: 'Hampton, VA', center: [37.0299, -76.3452], zoom: 13,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/hampton.geojson',
-    bbox: [37.12, -76.50, 36.93, -76.22], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [37.12, -76.50, 36.93, -76.22], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {'Downtown':{ level:'safe', score:3.9, desc:'Hampton waterfront — the Virginia Air & Space Center and the Hampton Coliseum. Generally safe.', tips:[{icon:'✅',text:'Generally safe'},{icon:'✈️',text:'Virginia Air & Space Center is excellent — Mercury capsule, space exhibits'},{icon:'🌊',text:'Hampton waterfront and marina'},{icon:'🏛️',text:'Fort Monroe National Monument is historic and worth visiting'}] }},
   },
   'williamsburg': {
     label: 'Williamsburg, VA', center: [37.2707, -76.7075], zoom: 14,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/williamsburg.geojson',
-    bbox: [37.31, -76.77, 37.22, -76.65], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [37.31, -76.77, 37.22, -76.65], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: WILLIAMSBURG_ZONE_DEFS,
   },
   'albany': {
     label: 'Albany, NY', center: [42.6526, -73.7562], zoom: 13,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/albany.geojson',
-    bbox: [42.75, -73.90, 42.60, -73.65], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [42.75, -73.90, 42.60, -73.65], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: ALBANY_ZONE_DEFS,
   },
   'rochester': {
     label: 'Rochester, NY', center: [43.1566, -77.6088], zoom: 13,
@@ -2520,42 +2809,42 @@ const CITIES = {
     apiType: 'arcgis', noDateFilter: true,
     dateField: 'OccurredFrom_Timestamp', typeFields: ['Statute_Description', 'Statute_Text', 'Statute_CrimeCategory'],
     bbox: [43.27, -77.78, 43.06, -77.48], bboxField: null,
-    baseline: 45, dataSource: 'Rochester PD Open Data', zoneDefs: {},
+    baseline: 45, dataSource: 'Rochester PD Open Data', zoneDefs: ROCHESTER_ZONE_DEFS,
   },
   'hartford': {
     label: 'Hartford, CT', center: [41.7658, -72.6851], zoom: 13,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/hartford.geojson',
-    bbox: [41.83, -72.78, 41.71, -72.60], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [41.83, -72.78, 41.71, -72.60], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: HARTFORD_ZONE_DEFS,
   },
   'new-haven': {
     label: 'New Haven, CT', center: [41.3083, -72.9279], zoom: 13,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/new-haven.geojson',
-    bbox: [41.38, -73.00, 41.26, -72.85], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [41.38, -73.00, 41.26, -72.85], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: NEW_HAVEN_ZONE_DEFS,
   },
   'stamford': {
     label: 'Stamford, CT', center: [41.0534, -73.5387], zoom: 13,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/stamford.geojson',
-    bbox: [41.14, -73.68, 41.00, -73.44], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [41.14, -73.68, 41.00, -73.44], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {'Downtown':{ level:'safe', score:4.0, desc:'Stamford\'s urban core — a growing restaurant scene and easy Metro-North access to New York City. Generally safe.', tips:[{icon:'✅',text:'Generally safe'},{icon:'🚂',text:'45-minute train to Grand Central Terminal on Metro-North'},{icon:'🍽️',text:'Good restaurants along Summer Street and Bedford Street'},{icon:'🎭',text:'Stamford Center for the Arts has good programming'}] }},
   },
   'rockville': {
     label: 'Rockville, MD', center: [39.0840, -77.1528], zoom: 14,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/rockville.geojson',
-    bbox: [39.16, -77.24, 39.03, -77.09], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [39.16, -77.24, 39.03, -77.09], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {'Rockville Town Square':{ level:'safe', score:4.3, desc:'Rockville\'s walkable town center with restaurants and the Metro Red Line. Very safe.', tips:[{icon:'✅',text:'Very safe'},{icon:'🚇',text:'Metro Red Line — 30 minutes to Downtown DC'},{icon:'🍽️',text:'Good restaurants around Rockville Town Square'},{icon:'🛒',text:'Good suburban shopping'}] }},
   },
   'providence': {
     label: 'Providence, RI', center: [41.8240, -71.4128], zoom: 13,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/providence.geojson',
-    bbox: [41.89, -71.53, 41.76, -71.33], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [41.89, -71.53, 41.76, -71.33], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: PROVIDENCE_ZONE_DEFS,
   },
   'springfield': {
     label: 'Springfield, MA', center: [42.1015, -72.5898], zoom: 13,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/springfield.geojson',
-    bbox: [42.14, -72.64, 42.06, -72.54], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [42.14, -72.64, 42.06, -72.54], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: SPRINGFIELD_ZONE_DEFS,
   },
   'olympia': {
     label: 'Olympia, WA', center: [47.0379, -122.9007], zoom: 14,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/olympia.geojson',
-    bbox: [47.10, -122.98, 46.99, -122.82], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [47.10, -122.98, 46.99, -122.82], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: OLYMPIA_ZONE_DEFS,
   },
   'nashville': {
     label: 'Nashville, TN',
@@ -2647,7 +2936,7 @@ const CITIES = {
     bbox: [32.45, -111.10, 32.00, -110.68],
     baseline: 35,
     dataSource: 'Tucson PD',
-    zoneDefs: {},
+    zoneDefs: TUCSON_ZONE_DEFS,
   },
   'albuquerque': {
     label: 'Albuquerque, NM',
@@ -2663,12 +2952,12 @@ const CITIES = {
     bbox: [35.22, -106.82, 34.95, -106.45],
     baseline: 40,
     dataSource: 'Albuquerque PD',
-    zoneDefs: {},
+    zoneDefs: ALBUQUERQUE_ZONE_DEFS,
   },
   'west-linn': {
     label: 'West Linn, OR', center: [45.3648, -122.6407], zoom: 14,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/west-linn.geojson',
-    bbox: [45.40, -122.68, 45.33, -122.60], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: {},
+    bbox: [45.40, -122.68, 45.33, -122.60], noApi: true, dataSource: 'OpenStreetMap', zoneDefs: WEST_LINN_ZONE_DEFS,
   },
 };
 
