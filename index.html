@@ -719,7 +719,7 @@
         <div class="leg-item"><div class="leg-swatch" style="background:var(--caution)"></div>Use Caution</div>
         <div class="leg-item"><div class="leg-swatch" style="background:var(--avoid)"></div>Avoid</div>
       </div>
-      <p class="method-note">Scores (1–5) from 12 months of live police data, weighted by crime severity. Higher = safer.</p>
+      <p class="method-note">Scores (1–5) from 12 months of live police data, weighted by crime severity and area-normalized. Higher = safer.</p>
     </div>
   </div>
 </div>
@@ -753,7 +753,7 @@
       <li><strong>Weight 2:</strong> Burglary, motor vehicle theft, arson</li>
       <li><strong>Weight 1:</strong> Theft, larceny</li>
     </ul>
-    <p class="modal-body">The weighted sum is converted to a 1–5 score using a log scale calibrated per city: <span class="modal-code">score = 5 − 2.5 × log₁₀(weighted / baseline)</span>, clamped to 1–5. Neighborhoods scoring ≥ 3.5 are <strong style="color:#16a34a">Safe</strong>, 2.5–3.5 are <strong style="color:#b45309">Use Caution</strong>, below 2.5 are <strong style="color:#b91c1c">Avoid</strong>.</p>
+    <p class="modal-body">The weighted sum is <strong>area-normalized</strong> before scoring: each neighborhood's crime count is scaled to what it would be if the zone were median-sized for that city. This corrects for the fact that large outer neighborhoods accumulate more total crimes than small downtown blocks, even at the same crime density. The normalized count is then converted to a 1–5 score: <span class="modal-code">score = 5 − 2.5 × log₁₀(normalizedWeighted / baseline)</span>, clamped to 1–5. Neighborhoods scoring ≥ 3.5 are <strong style="color:#16a34a">Safe</strong>, 2.5–3.5 are <strong style="color:#b45309">Use Caution</strong>, below 2.5 are <strong style="color:#b91c1c">Avoid</strong>.</p>
 
     <div class="modal-h">Data sources &amp; update frequency</div>
     <p class="modal-body">Crime scores refresh from live APIs every 6 hours and cover the most recent 12 months of reported incidents. Neighborhood boundaries are cached for 7 days.</p>
@@ -3373,10 +3373,25 @@ function computeScores(crimes, city, cityId, hourFilter) {
     }
   });
 
+  // Ensure area is cached on every zone
+  cityZones.forEach(z => { if (!z._area) z._area = estimateZoneAreaKm2(z.geometry); });
+
+  // Median area of zones that received any crimes (avoid biasing on empty zones)
+  const activeAreas = cityZones
+    .filter(z => weighted[z.name] > 0)
+    .map(z => z._area);
+  if (activeAreas.length === 0) cityZones.forEach(z => activeAreas.push(z._area));
+  activeAreas.sort((a, b) => a - b);
+  // medianArea = area of a "typical" zone in this city → factor of 1 at median, no distortion
+  const medianArea = activeAreas[Math.floor(activeAreas.length / 2)] || 1;
+
   const BASELINE = city.baseline, K = 2.5;
   const result = {};
   cityZones.forEach(z => {
-    const w = Math.max(weighted[z.name], 1);
+    // Normalize: scale crimes as if this zone were median-area-sized.
+    // Small zones (denser crime) score lower; large zones (sparser crime) score higher.
+    const areaFactor = medianArea / z._area;
+    const w = Math.max(weighted[z.name] * areaFactor, 1);
     const score = Math.max(1, Math.min(5, 5 - K * Math.log10(w / BASELINE)));
     const level = score >= 3.5 ? 'safe' : score >= 2.5 ? 'caution' : 'avoid';
     result[z.name] = { score: Math.round(score * 10) / 10, count: rawCount[z.name], level, weighted: weighted[z.name] };
@@ -4094,6 +4109,7 @@ function buildAndDrawZones(geoJSON, city, cityId) {
 
     const center = geoLayer.getBounds().getCenter();
     zone._center = center;
+    zone._area = estimateZoneAreaKm2(zone.geometry);
     L.marker(center, {
       icon: L.divIcon({
         className: 'zone-label',
@@ -4160,6 +4176,30 @@ function latLngDistKm(a, b) {
   const dy = (a.lat - b.lat) * R;
   const dx = (a.lng - b.lng) * R * Math.cos((a.lat + b.lat) / 2 * Math.PI / 180);
   return Math.sqrt(dx * dx + dy * dy);
+}
+
+// Returns approximate area of a GeoJSON Polygon/MultiPolygon in km²
+function estimateZoneAreaKm2(geometry) {
+  if (!geometry) return 1;
+  let ring;
+  if (geometry.type === 'Polygon') {
+    ring = geometry.coordinates[0];
+  } else if (geometry.type === 'MultiPolygon') {
+    // Use the largest outer ring
+    ring = geometry.coordinates
+      .map(p => p[0])
+      .sort((a, b) => b.length - a.length)[0];
+  }
+  if (!ring || ring.length < 3) return 1;
+  const lat0 = ring.reduce((s, c) => s + c[1], 0) / ring.length;
+  const cosLat = Math.cos(lat0 * Math.PI / 180);
+  const kmLat = 110.574, kmLng = 111.320 * cosLat;
+  let area = 0;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    area += (ring[j][0] * kmLng + ring[i][0] * kmLng) *
+            (ring[j][1] * kmLat - ring[i][1] * kmLat);
+  }
+  return Math.max(Math.abs(area / 2), 0.01);
 }
 
 function showZoneByIdx(idx) {
@@ -4363,15 +4403,16 @@ async function fetchTractGeoJSON(bounds) {
 // Census API — 1 request per county covers all its tracts; includes income, poverty, unemployment, vacancy
 async function fetchACSForCounty(stateCode, countyCode) {
   const ACS_TTL = 30 * 24 * 60 * 60 * 1000;
-  const cacheKey = `saferoute_acs4_${stateCode}_${countyCode}`;
+  const cacheKey = `saferoute_acs5_${stateCode}_${countyCode}`;
   const cached = getCached(cacheKey, ACS_TTL);
   if (cached) return cached;
-  const vars = 'B19013_001E,B17001_002E,B17001_001E,B23025_005E,B23025_003E,B25002_003E,B25002_001E';
+  const vars = 'B01003_001E,B19013_001E,B17001_002E,B17001_001E,B23025_005E,B23025_003E,B25002_003E,B25002_001E';
   const res = await fetch(`https://api.census.gov/data/2022/acs/acs5?get=${vars}&for=tract:*&in=state:${stateCode}&in=county:${countyCode}&key=6f40113c1e1bd9bd1784637176039eba443f4e4b`);
   if (!res.ok) throw new Error(`ACS ${res.status}`);
   const rows = await res.json();
   const hdr = rows[0];
-  const iInc = hdr.indexOf('B19013_001E'), iPovPop = hdr.indexOf('B17001_002E');
+  const iPop  = hdr.indexOf('B01003_001E');
+  const iInc  = hdr.indexOf('B19013_001E'), iPovPop = hdr.indexOf('B17001_002E');
   const iPovTot = hdr.indexOf('B17001_001E'), iSt = hdr.indexOf('state');
   const iCo = hdr.indexOf('county'), iTr = hdr.indexOf('tract');
   const iLF = hdr.indexOf('B23025_003E'), iUnemp = hdr.indexOf('B23025_005E');
@@ -4379,6 +4420,7 @@ async function fetchACSForCounty(stateCode, countyCode) {
   const acsMap = {};
   rows.slice(1).forEach(row => {
     const geoid = row[iSt] + row[iCo] + row[iTr];
+    const pop    = parseInt(row[iPop])  || 0;
     const income = parseInt(row[iInc]);
     const povPop = parseInt(row[iPovPop]) || 0;
     const povTot = parseInt(row[iPovTot]) || 1;
@@ -4387,6 +4429,7 @@ async function fetchACSForCounty(stateCode, countyCode) {
     const hu = parseInt(row[iHU]) || 0;
     const vac = parseInt(row[iVac]) || 0;
     acsMap[geoid] = {
+      population: pop > 0 ? pop : -1,
       income: income > 0 ? income : -1,
       povertyRate: povPop / Math.max(povTot, 1),
       unemploymentRate: lf > 0 ? unemp / lf : -1,
@@ -4451,6 +4494,7 @@ function buildCensusTractZones(features, acsMap) {
     const center = bounds.getCenter();
     if (isCoveredByCity(center.lat, center.lng)) return;
     const acs = acsMap[geoid] || {};
+    const population = acs.population ?? -1;
     const income = acs.income ?? -1;
     const povertyRate = acs.povertyRate ?? 0.12;
     const unemploymentRate = acs.unemploymentRate ?? -1;
@@ -4481,6 +4525,7 @@ function buildCensusTractZones(features, acsMap) {
         ...(hasCrime ? [
           { icon: '🚔', text: `County violent crime: ${crimeData.violentPer1k.toFixed(1)}/1,000 residents (CHR 2022/FBI UCR)` },
         ] : []),
+        ...(population > 0 ? [{ icon: '👥', text: `Est. population: ${population.toLocaleString()} (ACS 2022)` }] : []),
         ...(income > 0 ? [{ icon: '💰', text: `Median income: $${income.toLocaleString()}` }] : []),
         { icon: '📊', text: `Poverty rate: ${(povertyRate * 100).toFixed(1)}%` },
         ...(unemploymentRate >= 0 ? [{ icon: '💼', text: `Unemployment: ${(unemploymentRate * 100).toFixed(1)}%` }] : []),
@@ -4490,6 +4535,7 @@ function buildCensusTractZones(features, acsMap) {
       crimeScore: null, qolScore: null, amenityScore: null, crimeCount: null,
       geometry: feature.geometry,
       _center: center,
+      _area: estimateZoneAreaKm2(feature.geometry),
     };
     ZONES.push(zone);
     geoLayer.on('mouseover', () => geoLayer.setStyle({ fillOpacity: HOVER_OPACITY[level], weight: 1.5 }));
@@ -4548,6 +4594,19 @@ async function applySocrataCrimeToTracts(cityKey, config) {
     } catch(e) { console.warn(`SafeRoute: Socrata ${cityKey} failed:`, e); return; }
   }
   const [n, w, s, e] = config.bbox;
+
+  // Collect tracts in this city's bbox so we can compute a median area for normalization
+  const tractsInCity = ZONES.filter(z => z.geoid && z.acsScore !== undefined && z._area).filter(zone => {
+    const layer = polyLayers[`tract:${zone.geoid}`];
+    if (!layer) return false;
+    const tb = layer.getBounds();
+    const cLat = (tb.getSouth() + tb.getNorth()) / 2;
+    const cLng = (tb.getWest() + tb.getEast()) / 2;
+    return cLat >= s && cLat <= n && cLng >= w && cLng <= e;
+  });
+  const tractAreasSorted = tractsInCity.map(z => z._area).sort((a, b) => a - b);
+  const medianTractArea = tractAreasSorted[Math.floor(tractAreasSorted.length / 2)] || 1;
+
   ZONES.filter(z => z.geoid && z.acsScore !== undefined).forEach(zone => {
     const layer = polyLayers[`tract:${zone.geoid}`];
     if (!layer) return;
@@ -4555,12 +4614,17 @@ async function applySocrataCrimeToTracts(cityKey, config) {
     const cLat = (tb.getSouth() + tb.getNorth()) / 2;
     const cLng = (tb.getWest() + tb.getEast()) / 2;
     if (cLat < s || cLat > n || cLng < w || cLng > e) return;
-    const count = crimes.filter(c => {
+    const rawCount = crimes.filter(c => {
       const lat = parseFloat(c[config.latField]), lng = parseFloat(c[config.lngField]);
       return isFinite(lat) && isFinite(lng) &&
         lat >= tb.getSouth() && lat <= tb.getNorth() && lng >= tb.getWest() && lng <= tb.getEast();
     }).length;
-    const crimeScore = Math.max(1, Math.min(5, 5 - 2.5 * Math.log10(Math.max(count, 1) / config.baseline)));
+    // Normalize by tract area vs. median tract area in this city
+    const tractArea = zone._area || estimateZoneAreaKm2(zone.geometry) || 1;
+    const areaFactor = medianTractArea / tractArea;
+    const count = rawCount; // preserve raw count for display
+    const normalizedCount = Math.max(rawCount * areaFactor, 1);
+    const crimeScore = Math.max(1, Math.min(5, 5 - 2.5 * Math.log10(normalizedCount / config.baseline)));
     const raw = count > 0 ? 0.55 * crimeScore + 0.45 * zone.acsScore : zone.acsScore;
     const score = Math.round(raw * 10) / 10;
     const level = score >= 3.5 ? 'safe' : score >= 2.5 ? 'caution' : 'avoid';
