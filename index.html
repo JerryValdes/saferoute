@@ -12,6 +12,10 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="SafeRoute — Tourist Safety Map">
   <meta name="twitter:description" content="Live neighborhood safety scores powered by open police data.">
+  <link rel="manifest" href="/saferoute/manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="icon" href="/saferoute/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/saferoute/icon-192.png">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
@@ -548,6 +552,21 @@
       /* icon-only route button on narrow screens */
       .rt-label { display: none; }
       #route-btn { padding: 5px 8px; }
+    }
+
+    /* ─── Offline banner ─── */
+    #offline-banner {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #1e293b; color: #e2e8f0;
+      font-size: 12.5px; font-weight: 500;
+      padding: 9px 16px;
+      display: none; align-items: center; justify-content: center; gap: 8px;
+      z-index: 9998; border-top: 1px solid #334155;
+    }
+    #offline-banner.show { display: flex; }
+    .offline-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--caution); flex-shrink: 0;
     }
   </style>
 </head>
@@ -4761,6 +4780,25 @@ function applyShareHash() {
 }
 
 applyShareHash();
+
+// ── PWA: service worker + offline banner ──────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/saferoute/sw.js', { scope: '/saferoute/' })
+    .catch(() => {}); // fail silently — offline still works if SW was previously installed
+}
+
+const offlineBanner = document.getElementById('offline-banner');
+function updateOnlineStatus() {
+  offlineBanner.classList.toggle('show', !navigator.onLine);
+}
+window.addEventListener('online',  updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
 </script>
+
+<div id="offline-banner">
+  <span class="offline-dot"></span>
+  You're offline — showing cached map data. Live crime scores may be from a previous session.
+</div>
 </body>
 </html>
