@@ -419,6 +419,52 @@
     }
     #share-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+
+    /* ─── Route button ─── */
+    #route-btn {
+      display: flex; align-items: center; gap: 5px;
+      background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.2);
+      border-radius: 99px; color: #94a3b8; cursor: pointer;
+      font-size: 12px; font-weight: 600; padding: 3px 11px;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    #route-btn:hover { background: rgba(255,255,255,.16); color: #e2e8f0; }
+    #route-btn.active { background: var(--safe); border-color: var(--safe); color: #fff; }
+
+    /* ─── Route panel ─── */
+    #route-panel {
+      padding: 10px 14px 12px;
+      border-bottom: 1px solid var(--border);
+      display: none; flex-shrink: 0;
+    }
+    #route-panel.open { display: block; }
+    .rt-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+    .rt-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .rt-dot-a { background: #3b82f6; }
+    .rt-dot-b { background: var(--avoid); }
+    .rt-input {
+      flex: 1; padding: 6px 10px; border: 1px solid var(--border);
+      border-radius: 6px; font-size: 12.5px; font-family: inherit;
+      background: var(--bg); outline: none; color: var(--text);
+    }
+    .rt-input:focus { border-color: #94a3b8; }
+    #route-go-btn {
+      width: 100%; padding: 7px; border-radius: 6px; margin-top: 2px;
+      background: var(--dark); color: #fff; border: none;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    #route-go-btn:hover { background: #1e293b; }
+    #route-go-btn:disabled { background: var(--border); color: var(--muted); cursor: default; }
+    #route-status { font-size: 12px; color: var(--muted); margin-top: 6px; min-height: 16px; }
+    .rt-summary { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+    .rt-stat { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; color: #334155; margin-bottom: 5px; }
+    .rt-bar { height: 8px; border-radius: 4px; overflow: hidden; display: flex; margin: 8px 0 5px; }
+    .rt-bar-safe    { background: var(--safe); }
+    .rt-bar-caution { background: var(--caution); }
+    .rt-bar-avoid   { background: var(--avoid); }
+    .rt-bar-unknown { background: #cbd5e1; }
+    .rt-legend { font-size: 11px; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; }
+
     /* ─── Mobile ─── */
     @media (max-width: 700px) {
       body { overflow: auto; }
@@ -442,6 +488,10 @@
     <div class="s-dot s-dot-loading"></div>
     <span id="status-text">Loading crime data…</span>
   </div>
+  <button id="route-btn" onclick="toggleRouteMode()" aria-label="Plan a route">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M6 9v3a6 6 0 0 0 6 6h1"/><path d="M18 15v-3a6 6 0 0 0-6-6h-1"/></svg>
+    Route
+  </button>
   <button id="info-btn" aria-label="About SafeRoute">?</button>
 </div>
 
@@ -451,6 +501,19 @@
     <div id="search-wrap">
       <input id="search-input" type="search" placeholder="Search neighborhoods or any destination…" autocomplete="off">
       <div id="search-results"></div>
+    </div>
+    <div id="route-panel">
+      <div class="rt-row">
+        <div class="rt-dot rt-dot-a"></div>
+        <input id="route-from" class="rt-input" placeholder="Start — address or place" autocomplete="off">
+      </div>
+      <div class="rt-row">
+        <div class="rt-dot rt-dot-b"></div>
+        <input id="route-to"   class="rt-input" placeholder="End — address or place" autocomplete="off">
+      </div>
+      <button id="route-go-btn" onclick="computeRoute()">Get walking route</button>
+      <div id="route-status"></div>
+      <div id="route-summary"></div>
     </div>
     <div id="time-toggle">
       <button class="tt-btn active" onclick="setTimeMode('all')">All hours</button>
@@ -3653,6 +3716,151 @@ function setTimeMode(mode) {
   });
   ZONES.filter(z => z.crimeScore !== null).forEach(zone => applyComposite(zone));
   if (activeZone) showZone(activeZone);
+}
+
+
+// ── Route safety ─────────────────────────────────────────────────────────────
+const routeLayer   = L.layerGroup().addTo(map);
+const routeMarkers = L.layerGroup().addTo(map);
+let routeActive = false;
+
+function toggleRouteMode() {
+  routeActive = !routeActive;
+  document.getElementById('route-btn').classList.toggle('active', routeActive);
+  document.getElementById('route-panel').classList.toggle('open', routeActive);
+  document.getElementById('time-toggle').style.display = routeActive ? 'none' : '';
+  if (!routeActive) {
+    routeLayer.clearLayers();
+    routeMarkers.clearLayers();
+    document.getElementById('route-from').value = '';
+    document.getElementById('route-to').value = '';
+    document.getElementById('route-status').textContent = '';
+    document.getElementById('route-summary').innerHTML = '';
+    resetPanel();
+  }
+}
+
+function getZoneForCoord(lat, lng) {
+  for (const zone of ZONES) {
+    if (zone.geometry && pointInGeoJSON(lat, lng, zone.geometry)) return zone;
+  }
+  return null;
+}
+
+function colorRoute(coords) {
+  const COLORS = { safe: '#22c55e', caution: '#eab308', avoid: '#ef4444', unknown: '#94a3b8' };
+  const step = Math.max(1, Math.floor(coords.length / 150));
+  const pts = [];
+  for (let i = 0; i < coords.length; i += step) {
+    const [lng, lat] = coords[i];
+    const zone = getZoneForCoord(lat, lng);
+    pts.push({ lat, lng, level: zone?.level || 'unknown' });
+  }
+
+  let seg = [pts[0]], segLevel = pts[0].level;
+  const segments = [];
+  for (let i = 1; i < pts.length; i++) {
+    if (pts[i].level !== segLevel) {
+      segments.push({ ll: seg.map(p => [p.lat, p.lng]), level: segLevel });
+      seg = [pts[i - 1], pts[i]];
+      segLevel = pts[i].level;
+    } else {
+      seg.push(pts[i]);
+    }
+  }
+  segments.push({ ll: seg.map(p => [p.lat, p.lng]), level: segLevel });
+
+  segments.forEach(({ ll, level }) => {
+    if (ll.length < 2) return;
+    L.polyline(ll, { color: COLORS[level], weight: 6, opacity: 0.85,
+      lineCap: 'round', lineJoin: 'round' }).addTo(routeLayer);
+  });
+
+  const counts = {};
+  pts.forEach(p => counts[p.level] = (counts[p.level] || 0) + 1);
+  return { counts, total: pts.length };
+}
+
+function showRouteSummary(route, { counts, total }) {
+  const dist = route.distance;
+  const distStr = dist >= 1000 ? `${(dist / 1000).toFixed(1)} km` : `${Math.round(dist)} m`;
+  const mins = Math.round(route.duration / 60);
+  const timeStr = mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins} min`;
+
+  const pct = lvl => Math.round((counts[lvl] || 0) / total * 100);
+  const sp = pct('safe'), cp = pct('caution'), ap = pct('avoid'), up = pct('unknown');
+
+  const rScore = (sp * 5 + cp * 3 + ap * 1 + up * 3.5) / 100;
+  const rLevel = rScore >= 3.5 ? 'safe' : rScore >= 2.5 ? 'caution' : 'avoid';
+  const rLabel = { safe: 'Mostly safe', caution: 'Use caution', avoid: 'High risk' }[rLevel];
+
+  document.getElementById('route-summary').innerHTML = `
+    <div class="rt-summary">
+      <div class="rt-stat"><span>Distance</span><strong>${distStr}</strong></div>
+      <div class="rt-stat"><span>Walking time</span><strong>${timeStr}</strong></div>
+      <div class="rt-stat"><span>Overall safety</span>
+        <span class="badge badge-${rLevel}" style="font-size:11px;padding:3px 8px">${rLabel}</span>
+      </div>
+      <div class="rt-bar">
+        ${sp > 0 ? `<div class="rt-bar-safe"    style="width:${sp}%" title="${sp}% safe"></div>` : ''}
+        ${cp > 0 ? `<div class="rt-bar-caution" style="width:${cp}%" title="${cp}% caution"></div>` : ''}
+        ${ap > 0 ? `<div class="rt-bar-avoid"   style="width:${ap}%" title="${ap}% avoid"></div>` : ''}
+        ${up > 0 ? `<div class="rt-bar-unknown" style="width:${up}%" title="${up}% no data"></div>` : ''}
+      </div>
+      <div class="rt-legend">
+        ${sp > 0 ? `<span style="color:#16a34a">■ ${sp}% safe</span>` : ''}
+        ${cp > 0 ? `<span style="color:#92400e">■ ${cp}% caution</span>` : ''}
+        ${ap > 0 ? `<span style="color:#991b1b">■ ${ap}% avoid</span>` : ''}
+        ${up > 0 ? `<span>■ ${up}% unmapped</span>` : ''}
+      </div>
+    </div>`;
+}
+
+async function computeRoute() {
+  const fromVal = document.getElementById('route-from').value.trim();
+  const toVal   = document.getElementById('route-to').value.trim();
+  if (!fromVal || !toVal) return;
+
+  const btn    = document.getElementById('route-go-btn');
+  const status = document.getElementById('route-status');
+  btn.disabled = true;
+  status.textContent = 'Geocoding addresses…';
+  routeLayer.clearLayers();
+  routeMarkers.clearLayers();
+
+  try {
+    const geocode = async q => {
+      const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1`);
+      const d = await r.json();
+      if (!d.length) throw new Error(`Could not find "${q}"`);
+      return [parseFloat(d[0].lat), parseFloat(d[0].lon)];
+    };
+
+    const [fromCoord, toCoord] = await Promise.all([geocode(fromVal), geocode(toVal)]);
+
+    status.textContent = 'Fetching walking route…';
+    const osrm = `https://router.project-osrm.org/route/v1/foot/${fromCoord[1]},${fromCoord[0]};${toCoord[1]},${toCoord[0]}?geometries=geojson&overview=full`;
+    const res  = await fetch(osrm);
+    if (!res.ok) throw new Error('Routing service unavailable');
+    const json = await res.json();
+    if (!json.routes?.length) throw new Error('No walking route found between those locations');
+
+    const route = json.routes[0];
+    status.textContent = 'Scoring route…';
+
+    L.circleMarker(fromCoord, { radius: 7, color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 1, weight: 2 }).addTo(routeMarkers);
+    L.circleMarker(toCoord,   { radius: 7, color: '#ef4444', fillColor: '#ef4444', fillOpacity: 1, weight: 2 }).addTo(routeMarkers);
+
+    const summary = colorRoute(route.geometry.coordinates);
+    showRouteSummary(route, summary);
+
+    map.fitBounds(L.latLngBounds([fromCoord, toCoord]), { padding: [60, 60] });
+    status.textContent = '';
+  } catch (e) {
+    status.textContent = `⚠ ${e.message}`;
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 // ── Share / permalink ─────────────────────────────────────────────────────────
