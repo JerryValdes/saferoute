@@ -287,6 +287,44 @@
     .modal-code    { background: var(--bg); border: 1px solid var(--border); padding: 1px 5px; border-radius: 3px; font-size: 11.5px; font-family: 'SF Mono','Consolas',monospace; }
     .modal-disc    { font-size: 11px; color: var(--muted); margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); line-height: 1.65; }
 
+    /* ─── Settings button ─── */
+    #settings-btn {
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.2);
+      background: rgba(255,255,255,.08);
+      color: #94a3b8; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    #settings-btn:hover { background: rgba(255,255,255,.16); color: #e2e8f0; }
+
+    /* ─── Settings modal ─── */
+    #settings-modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.55);
+      display: none; align-items: center; justify-content: center;
+      z-index: 9999; padding: 16px;
+    }
+    #settings-modal-overlay.open { display: flex; }
+    #settings-modal {
+      background: #fff; border-radius: 12px;
+      padding: 24px 26px; max-width: 320px; width: 100%;
+      position: relative; box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    }
+    #settings-modal-close {
+      position: absolute; top: 12px; right: 14px;
+      background: none; border: none; font-size: 22px; line-height: 1;
+      color: var(--muted); cursor: pointer; padding: 4px 8px; border-radius: 4px;
+    }
+    #settings-modal-close:hover { background: var(--border); }
+    .settings-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .7px; color: var(--muted); margin: 18px 0 10px;
+    }
+    .settings-label:first-of-type { margin-top: 0; }
+    #unit-toggle { display: flex; }
+    #unit-toggle .tt-btn { flex: 1; }
+
     /* ─── Search ─── */
     #search-wrap {
       padding: 10px 14px 0;
@@ -465,18 +503,51 @@
     .rt-bar-unknown { background: #cbd5e1; }
     .rt-legend { font-size: 11px; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; }
 
+    /* ─── Nearby panel ─── */
+    .nearby-section { margin-top: 18px; }
+    .nearby-heading {
+      font-size: 10.5px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .65px;
+      color: var(--muted); margin-bottom: 8px;
+    }
+    .nearby-list { display: flex; flex-direction: column; gap: 2px; }
+    .nearby-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 8px; border-radius: 6px; cursor: pointer;
+      border: 1px solid transparent; font-size: 12.5px; color: #334155;
+      transition: background .12s;
+    }
+    .nearby-item:hover { background: var(--bg); border-color: var(--border); }
+    .nearby-dot  { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .nearby-name { flex: 1; line-height: 1.3; }
+    .nearby-city { font-size: 11px; color: var(--muted); display: block; }
+    .nearby-meta { font-weight: 600; font-size: 12px; color: var(--muted); flex-shrink: 0; text-align: right; line-height: 1.3; }
+
     /* ─── Mobile ─── */
     @media (max-width: 700px) {
-      body { overflow: auto; }
+      body { overflow: auto; overflow-x: hidden; }
       html, body { height: auto; }
       #main { flex-direction: column; overflow: visible; }
-      #map  { height: 56vw; min-height: 260px; max-height: 380px; }
+      #map  { height: 52vw; min-height: 240px; max-height: 340px; }
       #sidebar { width: 100%; border-left: none; border-top: 1px solid var(--border); overflow: visible; }
-      #panel { overflow: visible; padding: 16px; }
-      .placeholder { min-height: 110px; }
+      #panel { overflow: visible; padding: 14px; }
+      .placeholder { min-height: 100px; }
       #status-pill { display: none; }
-      #info-btn { width: 30px; height: 30px; font-size: 14px; }
-      #info-modal { padding: 22px 18px; }
+      #info-btn, #settings-btn { width: 30px; height: 30px; font-size: 14px; }
+      #info-modal { padding: 20px 16px; }
+      /* compact route panel */
+      #route-panel { padding: 8px 12px 10px; }
+      .rt-row { margin-bottom: 4px; }
+      .rt-input { padding: 5px 8px; font-size: 12px; }
+      /* compact time toggle */
+      .tt-sub { display: none; }
+      .tt-btn { padding: 7px 0; }
+      /* compact legend */
+      #legend { padding: 8px 14px; }
+      .method-note { display: none; }
+      /* icon-only route button on narrow screens */
+      .rt-label { display: none; }
+      #route-btn { padding: 5px 8px; }
     }
   </style>
 </head>
@@ -490,7 +561,10 @@
   </div>
   <button id="route-btn" onclick="toggleRouteMode()" aria-label="Plan a route">
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M6 9v3a6 6 0 0 0 6 6h1"/><path d="M18 15v-3a6 6 0 0 0-6-6h-1"/></svg>
-    Route
+    <span class="rt-label">Route</span>
+  </button>
+  <button id="settings-btn" onclick="openSettings()" aria-label="Settings">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
   </button>
   <button id="info-btn" aria-label="About SafeRoute">?</button>
 </div>
@@ -534,6 +608,18 @@
 </div>
 
 <div id="share-toast"></div>
+
+<div id="settings-modal-overlay">
+  <div id="settings-modal">
+    <button id="settings-modal-close" onclick="closeSettings()" aria-label="Close">&times;</button>
+    <div class="modal-title">Settings</div>
+    <div class="settings-label">Distance units</div>
+    <div id="unit-toggle">
+      <button class="tt-btn active" id="unit-mi" onclick="setUnitPref('mi')">Miles</button>
+      <button class="tt-btn" id="unit-km" onclick="setUnitPref('km')">Kilometers</button>
+    </div>
+  </div>
+</div>
 
 <div id="info-modal-overlay">
   <div id="info-modal">
@@ -2555,6 +2641,36 @@ function pointInGeoJSON(testLat, testLng, geometry) {
   return false;
 }
 
+// ── Unit preference ───────────────────────────────────────────────────────────
+let unitPref = localStorage.getItem('saferoute_unit') || 'mi';
+
+function fmtDistKm(km) {
+  if (unitPref === 'mi') {
+    const mi = km * 0.621371;
+    return mi < 0.1 ? `${Math.round(km * 3280.84)} ft` : `${mi.toFixed(1)} mi`;
+  }
+  return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
+}
+function fmtDistM(m) { return fmtDistKm(m / 1000); }
+
+function setUnitPref(u) {
+  unitPref = u;
+  localStorage.setItem('saferoute_unit', u);
+  document.getElementById('unit-mi').classList.toggle('active', u === 'mi');
+  document.getElementById('unit-km').classList.toggle('active', u === 'km');
+  if (activeZone) showZone(activeZone);
+  if (lastRoute) showRouteSummary(lastRoute, lastRouteSummary);
+}
+
+function openSettings() {
+  document.getElementById('unit-mi').classList.toggle('active', unitPref === 'mi');
+  document.getElementById('unit-km').classList.toggle('active', unitPref === 'km');
+  document.getElementById('settings-modal-overlay').classList.add('open');
+}
+function closeSettings() {
+  document.getElementById('settings-modal-overlay').classList.remove('open');
+}
+
 // ── Score computation ────────────────────────────────────────────────────────
 let timeMode = 'all'; // 'all' | 'day' | 'night'
 
@@ -3324,6 +3440,7 @@ function buildAndDrawZones(geoJSON, city, cityId) {
     polyLayers[`${cityId}:${zone.name}`] = geoLayer;
 
     const center = geoLayer.getBounds().getCenter();
+    zone._center = center;
     L.marker(center, {
       icon: L.divIcon({
         className: 'zone-label',
@@ -3374,6 +3491,54 @@ const PLACEHOLDER = `
 function resetPanel() {
   activeZone = null;
   document.getElementById('panel').innerHTML = PLACEHOLDER;
+}
+
+function zoneCenterApprox(zone) {
+  if (zone._center) return zone._center;
+  if (!zone.geometry) return null;
+  try {
+    zone._center = L.geoJSON({ type: 'Feature', geometry: zone.geometry }).getBounds().getCenter();
+    return zone._center;
+  } catch (e) { return null; }
+}
+
+function latLngDistKm(a, b) {
+  const R = 111.32;
+  const dy = (a.lat - b.lat) * R;
+  const dx = (a.lng - b.lng) * R * Math.cos((a.lat + b.lat) / 2 * Math.PI / 180);
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+function showZoneByIdx(idx) {
+  if (ZONES[idx]) showZone(ZONES[idx]);
+}
+
+function nearbyHtml(zone) {
+  const center = zoneCenterApprox(zone);
+  if (!center) return '';
+  const RADIUS_KM = 5;
+  const COLOR = { safe: 'var(--safe)', caution: 'var(--caution)', avoid: 'var(--avoid)' };
+  const candidates = [];
+  for (let i = 0; i < ZONES.length; i++) {
+    const z = ZONES[i];
+    if (z === zone || !z.score) continue;
+    const c = zoneCenterApprox(z);
+    if (!c) continue;
+    const km = latLngDistKm(center, c);
+    if (km <= RADIUS_KM) candidates.push({ z, km, i });
+  }
+  if (candidates.length === 0) return '';
+  candidates.sort((a, b) => b.z.score - a.z.score);
+  const rows = candidates.slice(0, 8).map(({ z, km, i }) => {
+    const dist = fmtDistKm(km);
+    const cityPart = z.cityLabel && z.cityLabel !== 'US Census Tract' ? `<span class="nearby-city">${z.cityLabel}</span>` : '';
+    return `<div class="nearby-item" onclick="showZoneByIdx(${i})">` +
+      `<span class="nearby-dot" style="background:${COLOR[z.level] || '#94a3b8'}"></span>` +
+      `<span class="nearby-name">${z.name}${cityPart}</span>` +
+      `<span class="nearby-meta">${z.score}/5<br><span style="font-weight:400">${dist}</span></span>` +
+      `</div>`;
+  }).join('');
+  return `<div class="nearby-section"><div class="nearby-heading">Nearby Neighborhoods</div><div class="nearby-list">${rows}</div></div>`;
 }
 
 function starsHtml(score) {
@@ -3429,6 +3594,7 @@ function showZone(zone) {
       ${crimeBox}
       <div class="tips-heading">Tourist Tips</div>
       ${zone.tips.map(t => `<div class="tip"><span class="tip-icon">${t.icon}</span><span>${t.text}</span></div>`).join('')}
+      ${nearbyHtml(zone)}
     </div>`;
 
   if (window.innerWidth <= 700) {
@@ -3670,6 +3836,7 @@ function buildCensusTractZones(features, acsMap) {
       ],
       crimeScore: null, qolScore: null, amenityScore: null, crimeCount: null,
       geometry: feature.geometry,
+      _center: center,
     };
     ZONES.push(zone);
     geoLayer.on('mouseover', () => geoLayer.setStyle({ fillOpacity: HOVER_OPACITY[level], weight: 1.5 }));
@@ -3764,9 +3931,7 @@ function loadCensusTracts() {
   _censusTimer = setTimeout(_doLoadCensusTracts, 400);
 }
 
-async function _doLoadCensusTracts() {
-  if (map.getZoom() < 10) return;
-  const bounds = map.getBounds();
+async function loadCensusTractsForBounds(bounds) {
   let geoJSON;
   try {
     geoJSON = await fetchTractGeoJSON(bounds);
@@ -3776,7 +3941,6 @@ async function _doLoadCensusTracts() {
   }
   if (!geoJSON.features?.length) return;
 
-  // Filter to tracts not yet drawn and not inside an existing city bbox
   const newFeatures = geoJSON.features.filter(f => {
     const geoid = f.properties?.GEOID;
     if (!geoid || polyLayers[`tract:${geoid}`]) return false;
@@ -3784,7 +3948,6 @@ async function _doLoadCensusTracts() {
   });
   if (!newFeatures.length) return;
 
-  // Skip water-only tracts (AREALAND=0); land tracts draw in censusLayerGroup below city neighborhoods
   const drawable = newFeatures.filter(f => {
     const geoid = f.properties.GEOID;
     if (!(parseInt(f.properties.AREALAND) > 0)) {
@@ -3795,7 +3958,6 @@ async function _doLoadCensusTracts() {
   });
   if (!drawable.length) return;
 
-  // Group by state+county — 1 Census API call per county covers all its tracts
   const byCounty = {};
   drawable.forEach(f => {
     const geoid = f.properties.GEOID;
@@ -3812,6 +3974,11 @@ async function _doLoadCensusTracts() {
     });
     buildCensusTractZones(features, acsMap);
   }));
+}
+
+async function _doLoadCensusTracts() {
+  if (map.getZoom() < 10) return;
+  await loadCensusTractsForBounds(map.getBounds());
 
   // Upgrade tracts in Socrata-covered cities with real crime data
   const bounds2 = map.getBounds();
@@ -3907,7 +4074,14 @@ document.getElementById('info-btn').addEventListener('click', openInfoModal);
 document.getElementById('info-modal-overlay').addEventListener('click', e => {
   if (e.target === document.getElementById('info-modal-overlay')) closeInfoModal();
 });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeInfoModal(); });
+document.getElementById('settings-modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('settings-modal-overlay')) closeSettings();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeInfoModal(); closeSettings(); } });
+
+// Apply saved unit pref to toggle on load
+document.getElementById('unit-mi').classList.toggle('active', unitPref === 'mi');
+document.getElementById('unit-km').classList.toggle('active', unitPref === 'km');
 
 // ── Time-of-day toggle ────────────────────────────────────────────────────────
 function setTimeMode(mode) {
@@ -3982,9 +4156,12 @@ function colorRoute(coords) {
   return { counts, total: pts.length };
 }
 
+let lastRoute = null, lastRouteSummary = null;
+
 function showRouteSummary(route, { counts, total }) {
-  const dist = route.distance;
-  const distStr = dist >= 1000 ? `${(dist / 1000).toFixed(1)} km` : `${Math.round(dist)} m`;
+  lastRoute = route;
+  lastRouteSummary = { counts, total };
+  const distStr = fmtDistM(route.distance);
   const mins = Math.round(route.duration / 60);
   const timeStr = mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins} min`;
 
@@ -4046,21 +4223,76 @@ async function computeRoute() {
     const json = await res.json();
     if (!json.routes?.length) throw new Error('No walking route found between those locations');
 
-    const route = json.routes[0];
-    status.textContent = 'Scoring route…';
+    const route  = json.routes[0];
+    const coords = route.geometry.coordinates;
 
     L.circleMarker(fromCoord, { radius: 7, color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 1, weight: 2 }).addTo(routeMarkers);
     L.circleMarker(toCoord,   { radius: 7, color: '#ef4444', fillColor: '#ef4444', fillOpacity: 1, weight: 2 }).addTo(routeMarkers);
 
-    const summary = colorRoute(route.geometry.coordinates);
-    showRouteSummary(route, summary);
-
+    // Initial draw with whatever is already loaded (may have gray/unknown segments)
+    status.textContent = 'Scoring route…';
+    colorRoute(coords);
     map.fitBounds(L.latLngBounds([fromCoord, toCoord]), { padding: [60, 60] });
+
+    // Load city + census tract data for every area along the route
+    status.textContent = 'Loading safety data for route area…';
+    await loadRouteCorridor(coords);
+
+    // Re-draw now that data is loaded — clear old segments first
+    routeLayer.clearLayers();
+    const summary = colorRoute(coords);
+    showRouteSummary(route, summary);
     status.textContent = '';
   } catch (e) {
     status.textContent = `⚠ ${e.message}`;
   } finally {
     btn.disabled = false;
+  }
+}
+
+
+// ── Route corridor data loader ────────────────────────────────────────────────
+async function loadRouteCorridor(coords) {
+  // Build route bounding box
+  let south = 90, north = -90, west = 180, east = -180;
+  for (const [lng, lat] of coords) {
+    if (lat < south) south = lat; if (lat > north) north = lat;
+    if (lng < west)  west = lng;  if (lng > east)  east = lng;
+  }
+  const routeBounds = L.latLngBounds([[south, west], [north, east]]);
+
+  // 1. Load any unloaded cities whose bbox intersects the route
+  const cityLoads = [];
+  for (const [cityId, city] of Object.entries(CITIES)) {
+    if (crimeLoaded.has(cityId) || !city.bbox) continue;
+    const [n, w, s, e] = city.bbox;
+    if (!routeBounds.intersects(L.latLngBounds([[s, w], [n, e]]))) continue;
+    crimeLoaded.add(cityId);
+    cityLoads.push(loadVisibleCity(cityId).catch(() => {}));
+  }
+
+  // 2. Load census tracts — one 9km window per ~4km of route diagonal for full coverage
+  const d = 0.04; // ~4.5 km half-width per window
+  const diagDeg = Math.sqrt(Math.pow(north - south, 2) + Math.pow(east - west, 2));
+  const windows = Math.max(4, Math.min(20, Math.ceil(diagDeg / d)));
+  const step = Math.max(1, Math.floor(coords.length / windows));
+  const tractLoads = [];
+  for (let i = 0; i < coords.length; i += step) {
+    const [lng, lat] = coords[i];
+    tractLoads.push(
+      loadCensusTractsForBounds(L.latLngBounds([[lat-d, lng-d], [lat+d, lng+d]])).catch(() => {})
+    );
+  }
+
+  await Promise.all([...cityLoads, ...tractLoads]);
+
+  // 3. Apply Socrata crime data to census tracts in any Socrata city along the route
+  for (const [cityKey, config] of Object.entries(SOCRATA_CITIES)) {
+    if (socrataLoaded.has(cityKey)) continue;
+    const [n, w, s, e] = config.bbox;
+    if (!routeBounds.intersects(L.latLngBounds([s, w], [n, e]))) continue;
+    socrataLoaded.add(cityKey);
+    applySocrataCrimeToTracts(cityKey, config);
   }
 }
 
