@@ -1738,6 +1738,68 @@ const ORLANDO_ZONE_DEFS = {
 };
 
 
+// ── International city zone definitions ───────────────────────────────────────
+const LONDON_ZONE_DEFS = {
+  "Westminster":{ level:"caution", score:3.4, desc:"London's tourist heart \u2014 Buckingham Palace, the Houses of Parliament, Westminster Abbey, Trafalgar Square, and the West End theatres. Very safe in the main sights, but Europe's highest pickpocket rate. Keep your bag zipped.", tips:[{"icon": "✅", "text": "Very safe for tourists in the main areas — heavily policed"}, {"icon": "⚠️", "text": "Europe's highest pickpocket rate — keep bags in front, phones in pockets"}, {"icon": "🎭", "text": "West End theatres, Leicester Square, and Covent Garden are all here"}, {"icon": "🏛️", "text": "Westminster Abbey, Big Ben, and Buckingham Palace are within walking distance of each other"}] },
+  "Kensington and Chelsea":{ level:"safe", score:4.3, desc:"London's most expensive borough \u2014 the V&A, Natural History Museum, Science Museum, Notting Hill, and Chelsea. Very safe and visitor-friendly.", tips:[{"icon": "✅", "text": "Very safe — London's most exclusive borough"}, {"icon": "🏛️", "text": "South Kensington museum quarter: V&A, Natural History, and Science museums are all free"}, {"icon": "🌸", "text": "Notting Hill Carnival in August is spectacular — also great boutiques year-round"}, {"icon": "🌳", "text": "Hyde Park and Kensington Gardens are excellent for walking"}] },
+  "Southwark":{ level:"safe", score:3.8, desc:"London's cultural south bank \u2014 the Tate Modern, Shakespeare's Globe, Borough Market, and the Shard. Very safe in the tourist corridor.", tips:[{"icon": "✅", "text": "Very safe in the tourist areas along the South Bank"}, {"icon": "🎨", "text": "Tate Modern is free and world-class"}, {"icon": "🍽️", "text": "Borough Market is one of London's best food markets — busy but safe"}, {"icon": "🌉", "text": "Millennium Bridge and Tower Bridge are both here — great views of the City"}] },
+  "City of London":{ level:"safe", score:4.1, desc:"The ancient 'Square Mile' \u2014 Britain's financial district. Almost entirely offices and banks; very safe but very quiet evenings and weekends.", tips:[{"icon": "✅", "text": "Very safe — low residential population keeps crime low"}, {"icon": "🏛️", "text": "Museum of London and St Paul's Cathedral are excellent"}, {"icon": "🌉", "text": "Tower of London and Tower Bridge are just east of here"}, {"icon": "ℹ️", "text": "Quiet on weekends — most businesses close on Saturdays"}] },
+  "Camden":{ level:"caution", score:3.2, desc:"Eccentric north London neighbourhood \u2014 Camden Market, Primrose Hill, and a famous music heritage. Safe in the tourist areas but pickpocketing is common in the market.", tips:[{"icon": "🎸", "text": "Camden Market is chaotic and fun — especially for vintage fashion and street food"}, {"icon": "⚠️", "text": "Pickpocketing is common in the busy market — keep your valuables secure"}, {"icon": "🌳", "text": "Primrose Hill has the best views of the London skyline — very safe"}, {"icon": "🍺", "text": "Good pub scene along Camden High Street and the surrounding area"}] },
+  "Hackney":{ level:"caution", score:3.1, desc:"One of London's hippest boroughs \u2014 Shoreditch, Broadway Market, Dalston, and the Hackney Canal. Gentrified in parts but still has elevated crime in some areas.", tips:[{"icon": "🎨", "text": "Shoreditch street art and gallery scene is world-famous"}, {"icon": "🛍️", "text": "Broadway Market (Saturdays) is one of London's best"}, {"icon": "⚠️", "text": "Elevated crime on some residential streets — stick to the main commercial areas"}, {"icon": "🍺", "text": "Excellent bar and restaurant scene throughout — very vibrant"}] },
+  "Tower Hamlets":{ level:"caution", score:3.0, desc:"East London borough with huge contrasts \u2014 Canary Wharf's gleaming towers, Brick Lane's curry houses, and Whitechapel's markets. Mixed safety.", tips:[{"icon": "🍛", "text": "Brick Lane is London's best curry restaurant corridor"}, {"icon": "🏙️", "text": "Canary Wharf is modern and very safe"}, {"icon": "⚠️", "text": "Whitechapel and some residential streets have elevated crime"}, {"icon": "🕌", "text": "East London Mosque and Whitechapel Gallery are notable cultural sites"}] },
+  "Islington":{ level:"safe", score:3.9, desc:"Trendy north London borough \u2014 the Angel neighbourhood, Upper Street restaurants, and Borough-style markets. Generally safe.", tips:[{"icon": "✅", "text": "Generally safe — very popular with professionals and families"}, {"icon": "🍽️", "text": "Upper Street has one of London's best concentrations of independent restaurants"}, {"icon": "🎭", "text": "Almeida Theatre and many smaller venues"}, {"icon": "🌊", "text": "Regent's Canal towpath is a lovely walk toward King's Cross"}] },
+  "Lambeth":{ level:"caution", score:3.1, desc:"South London borough with huge contrasts \u2014 the South Bank (very safe) versus Brixton and Streatham (elevated crime). Tourist areas are safe.", tips:[{"icon": "✅", "text": "South Bank/Waterloo area is very safe and touristy"}, {"icon": "🎵", "text": "Brixton is famous for its music culture — David Bowie, the Windrush generation"}, {"icon": "⚠️", "text": "Brixton market area has elevated crime — keep aware"}, {"icon": "🏛️", "text": "Imperial War Museum in Lambeth is excellent and free"}] },
+  "Wandsworth":{ level:"safe", score:4.1, desc:"Affluent south London borough \u2014 Battersea, Clapham, Tooting Bec. Generally safe with a vibrant pub and restaurant scene.", tips:[{"icon": "✅", "text": "Very safe — one of London's safer boroughs"}, {"icon": "🏭", "text": "Battersea Power Station redevelopment has excellent new restaurants and shops"}, {"icon": "🌳", "text": "Clapham Common is great for outdoor socialising"}, {"icon": "🐘", "text": "Battersea Park and children's zoo"}] },
+  "Hammersmith and Fulham":{ level:"safe", score:3.9, desc:"West London borough \u2014 Chiswick, Fulham, and Shepherd's Bush. Generally safe with good transport links.", tips:[{"icon": "✅", "text": "Generally safe"}, {"icon": "🛍️", "text": "Westfield Shepherd's Bush is a huge modern shopping centre"}, {"icon": "🎭", "text": "Lyric Hammersmith is an excellent theatre"}, {"icon": "🚣", "text": "Thames Path runs along the south of this borough — great for walking"}] },
+  "Richmond upon Thames":{ level:"safe", score:4.7, desc:"Southwest London's jewel \u2014 Richmond Park (deer!), Kew Gardens, Hampton Court Palace, and the best riverside pubs. Extremely safe.", tips:[{"icon": "✅", "text": "Extremely safe — one of London's safest boroughs"}, {"icon": "🦌", "text": "Richmond Park has 600 free-roaming deer — magnificent"}, {"icon": "🌿", "text": "Kew Gardens is the world's greatest botanical garden — go for a full day"}, {"icon": "🏰", "text": "Hampton Court Palace is a major Tudor landmark"}] },
+  "Greenwich":{ level:"safe", score:4.0, desc:"Historic Royal Borough \u2014 the Cutty Sark, Old Royal Naval College, Royal Observatory (Prime Meridian), and beautiful Greenwich Park.", tips:[{"icon": "✅", "text": "Very safe — major tourist area"}, {"icon": "🌐", "text": "Stand on the Prime Meridian line at the Royal Observatory — free grounds"}, {"icon": "⛵", "text": "Cutty Sark clipper ship is in excellent condition"}, {"icon": "🏛️", "text": "Old Royal Naval College is a spectacular Baroque complex — free"}] },
+  "Merton":{ level:"safe", score:4.2, desc:"South London suburb \u2014 Wimbledon Village, Wimbledon Common, and the All England Tennis Club.", tips:[{"icon": "✅", "text": "Very safe suburban borough"}, {"icon": "🎾", "text": "Wimbledon championships in June/July — tickets via ballot"}, {"icon": "🌳", "text": "Wimbledon Common is one of London's largest natural spaces"}, {"icon": "🛒", "text": "Wimbledon Village has good independent shops and restaurants"}] },
+  "Kingston upon Thames":{ level:"safe", score:4.3, desc:"Historic royal town in southwest London \u2014 excellent shopping, riverside location, and good transport.", tips:[{"icon": "✅", "text": "Very safe"}, {"icon": "🛍️", "text": "Kingston town centre has excellent shopping"}, {"icon": "🚣", "text": "Thames riverfront is beautiful for walking"}, {"icon": "🚂", "text": "Good train connections to central London"}] },
+  "Hounslow":{ level:"safe", score:3.7, desc:"West London borough adjacent to Heathrow \u2014 Chiswick House, Syon Park, and good transport links.", tips:[{"icon": "✅", "text": "Generally safe"}, {"icon": "🏛️", "text": "Chiswick House has beautiful Palladian gardens — free grounds"}, {"icon": "✈️", "text": "Very close to Heathrow Airport"}, {"icon": "🌳", "text": "Syon Park (National Trust) is nearby"}] },
+  "Ealing":{ level:"safe", score:3.8, desc:"West London suburb \u2014 'Queen of the Suburbs'. Generally safe with good transport.", tips:[{"icon": "✅", "text": "Generally safe"}, {"icon": "🚇", "text": "Multiple tube lines make this very well-connected"}, {"icon": "🛒", "text": "Ealing Broadway has good shopping and dining"}, {"icon": "🌳", "text": "Walpole Park is pleasant"}] },
+  "Brent":{ level:"caution", score:3.2, desc:"Northwest London \u2014 Wembley (national stadium), Harlesden, and Kilburn. Mixed safety.", tips:[{"icon": "⚽", "text": "Wembley Stadium and Wembley Arena are major entertainment venues"}, {"icon": "⚠️", "text": "Some areas have elevated crime — Harlesden has higher rates"}, {"icon": "🚇", "text": "Wembley area is well-served by tube"}, {"icon": "🌳", "text": "Fryent Country Park is a hidden gem"}] },
+  "Barnet":{ level:"safe", score:4.3, desc:"Large north London suburb \u2014 Hampstead Heath (partially), Finchley, and Mill Hill. Very safe.", tips:[{"icon": "✅", "text": "Very safe — large, affluent north London suburb"}, {"icon": "🌳", "text": "East Barnet has access to Trent Country Park"}, {"icon": "🛒", "text": "Good suburban shopping centres"}, {"icon": "🚂", "text": "Multiple Northern line stations"}] },
+  "Haringey":{ level:"caution", score:2.9, desc:"North London borough with major contrasts \u2014 Muswell Hill (very safe) versus Tottenham (elevated crime). Exercise caution in the east.", tips:[{"icon": "⚠️", "text": "Large variation — Muswell Hill is safe, Tottenham has elevated crime"}, {"icon": "🎵", "text": "Tottenham is home to Alexandra Palace — 'Ally Pally' — great venue"}, {"icon": "🌳", "text": "Alexandra Palace Park has great views of London"}, {"icon": "⚽", "text": "Tottenham Hotspur's new stadium is impressive"}] },
+  "Enfield":{ level:"safe", score:3.9, desc:"Northernmost London borough \u2014 largely suburban. Generally safe.", tips:[{"icon": "✅", "text": "Generally safe suburban borough"}, {"icon": "🌳", "text": "Trent Country Park and Forty Hall have excellent walking"}, {"icon": "🚂", "text": "Good train connections into Liverpool Street"}, {"icon": "🛒", "text": "Enfield Town has standard high street retail"}] },
+  "Newham":{ level:"caution", score:2.8, desc:"East London borough \u2014 home of the 2012 Olympic Park (now Queen Elizabeth Olympic Park), Stratford Westfield, and West Ham United. Mixed safety.", tips:[{"icon": "🏟️", "text": "Queen Elizabeth Olympic Park and the ArcelorMittal Orbit are impressive"}, {"icon": "🛍️", "text": "Westfield Stratford is one of Europe's largest shopping centres"}, {"icon": "⚠️", "text": "Some areas away from the main development have elevated crime"}, {"icon": "⚽", "text": "London Stadium (West Ham) and Aquatics Centre"}] },
+  "Havering":{ level:"safe", score:4.2, desc:"Far east London \u2014 suburban, commuter. Very safe.", tips:[{"icon": "✅", "text": "Very safe outer London suburb"}, {"icon": "🌳", "text": "Havering Country Park has good walking"}, {"icon": "🚂", "text": "Train to Liverpool Street"}, {"icon": "🏡", "text": "Largely residential — not a major tourist area"}] },
+  "Redbridge":{ level:"safe", score:3.9, desc:"East London suburb. Generally safe.", tips:[{"icon": "✅", "text": "Generally safe"}, {"icon": "🌳", "text": "Valentines Park is pleasant"}, {"icon": "🛒", "text": "Ilford has good shopping"}, {"icon": "🚂", "text": "Elizabeth line (Crossrail) connections"}] },
+  "Barking and Dagenham":{ level:"caution", score:2.9, desc:"East London borough. Elevated crime in some areas.", tips:[{"icon": "⚠️", "text": "Elevated crime — not a tourist destination"}, {"icon": "🚂", "text": "Good transport links"}, {"icon": "🏭", "text": "Ford's former Dagenham plant is historically significant"}] },
+  "Waltham Forest":{ level:"caution", score:3.0, desc:"Northeast London \u2014 Walthamstow Village (nice!), Wood Street, and the Walthamstow Wetlands. Mixed safety.", tips:[{"icon": "✅", "text": "Walthamstow Village is actually charming and safe"}, {"icon": "🦆", "text": "Walthamstow Wetlands is Europe's largest urban wetland reserve"}, {"icon": "⚠️", "text": "Some residential areas have elevated crime"}, {"icon": "🎵", "text": "Strong local arts scene on Wood Street"}] },
+  "Lewisham":{ level:"caution", score:3.0, desc:"South London borough. Elevated crime in some areas.", tips:[{"icon": "⚠️", "text": "Elevated crime in some areas — exercise caution"}, {"icon": "🏡", "text": "Brockley and Telegraph Hill have lovely Victorian terraces"}, {"icon": "🚂", "text": "Blackheath Village is just outside the borough — worth visiting"}, {"icon": "🌳", "text": "Mountsfield Park is pleasant"}] },
+  "Bromley":{ level:"safe", score:4.2, desc:"South London suburb \u2014 large, leafy, and affluent. Very safe.", tips:[{"icon": "✅", "text": "Very safe suburban borough"}, {"icon": "🌳", "text": "Crystal Palace Park has impressive grounds and a transmitter tower"}, {"icon": "🛒", "text": "Bromley town centre has good shopping"}, {"icon": "🌿", "text": "Beckenham Place Park is a nature reserve"}] },
+  "Croydon":{ level:"caution", score:2.8, desc:"Major south London town. Mixed safety \u2014 elevated crime in the centre.", tips:[{"icon": "⚠️", "text": "Elevated crime in Croydon town centre — exercise caution"}, {"icon": "🚂", "text": "Good transport links — Gatwick Express"}, {"icon": "🌳", "text": "Addington Hills and Selsdon Wood are pleasant"}, {"icon": "🛒", "text": "Boxpark Croydon has good street food"}] },
+  "Sutton":{ level:"safe", score:4.3, desc:"Quiet south London suburb. Very safe.", tips:[{"icon": "✅", "text": "Very safe"}, {"icon": "🌳", "text": "Nonsuch Park is beautiful"}, {"icon": "🚂", "text": "Good Southern Rail connections"}, {"icon": "🏡", "text": "Pleasant residential suburb — not a tourist destination"}] },
+  "Hillingdon":{ level:"safe", score:3.8, desc:"West London borough \u2014 Heathrow Airport, Ruislip Lido, and Uxbridge. Generally safe.", tips:[{"icon": "✅", "text": "Generally safe"}, {"icon": "✈️", "text": "Heathrow Airport is in this borough"}, {"icon": "🌊", "text": "Ruislip Lido is a surprisingly nice beach with a miniature railway"}, {"icon": "🚇", "text": "Piccadilly line runs through here"}] },
+  "Harrow":{ level:"safe", score:4.0, desc:"Northwest London suburb \u2014 Harrow-on-the-Hill is picturesque. Generally safe.", tips:[{"icon": "✅", "text": "Generally safe"}, {"icon": "🏫", "text": "Harrow School (Churchill's school) has beautiful grounds"}, {"icon": "🌳", "text": "Harrow-on-the-Hill is worth a visit"}, {"icon": "🚇", "text": "Metropolitan line connections"}] },
+};
+
+const TORONTO_ZONE_DEFS = {
+  "Waterfront Communities-The Island":{ level:"safe", score:4.2, desc:"Toronto's lakefront \u2014 CN Tower, Scotiabank Arena, Rogers Centre, the Distillery District, and Centre Island ferry terminal. Very safe in the tourist corridor.", tips:[{"icon": "✅", "text": "Very safe — heavily visited tourist area"}, {"icon": "🗼", "text": "CN Tower is the signature Toronto landmark — glass floor and EdgeWalk"}, {"icon": "⛵", "text": "Centre Island ferry for car-free beaches and skyline views"}, {"icon": "🍺", "text": "Distillery District has excellent restaurants, galleries, and microbreweries"}] },
+  "Bay Street Corridor":{ level:"safe", score:3.8, desc:"Downtown Toronto financial core \u2014 Bay St, the PATH underground network, Eaton Centre, and the theatre district. Safe daytime; quieter evenings.", tips:[{"icon": "✅", "text": "Generally safe — major downtown hub"}, {"icon": "🛍️", "text": "Toronto Eaton Centre is Canada's busiest shopping mall"}, {"icon": "🎭", "text": "Theatre district nearby — Royal Alexandra, Princess of Wales"}, {"icon": "🚇", "text": "Multiple subway connections from Union Station"}] },
+  "Church-Yonge Corridor":{ level:"safe", score:3.7, desc:"Dense downtown neighbourhood \u2014 Toronto's LGBTQ+ Village, Ryerson University, and Yonge-Dundas Square (Toronto's Times Square). Safe but watch belongings.", tips:[{"icon": "✅", "text": "Generally safe"}, {"icon": "🌈", "text": "Church-Wellesley Village is the heart of Toronto's LGBTQ+ community"}, {"icon": "🎉", "text": "Yonge-Dundas Square has free concerts and events year-round"}, {"icon": "🛒", "text": "Yonge Street has abundant shopping and dining"}] },
+  "Kensington-Chinatown":{ level:"safe", score:3.6, desc:"Two of Toronto's most vibrant neighbourhoods \u2014 Kensington Market (artsy, multicultural) and Chinatown (Spadina Ave). Safe in the main areas.", tips:[{"icon": "✅", "text": "Generally safe in the main market areas"}, {"icon": "🛍️", "text": "Kensington Market is a treasure trove of vintage, multicultural food, and indie shops"}, {"icon": "🍜", "text": "Spadina Chinatown has excellent and inexpensive Chinese, Vietnamese, and Thai food"}, {"icon": "⚠️", "text": "Some petty crime in Kensington Market — keep your belongings secure"}] },
+  "University":{ level:"safe", score:4.0, desc:"University of Toronto and Queen's Park. Safe university district.", tips:[{"icon": "✅", "text": "Very safe university neighbourhood"}, {"icon": "🏛️", "text": "University of Toronto campus is stunning — free to walk around"}, {"icon": "🏛️", "text": "Royal Ontario Museum (ROM) is Canada's largest museum"}, {"icon": "🌳", "text": "Queen's Park (provincial legislature) has beautiful grounds"}] },
+  "Trinity-Bellwoods":{ level:"safe", score:4.1, desc:"Hipster west-end neighbourhood around Trinity Bellwoods Park. Very popular with young Torontonians.", tips:[{"icon": "✅", "text": "Very safe and very trendy"}, {"icon": "🌳", "text": "Trinity Bellwoods Park is the social heart of Toronto's west end"}, {"icon": "☕", "text": "Excellent coffee shops and restaurants on Queen West"}, {"icon": "🍺", "text": "Great bar scene along Ossington and Queen West"}] },
+  "Annex":{ level:"safe", score:4.2, desc:"University neighbourhood north of downtown \u2014 Bloor Street restaurants, Koreatown, and beautiful Victorian architecture.", tips:[{"icon": "✅", "text": "Very safe"}, {"icon": "🍜", "text": "Koreatown on Bloor W. is excellent — lots of Korean BBQ and late-night food"}, {"icon": "🏛️", "text": "Spadina Museum (historic mansion) is nearby"}, {"icon": "☕", "text": "Excellent independent coffee shops throughout"}] },
+  "Rosedale-Moore Park":{ level:"safe", score:4.7, desc:"Toronto's most prestigious neighbourhood \u2014 beautiful ravines, grand Victorian and Edwardian homes, and safe streets.", tips:[{"icon": "✅", "text": "Extremely safe — Toronto's most exclusive neighbourhood"}, {"icon": "🌳", "text": "Extensive ravine trail network throughout"}, {"icon": "🏛️", "text": "Evergreen Brick Works nature/culture venue is nearby"}, {"icon": "🏡", "text": "Some of Canada's most beautiful historic homes"}] },
+  "Cabbagetown-South St.James Town":{ level:"safe", score:3.9, desc:"Historic working-class neighbourhood turned trendy \u2014 Victorian cottages and the famous fall-foliage architecture. Generally safe.", tips:[{"icon": "✅", "text": "Generally safe"}, {"icon": "🏡", "text": "Victorian cottage architecture is extraordinary — best fall colours in the city"}, {"icon": "🍽️", "text": "Parliament St has good independent restaurants"}, {"icon": "🌳", "text": "Riverdale Farm and park are nearby"}] },
+  "Regent Park":{ level:"caution", score:3.0, desc:"Former public housing neighbourhood undergoing massive redevelopment. Transitional \u2014 safe in new development areas.", tips:[{"icon": "⚠️", "text": "Transitional neighbourhood — safe in new development, some elevated crime in older sections"}, {"icon": "🏊", "text": "Daniels Spectrum arts centre and new aquatic centre"}, {"icon": "🔨", "text": "One of Canada's largest urban revitalization projects"}, {"icon": "🚇", "text": "Close to downtown by streetcar"}] },
+  "Moss Park":{ level:"avoid", score:2.2, desc:"Downtown east shelter district with very high crime rates. Not recommended for tourists.", tips:[{"icon": "🚫", "text": "Highest crime rate in the downtown core — not recommended for tourists"}, {"icon": "🚶", "text": "Keep walking if passing through"}, {"icon": "📞", "text": "Emergency: 911"}, {"icon": "🏘️", "text": "Currently undergoing major redevelopment plans"}] },
+  "South Riverdale":{ level:"safe", score:3.9, desc:"Leslieville \u2014 one of Toronto's hippest east-end neighbourhoods. Brunch destination, independent shops, and Queen St E.", tips:[{"icon": "✅", "text": "Very safe and very trendy"}, {"icon": "🍳", "text": "Leslieville is Toronto's brunch capital — long waits at most spots"}, {"icon": "☕", "text": "Excellent independent coffee shops on Queen East"}, {"icon": "🛍️", "text": "Good vintage and independent shops throughout"}] },
+  "The Beaches":{ level:"safe", score:4.4, desc:"Toronto's relaxed east-end beach neighbourhood \u2014 boardwalk, sandy beaches, and a village atmosphere. Very safe.", tips:[{"icon": "✅", "text": "Very safe — family-friendly neighbourhood"}, {"icon": "🏖️", "text": "4km boardwalk along Lake Ontario — beautiful for walking or cycling"}, {"icon": "🌊", "text": "Actual sandy beaches on the lake"}, {"icon": "🍦", "text": "Kew Gardens and the Boardwalk have a lovely summer atmosphere"}] },
+  "North Riverdale":{ level:"safe", score:4.0, desc:"Riverdale \u2014 upscale east-end neighbourhood with Riverdale Farm and great Danforth restaurants.", tips:[{"icon": "✅", "text": "Very safe"}, {"icon": "🌳", "text": "Riverdale Park East has a small free farm and great views of the downtown skyline"}, {"icon": "🍽️", "text": "The Danforth has excellent Greek restaurants — 'Greektown'"}, {"icon": "🚇", "text": "Subway stops on the Danforth line"}] },
+  "Niagara":{ level:"safe", score:3.8, desc:"King West and Liberty Village \u2014 trendy tech/creative hub with excellent restaurants and bars.", tips:[{"icon": "✅", "text": "Generally safe — very popular with young professionals"}, {"icon": "🍹", "text": "King West has some of Toronto's best bars and restaurants"}, {"icon": "🏭", "text": "Liberty Village has tech offices and good food"}, {"icon": "🚋", "text": "King streetcar connects easily to downtown"}] },
+  "High Park-Swansea":{ level:"safe", score:4.4, desc:"Beautiful west-end residential neighbourhood surrounding High Park \u2014 Toronto's Central Park.", tips:[{"icon": "✅", "text": "Very safe"}, {"icon": "🌳", "text": "High Park has 400 acres of trails, a zoo, and famous cherry blossoms in spring"}, {"icon": "🌸", "text": "Japanese cherry blossom grove in April is spectacular"}, {"icon": "🚇", "text": "High Park subway station"}] },
+  "Palmerston-Little Italy":{ level:"safe", score:4.1, desc:"Historic Little Italy on College Street \u2014 excellent Italian restaurants, bars, and cafe culture. Safe and lively.", tips:[{"icon": "✅", "text": "Very safe and very fun"}, {"icon": "🍝", "text": "College Street has excellent Italian restaurants"}, {"icon": "☕", "text": "Best outdoor patio culture in the city on warm evenings"}, {"icon": "🍺", "text": "Great bar scene throughout"}] },
+  "Roncesvalles":{ level:"safe", score:4.3, desc:"Historic Polish neighbourhood on the west side \u2014 independent shops, great restaurants, and very family-friendly.", tips:[{"icon": "✅", "text": "Very safe"}, {"icon": "🍲", "text": "Polish and Eastern European food alongside trendy new restaurants"}, {"icon": "🛒", "text": "Roncesvalles Ave has great independent shops"}, {"icon": "🌳", "text": "Roncesvalles Village has a very strong community feel"}] },
+  "Yonge-Eglinton":{ level:"safe", score:4.1, desc:"Midtown Toronto hub \u2014 excellent restaurants, bars, and the new Eglinton Crosstown LRT.", tips:[{"icon": "✅", "text": "Very safe"}, {"icon": "🍽️", "text": "One of Toronto's best dining areas"}, {"icon": "🚇", "text": "Yonge-Eglinton is a major transit hub"}, {"icon": "🛒", "text": "Good shopping along Yonge and Eglinton"}] },
+  "Mount Pleasant East":{ level:"safe", score:4.2, desc:"Upscale midtown neighbourhood with Midtown dining, Mount Pleasant Cemetery (beautiful walks), and excellent schools.", tips:[{"icon": "✅", "text": "Very safe"}, {"icon": "🌳", "text": "Mount Pleasant Cemetery is beautifully landscaped — excellent walking"}, {"icon": "🍽️", "text": "Good restaurant clusters on Yonge and Merton"}, {"icon": "🏡", "text": "Beautiful tree-lined residential streets"}] },
+  "Forest Hill South":{ level:"safe", score:4.6, desc:"One of Toronto's wealthiest neighbourhoods \u2014 grand homes, tree-lined streets, and exclusive schools.", tips:[{"icon": "✅", "text": "Very safe — exclusive neighbourhood"}, {"icon": "🏡", "text": "Exceptional residential architecture"}, {"icon": "🌳", "text": "Beautiful tree canopy throughout"}, {"icon": "🚇", "text": "Eglinton station nearby"}] },
+  "Casa Loma":{ level:"safe", score:4.2, desc:"Named after the iconic castle \u2014 Davenport neighbourhood with Casa Loma as the major tourist attraction.", tips:[{"icon": "✅", "text": "Very safe"}, {"icon": "🏰", "text": "Casa Loma is Canada's only castle — excellent guided tours and gardens"}, {"icon": "🌳", "text": "Sir Winston Churchill Park has great ravine trails"}, {"icon": "🚇", "text": "Spadina subway station nearby"}] },
+};
+
+
 // ── City configurations ──────────────────────────────────────────────────────
 const CITIES = {
   'new-orleans': {
@@ -2258,6 +2320,33 @@ const CITIES = {
     dataSource: 'Metro Nashville PD',
     zoneDefs: {},
   },
+  'london': {
+    label: 'London, UK', center: [51.5074, -0.1278], zoom: 11,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/london.geojson',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[51.51,-0.13],[51.52,-0.07],[51.49,-0.12]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [51.70, -0.51, 51.28, 0.33],
+    baseline: 500,
+    dataSource: 'data.police.uk (Metropolitan Police)',
+    zoneDefs: LONDON_ZONE_DEFS,
+  },
+  'toronto': {
+    label: 'Toronto, ON', center: [43.6532, -79.3832], zoom: 11,
+    geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/toronto.geojson',
+    crimeEndpoint: 'https://services.arcgis.com/S9th0jAJ7bqgIRjw/arcgis/rest/services/Major_Crime_Indicators_Open_Data/FeatureServer/0/query',
+    apiType: 'arcgis',
+    dateField: 'OCC_DATE',
+    typeFields: ['OFFENCE'],
+    latField: 'LAT_WGS84', lngField: 'LONG_WGS84',
+    bbox: [43.87, -79.70, 43.57, -79.10],
+    limit: 50000, baseline: 40,
+    dataSource: 'Toronto Police Service Open Data',
+    zoneDefs: TORONTO_ZONE_DEFS,
+  },
   'tucson': {
     label: 'Tucson, AZ',
     center: [32.2226, -110.9747], zoom: 11,
@@ -2320,6 +2409,11 @@ const LEVEL_LABELS  = { safe:'Safe', caution:'Use Caution', avoid:'Avoid' };
 
 // ── Crime severity weights (most-specific match first) ───────────────────────
 const CRIME_WEIGHTS = [
+  { match:'VIOLENT CRIME',       weight:3 },  // data.police.uk
+  { match:'POSSESSION OF WEAPONS',weight:4 }, // data.police.uk
+  { match:'VEHICLE CRIME',       weight:2 },  // data.police.uk
+  { match:'ANTI SOCIAL',         weight:1 },  // data.police.uk
+  { match:'PUBLIC ORDER',        weight:2 },  // data.police.uk
   { match:'MURDER',             weight:5 },
   { match:'HOMICIDE',           weight:5 },
   { match:'RAPE',               weight:5 },
@@ -2854,6 +2948,38 @@ async function fetchCrimes(cityId, city, period = 0) {
       const lng = attrs[lngF] != null ? parseFloat(attrs[lngF]) : f.geometry?.x ?? null;
       return { ...attrs, latitude: lat, longitude: lng };
     });
+
+  } else if (apiType === 'police_uk') {
+    // data.police.uk: query last N months at multiple center points (1-mile radius each)
+    const luRes = await fetch('https://data.police.uk/api/crime-last-updated');
+    const lastUpdated = (await luRes.json()).date; // e.g. "2026-03-01"
+    const [luY, luM] = lastUpdated.split('-').map(Number);
+    const months = [];
+    for (let i = 0; i < (city.months || 3); i++) {
+      const d = new Date(luY, luM - 1 - i);
+      months.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
+    }
+    const pts = city.queryPoints || [city.center];
+    const allCrimes = [], seen = new Set();
+    await Promise.all(pts.flatMap(([plat, plng]) => months.map(async month => {
+      try {
+        const r = await fetch(`${city.crimeEndpoint}?lat=${plat}&lng=${plng}&date=${month}`);
+        if (!r.ok) return;
+        const crimes = await r.json();
+        for (const crime of (Array.isArray(crimes) ? crimes : [])) {
+          if (crime.id && seen.has(crime.id)) continue;
+          if (crime.id) seen.add(crime.id);
+          const loc = crime.location || {};
+          allCrimes.push({
+            [city.typeFields[0]]: crime.category,
+            latitude: parseFloat(loc.latitude) || 0,
+            longitude: parseFloat(loc.longitude) || 0,
+            [city.dateField]: crime.month,
+          });
+        }
+      } catch {}
+    })));
+    data = allCrimes;
 
   } else if (apiType === 'ckan') {
     const latF2 = city.latField || 'latitude';
