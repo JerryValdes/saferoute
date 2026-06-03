@@ -353,6 +353,46 @@
     .ov-divider { height: 1px; background: var(--border); margin: 10px 0; }
     .ov-hint  { font-size: 11.5px; color: var(--muted); text-align: center; margin-top: 14px; }
 
+    /* ─── Share button ─── */
+    .share-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 11px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+      cursor: pointer;
+      margin-left: 8px;
+      vertical-align: middle;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .share-btn:hover { background: var(--border); color: var(--text); }
+    .share-btn svg { flex-shrink: 0; }
+
+    /* ─── Toast notification ─── */
+    #share-toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: var(--dark);
+      color: #fff;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity .18s, transform .18s;
+      pointer-events: none;
+    }
+    #share-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
     /* ─── Mobile ─── */
     @media (max-width: 700px) {
       body { overflow: auto; }
@@ -398,6 +438,8 @@
     </div>
   </div>
 </div>
+
+<div id="share-toast"></div>
 
 <div id="info-modal-overlay">
   <div id="info-modal">
@@ -2888,7 +2930,13 @@ function showZone(zone) {
 
   document.getElementById('panel').innerHTML = `
     <div>
-      <div class="zone-name">${zone.name}</div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:9px">
+        <div class="zone-name" style="margin-bottom:0">${zone.name}</div>
+        <button class="share-btn" onclick="shareZone(activeZone)" title="Copy link to this neighborhood">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          Share
+        </button>
+      </div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:6px">${zone.cityLabel}</div>
       <span class="badge badge-${zone.level}"><span class="badge-dot"></span>${LEVEL_LABELS[zone.level]}</span>
       <div class="score-row">
@@ -3375,6 +3423,57 @@ document.getElementById('info-modal-overlay').addEventListener('click', e => {
   if (e.target === document.getElementById('info-modal-overlay')) closeInfoModal();
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeInfoModal(); });
+
+// ── Share / permalink ─────────────────────────────────────────────────────────
+function shareZone(zone) {
+  if (!zone) return;
+  const c = map.getCenter();
+  const params = new URLSearchParams({
+    lat:  c.lat.toFixed(4),
+    lng:  c.lng.toFixed(4),
+    z:    map.getZoom(),
+    city: zone.cityId,
+    zone: zone.name,
+  });
+  const url = `${location.origin}${location.pathname}#${params.toString()}`;
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(url).then(() => showToast('Link copied!'));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('Link copied!');
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('share-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function tryShowSharedZone(cityId, zoneName, retries) {
+  const zone = ZONES.find(z => z.cityId === cityId && z.name === zoneName);
+  if (zone) { showZone(zone); return; }
+  if (retries > 0) setTimeout(() => tryShowSharedZone(cityId, zoneName, retries - 1), 600);
+}
+
+function applyShareHash() {
+  if (!location.hash) return;
+  try {
+    const p = Object.fromEntries(new URLSearchParams(location.hash.slice(1)));
+    if (!p.lat || !p.lng) return;
+    const lat = parseFloat(p.lat), lng = parseFloat(p.lng), z = parseInt(p.z) || 13;
+    map.setView([lat, lng], z);
+    if (p.city && p.zone) tryShowSharedZone(p.city, decodeURIComponent(p.zone), 10);
+  } catch {}
+}
+
+applyShareHash();
 </script>
 </body>
 </html>
