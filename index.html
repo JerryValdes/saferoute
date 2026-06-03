@@ -353,6 +353,32 @@
     .ov-divider { height: 1px; background: var(--border); margin: 10px 0; }
     .ov-hint  { font-size: 11.5px; color: var(--muted); text-align: center; margin-top: 14px; }
 
+    /* ─── Time toggle ─── */
+    #time-toggle {
+      display: flex;
+      padding: 8px 14px 4px;
+      gap: 0;
+      flex-shrink: 0;
+    }
+    .tt-btn {
+      flex: 1;
+      padding: 5px 0;
+      font-size: 11.5px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+      cursor: pointer;
+      transition: background .1s, color .1s;
+      line-height: 1.3;
+    }
+    .tt-btn:first-child { border-radius: 6px 0 0 6px; }
+    .tt-btn:last-child  { border-radius: 0 6px 6px 0; }
+    .tt-btn + .tt-btn   { border-left: none; }
+    .tt-btn.active      { background: var(--dark); color: #fff; border-color: var(--dark); z-index: 1; }
+    .tt-btn:not(.active):hover { background: var(--border); color: var(--text); }
+    .tt-sub { display: block; font-size: 9.5px; font-weight: 400; opacity: .75; margin-top: 1px; }
+
     /* ─── Share button ─── */
     .share-btn {
       display: inline-flex;
@@ -425,6 +451,11 @@
     <div id="search-wrap">
       <input id="search-input" type="search" placeholder="Search neighborhoods or any destination…" autocomplete="off">
       <div id="search-results"></div>
+    </div>
+    <div id="time-toggle">
+      <button class="tt-btn active" onclick="setTimeMode('all')">All hours</button>
+      <button class="tt-btn" onclick="setTimeMode('day')">Day<span class="tt-sub">6 am – 9 pm</span></button>
+      <button class="tt-btn" onclick="setTimeMode('night')">Night<span class="tt-sub">9 pm – 6 am</span></button>
     </div>
     <div id="panel"></div>
     <div id="legend">
@@ -2153,7 +2184,16 @@ function pointInGeoJSON(testLat, testLng, geometry) {
 }
 
 // ── Score computation ────────────────────────────────────────────────────────
-function computeScores(crimes, city, cityId) {
+let timeMode = 'all'; // 'all' | 'day' | 'night'
+
+function getCrimeHour(crime, dateField) {
+  const v = crime[dateField];
+  if (!v) return -1;
+  const d = new Date(v);
+  return isNaN(d) ? -1 : d.getHours();
+}
+
+function computeScores(crimes, city, cityId, hourFilter) {
   const cityZones = ZONES.filter(z => z.cityId === cityId);
   const weighted = {}, rawCount = {};
   cityZones.forEach(z => { weighted[z.name] = 0; rawCount[z.name] = 0; });
@@ -2162,7 +2202,11 @@ function computeScores(crimes, city, cityId) {
   const lngF  = city.lngField  || 'longitude';
   const bboxF = city.bboxField;
 
-  crimes.forEach(c => {
+  const filteredCrimes = hourFilter
+    ? crimes.filter(c => { const h = getCrimeHour(c, city.dateField); return h >= 0 && hourFilter(h); })
+    : crimes;
+
+  filteredCrimes.forEach(c => {
     let lat, lng;
     if (bboxF && c[bboxF]?.coordinates?.length === 2) {
       [lng, lat] = c[bboxF].coordinates;                    // GeoJSON Point field
@@ -2732,9 +2776,22 @@ function computeAmenityScores(points, cityId) {
 }
 
 // ── Composite scoring ─────────────────────────────────────────────────────────
+function activeCrimeScore(zone) {
+  if (timeMode === 'day'   && zone.crimeScoreDay   != null) return zone.crimeScoreDay;
+  if (timeMode === 'night' && zone.crimeScoreNight != null) return zone.crimeScoreNight;
+  return zone.crimeScore;
+}
+
+function activeCrimeCount(zone) {
+  if (timeMode === 'day'   && zone.crimeCountDay   != null) return zone.crimeCountDay;
+  if (timeMode === 'night' && zone.crimeCountNight != null) return zone.crimeCountNight;
+  return zone.crimeCount;
+}
+
 function computeComposite(zone) {
-  if (zone.crimeScore === null) return zone.curatedScore;
-  const parts = [{ v: zone.crimeScore, w: 0.60 }];
+  const cs = activeCrimeScore(zone);
+  if (cs === null) return zone.curatedScore;
+  const parts = [{ v: cs, w: 0.60 }];
   if (zone.qolScore     !== null) parts.push({ v: zone.qolScore,     w: 0.25 });
   if (zone.amenityScore !== null) parts.push({ v: zone.amenityScore, w: 0.15 });
   const totalW = parts.reduce((s, x) => s + x.w, 0);
@@ -2832,7 +2889,7 @@ function buildAndDrawZones(geoJSON, city, cityId) {
     const key  = name.replace(/\s+/g, ' ');
     const defs = city.zoneDefs;
     const def  = defs[name] || defs[key] || defaultDef(cityId, name);
-    return { name, cityId, cityLabel: city.label, dataSource: city.dataSource, ...def, curatedScore: def.score || 3.0, crimeScore: null, qolScore: null, amenityScore: null, crimeCount: null, geometry: feature.geometry };
+    return { name, cityId, cityLabel: city.label, dataSource: city.dataSource, ...def, curatedScore: def.score || 3.0, crimeScore: null, crimeScoreDay: null, crimeScoreNight: null, crimeCount: null, crimeCountDay: null, crimeCountNight: null, qolScore: null, amenityScore: null, geometry: feature.geometry };
   });
   ZONES.push(...cityZones);
 
@@ -2911,16 +2968,19 @@ function trendBadge(trend) {
 
 function showZone(zone) {
   activeZone = zone;
-  const hasLive = zone.crimeCount !== null || zone.qolScore !== null || zone.amenityScore !== null;
-  const multiSrc = [zone.crimeScore, zone.qolScore, zone.amenityScore].filter(s => s !== null).length > 1;
+  const dispCount = activeCrimeCount(zone);
+  const dispScore = activeCrimeScore(zone);
+  const hasLive = dispCount !== null || zone.qolScore !== null || zone.amenityScore !== null;
+  const multiSrc = [dispScore, zone.qolScore, zone.amenityScore].filter(s => s !== null).length > 1;
   const sources = [zone.dataSource, zone.qolScore !== null ? '311' : null, zone.amenityScore !== null ? 'OSM' : null].filter(Boolean).join(' + ');
+  const timeLabel = timeMode === 'day' ? 'Daytime (6 am – 9 pm)' : timeMode === 'night' ? 'Nighttime (9 pm – 6 am)' : 'All hours';
   const crimeBox = hasLive ? `
     <div class="crime-box">
-      <div class="crime-box-title">Live Data · Last 12 Months</div>
-      ${zone.crimeCount !== null ? `
-        <div class="crime-row"><span>Reported crimes</span><span class="crime-val">${zone.crimeCount.toLocaleString()}</span></div>
-        <div class="crime-row"><span>Crime safety</span><span class="crime-val">${zone.crimeScore}/5${zone.trend ? ' ' + trendBadge(zone.trend) : ''}</span></div>
-        <div class="crime-row"><span>vs. prior 12 months</span><span class="crime-val">${zone.trend ? (zone.trend === 'improving' ? '↓ Improving' : zone.trend === 'worsening' ? '↑ Increasing' : '→ Stable') : '—'}</span></div>
+      <div class="crime-box-title">Live Data · ${timeLabel}</div>
+      ${dispCount !== null ? `
+        <div class="crime-row"><span>Reported crimes</span><span class="crime-val">${dispCount.toLocaleString()}</span></div>
+        <div class="crime-row"><span>Crime safety</span><span class="crime-val">${dispScore}/5${timeMode === 'all' && zone.trend ? ' ' + trendBadge(zone.trend) : ''}</span></div>
+        ${timeMode === 'all' ? `<div class="crime-row"><span>vs. prior 12 months</span><span class="crime-val">${zone.trend ? (zone.trend === 'improving' ? '↓ Improving' : zone.trend === 'worsening' ? '↑ Increasing' : '→ Stable') : '—'}</span></div>` : ''}
       ` : ''}
       ${zone.qolScore !== null ? `<div class="crime-row"><span>Quality of life</span><span class="crime-val">${zone.qolScore}/5</span></div>` : ''}
       ${zone.amenityScore !== null ? `<div class="crime-row"><span>Tourist amenities</span><span class="crime-val">${zone.amenityScore}/5</span></div>` : ''}
@@ -2956,12 +3016,14 @@ function showZone(zone) {
 }
 
 // ── Apply live scores + trend ─────────────────────────────────────────────────
-function applyScores(scoreMap, priorMap, cityId) {
+function applyScores(scoreMap, priorMap, cityId, dayMap, nightMap) {
   ZONES.filter(z => z.cityId === cityId).forEach(zone => {
     const s = scoreMap[zone.name];
     if (!s) return;
     zone.crimeScore = s.score;
     zone.crimeCount = s.count;
+    if (dayMap?.[zone.name])   { zone.crimeScoreDay   = dayMap[zone.name].score;   zone.crimeCountDay   = dayMap[zone.name].count; }
+    if (nightMap?.[zone.name]) { zone.crimeScoreNight = nightMap[zone.name].score; zone.crimeCountNight = nightMap[zone.name].count; }
     if (priorMap) {
       const p = priorMap[zone.name];
       if (p && p.weighted > 0 && s.weighted > 0) {
@@ -3004,9 +3066,11 @@ async function loadCityData(cityId) {
     fetchAmenities(cityId, city).catch(() => null),
   ]);
   if (crimeRes) {
-    const scoreMap = computeScores(crimeRes, city, cityId);
-    const priorMap = priorRes ? computeScores(priorRes, city, cityId) : null;
-    applyScores(scoreMap, priorMap, cityId);
+    const scoreMap      = computeScores(crimeRes, city, cityId);
+    const dayMap        = computeScores(crimeRes, city, cityId, h => h >= 6 && h < 21);
+    const nightMap      = computeScores(crimeRes, city, cityId, h => h < 6 || h >= 21);
+    const priorMap      = priorRes ? computeScores(priorRes, city, cityId) : null;
+    applyScores(scoreMap, priorMap, cityId, dayMap, nightMap);
     totalIncidents += crimeRes.length;
     setStatus('live', totalIncidents);
   }
@@ -3423,6 +3487,16 @@ document.getElementById('info-modal-overlay').addEventListener('click', e => {
   if (e.target === document.getElementById('info-modal-overlay')) closeInfoModal();
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeInfoModal(); });
+
+// ── Time-of-day toggle ────────────────────────────────────────────────────────
+function setTimeMode(mode) {
+  timeMode = mode;
+  document.querySelectorAll('.tt-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', ['all', 'day', 'night'][i] === mode);
+  });
+  ZONES.filter(z => z.crimeScore !== null).forEach(zone => applyComposite(zone));
+  if (activeZone) showZone(activeZone);
+}
 
 // ── Share / permalink ─────────────────────────────────────────────────────────
 function shareZone(zone) {
