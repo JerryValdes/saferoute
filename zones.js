@@ -2024,6 +2024,20 @@ const COVENTRY_ZONE_DEFS = {
   'Holbrook, Radford, Sherbourne and Bablake':{ level:'caution', score:3.1, desc:"Northwest Coventry — Bablake and Sherbourne are residential and generally safe; Radford has elevated crime. Bablake School is a landmark 15th-century building.", tips:[{icon:'🏛️',text:'Bablake School building is a beautiful 15th-century almshouse near the city centre'},{icon:'⚠️',text:'Radford has elevated crime — exercise caution'},{icon:'🚗',text:'Car recommended for Radford areas'},{icon:'🌙',text:'Use caution after dark in Radford'}] },
 };
 
+// ── Belfast zone definitions (PSNI districts) ────────────────────────────────
+const BELFAST_ZONE_DEFS = {
+  'Lisburn Road':{ level:'safe', score:3.9, desc:"South Belfast and the city centre — the Crown Bar (a National Trust Victorian gin palace), Grand Opera House, Botanic Gardens, Ulster Museum, Queen's University, and the Golden Mile along Great Victoria Street are all here. The most visitor-friendly part of Belfast.", tips:[{icon:'✅',text:'Very safe — the most visitor-friendly district in Belfast'},{icon:'🍺',text:'Crown Bar on Great Victoria Street is a National Trust Victorian gin palace — unmissable'},{icon:'🎨',text:'Ulster Museum in Botanic Gardens is free and world-class — Irish history, art, and nature'},{icon:'🎭',text:'Grand Opera House is a beautiful Victorian theatre — worth a look even if not attending a show'}] },
+  'Strandtown':{ level:'caution', score:3.3, desc:"East Belfast — where C.S. Lewis (The Chronicles of Narnia) was born and raised, now marked by bronze Narnia sculptures at C.S. Lewis Square. Van Morrison also grew up in east Belfast. The Ballyhackamore café and restaurant scene is popular with locals. Generally safe on main streets.", tips:[{icon:'🦁',text:'C.S. Lewis Square in Belmont has seven bronze Narnia sculptures where the author grew up'},{icon:'🎵',text:'Van Morrison was born near Hyndford Street in east Belfast — cultural heritage tour worthy'},{icon:'☕',text:'Ballyhackamore has a good independent café and restaurant scene on the Holywood Road'},{icon:'⚠️',text:'Exercise caution on quieter residential streets, particularly around Short Strand at night'}] },
+  'Castlereagh':{ level:'safe', score:4.0, desc:"Southeast Belfast — home to Stormont, the spectacular Parliament Buildings of the Northern Ireland Assembly set in 300 acres of open wooded estate. Castlereagh Borough is primarily suburban and residential with low crime.", tips:[{icon:'🏛️',text:'Stormont Estate is open to the public — beautiful 300-acre grounds with views of Parliament Buildings'},{icon:'✅',text:'Generally safe — low crime suburban area'},{icon:'🌳',text:'The wooded estate grounds around Stormont are open for walking and picnics'},{icon:'🚗',text:'Car or bus recommended — limited transport connections'}] },
+  'Tennent Street':{ level:'caution', score:3.0, desc:"North Belfast covering Cliftonville, Tiger\'s Bay, and the New Lodge — historically one of Belfast\'s most divided areas. Belfast Cathedral (St Anne\'s) and the Cathedral Quarter\'s restaurants and bars are at its southern edge and are very safe. Elevated crime in some residential areas away from the main streets.", tips:[{icon:'⛪',text:'Belfast Cathedral (St Anne\'s) — striking early 20th-century cathedral with a Crown of Thorns spire'},{icon:'🍺',text:'Cathedral Quarter on Donegall Street has excellent bars and restaurants'},{icon:'⚠️',text:'Elevated crime in some residential areas — stick to the Cathedral Quarter and main streets'},{icon:'🌙',text:'Exercise caution after dark away from the Cathedral Quarter'}] },
+  'Woodbourne':{ level:'caution', score:3.2, desc:"West Belfast — home to the Falls Road and Shankill Road, two of the most historically and politically significant streets in Northern Ireland. The International Wall murals and Peace Wall are major tourist attractions. Black Cab Tours offer essential context to the history of the Troubles. Stick to the main tourist routes.", tips:[{icon:'🎨',text:'International Wall on Falls Road has remarkable political murals — one of Belfast\'s top sights'},{icon:'🚖',text:'Black Cab Tours are the best way to explore with proper historical context — highly recommended'},{icon:'🕊️',text:'Peace Wall and Gates connect Falls Road to Shankill Road — visitors can sign the wall'},{icon:'⚠️',text:'Stick to the main tourist route on Falls and Shankill — use caution on quieter residential streets'}] },
+};
+
+// ── Derry zone definitions (PSNI district) ────────────────────────────────────
+const DERRY_ZONE_DEFS = {
+  'Strand Road':{ level:'safe', score:3.8, desc:"Derry/Londonderry — one of Ireland\'s most atmospheric cities and the only completely walled city in Britain or Ireland. The 17th-century City Walls, the Guildhall, the Bogside murals, the Derry Girls mural, and the Peace Bridge are all within easy walking distance of each other in the historic city centre.", tips:[{icon:'🏰',text:'The City Walls (1613–1619) are the best preserved in Britain and Ireland — a free unmissable walk'},{icon:'🎨',text:'Free Derry murals in the Bogside are internationally famous — very safe and important to visit'},{icon:'🌉',text:'Peace Bridge (2011) is a striking footbridge linking the Cityside to the Waterside'},{icon:'🎭',text:'The Derry Girls mural on Orchard Street is a hugely popular photo stop'}] },
+};
+
 // ── City configurations ──────────────────────────────────────────────────────
 const CITIES = {
   'new-orleans': {
@@ -3011,5 +3025,37 @@ const CITIES = {
     baseline: 120,
     dataSource: 'data.police.uk (Norfolk)',
     zoneDefs: NORWICH_ZONE_DEFS,
+  },
+
+  // ── Northern Ireland ────────────────────────────────────────────────────────
+  'belfast': {
+    label: 'Belfast, Northern Ireland',
+    center: [54.5973, -5.9301], zoom: 12,
+    geoURL: 'police_uk_geo:northern-ireland',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[54.597, -5.930], [54.584, -6.000], [54.564, -5.953]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [54.68, -6.10, 54.52, -5.80],
+    baseline: 150,
+    dataSource: 'data.police.uk (PSNI)',
+    zoneDefs: BELFAST_ZONE_DEFS,
+  },
+  'derry': {
+    label: 'Derry/Londonderry, N. Ireland',
+    center: [54.9966, -7.3086], zoom: 13,
+    geoURL: 'police_uk_geo:northern-ireland',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[54.997, -7.309]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [55.06, -7.47, 54.88, -7.10],
+    baseline: 150,
+    dataSource: 'data.police.uk (PSNI)',
+    zoneDefs: DERRY_ZONE_DEFS,
   },
 };
