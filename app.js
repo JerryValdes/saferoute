@@ -1062,6 +1062,122 @@ map.on('zoomend', () => {
   buildCityMarkers();
 });
 
+// ── Safe landmark overlay ─────────────────────────────────────────────────────
+const landmarkLayer = L.layerGroup().addTo(map);
+let landmarksVisible = localStorage.getItem('saferoute_landmarks') !== '0';
+let _lmDebounce = null;
+let _lmReqId = 0;
+
+const LM_TYPES = {
+  police:       { label: 'Police Station',      icon: '🚔', note: 'Call 911 (US) · 999 (UK) in an emergency.' },
+  hospital:     { label: 'Hospital / A&E',      icon: '🏥', note: 'Emergency care available 24/7.' },
+  pharmacy:     { label: 'Pharmacy',             icon: '💊', note: 'Staffed shop — safe to step inside.' },
+  hotel:        { label: 'Hotel',                icon: '🏨', note: '24/7 front desk — a safe refuge if you feel threatened.' },
+  supermarket:  { label: 'Supermarket',          icon: '🛒', note: 'Busy and well-lit — good place to step in if uncomfortable.' },
+  marketplace:  { label: 'Market',               icon: '🏪', note: 'Busy public market — generally well-populated.' },
+  station:      { label: 'Transit Station',      icon: '🚉', note: 'Well-lit, staffed transport hub.' },
+  tourist_info: { label: 'Tourist Information',  icon: 'ℹ️', note: 'Official visitor information center.' },
+};
+
+function _lmType(tags) {
+  if (!tags) return null;
+  if (tags.amenity === 'police') return 'police';
+  if (tags.amenity === 'hospital' || tags.amenity === 'clinic') return 'hospital';
+  if (tags.amenity === 'pharmacy') return 'pharmacy';
+  if (tags.tourism === 'hotel' || tags.tourism === 'hostel') return 'hotel';
+  if (tags.shop === 'supermarket') return 'supermarket';
+  if (tags.amenity === 'marketplace' || tags.shop === 'mall') return 'marketplace';
+  if (tags.tourism === 'information' || tags.amenity === 'tourist_info') return 'tourist_info';
+  if (tags.railway === 'station') return 'station';
+  return null;
+}
+
+async function fetchLandmarks() {
+  const reqId = ++_lmReqId;
+  if (!landmarksVisible || map.getZoom() < 13) { landmarkLayer.clearLayers(); return; }
+
+  const b = map.getBounds().pad(0.05);
+  const s = b.getSouth().toFixed(2), w = b.getWest().toFixed(2);
+  const n = b.getNorth().toFixed(2), e = b.getEast().toFixed(2);
+  const cacheKey = `lm2:${s},${w},${n},${e}`;
+
+  let pois = await getCached(cacheKey, 24 * 60 * 60 * 1000);
+  if (!pois) {
+    const q = `[out:json][timeout:20];(`+
+      `node["amenity"="police"](${s},${w},${n},${e});`+
+      `way["amenity"="police"](${s},${w},${n},${e});`+
+      `node["amenity"="hospital"](${s},${w},${n},${e});`+
+      `way["amenity"="hospital"](${s},${w},${n},${e});`+
+      `node["tourism"="hotel"]["name"](${s},${w},${n},${e});`+
+      `node["tourism"="hostel"]["name"](${s},${w},${n},${e});`+
+      `node["shop"="supermarket"]["name"](${s},${w},${n},${e});`+
+      `node["amenity"="marketplace"]["name"](${s},${w},${n},${e});`+
+      `node["tourism"="information"]["information"="office"](${s},${w},${n},${e});`+
+      `node["railway"="station"]["name"](${s},${w},${n},${e});`+
+      `node["amenity"="pharmacy"]["name"](${s},${w},${n},${e});`+
+    `);out center;`;
+    try {
+      const res = await fetch('https://overpass-api.de/api/interpreter', { method:'POST', body:q });
+      if (!res.ok) return;
+      const data = await res.json();
+      pois = data.elements.map(el => ({
+        lat:  el.type === 'node' ? el.lat  : el.center?.lat,
+        lng:  el.type === 'node' ? el.lon  : el.center?.lon,
+        name: el.tags?.name || el.tags?.['name:en'] || '',
+        type: _lmType(el.tags),
+      })).filter(p => p.lat && p.lng && p.type);
+      await setCached(cacheKey, pois);
+    } catch { return; }
+  }
+
+  if (reqId !== _lmReqId) return;
+  renderLandmarks(pois);
+}
+
+function renderLandmarks(pois) {
+  landmarkLayer.clearLayers();
+  const caps  = { police:99, hospital:99, tourist_info:10, station:6, hotel:14, supermarket:10, marketplace:6, pharmacy:8 };
+  const order = ['police','hospital','tourist_info','station','hotel','supermarket','marketplace','pharmacy'];
+  const groups = {};
+  order.forEach(t => groups[t] = []);
+  pois.forEach(p => { if (groups[p.type]) groups[p.type].push(p); });
+
+  order.forEach(t => {
+    groups[t].slice(0, caps[t]).forEach(poi => {
+      const def = LM_TYPES[t];
+      const nm  = poi.name || def.label;
+      const icon = L.divIcon({
+        html: `<div class="lm-pin lm-${t}">${def.icon}</div>`,
+        className: '', iconSize:[32,32], iconAnchor:[16,16], popupAnchor:[0,-16],
+      });
+      const mk = L.marker([poi.lat, poi.lng], { icon, zIndexOffset:800 });
+      mk.bindPopup(
+        `<div class="lm-popup"><div class="lm-pname">${nm}</div>`+
+        `<div class="lm-ptype">${def.label}</div>`+
+        `<div class="lm-pnote">${def.note}</div></div>`,
+        { maxWidth:220, className:'lm-popup-wrap' }
+      );
+      landmarkLayer.addLayer(mk);
+    });
+  });
+}
+
+function setLandmarksVisible(on) {
+  landmarksVisible = on;
+  localStorage.setItem('saferoute_landmarks', on ? '1' : '0');
+  const cb = document.getElementById('landmarks-toggle');
+  if (cb) cb.checked = on;
+  if (on) fetchLandmarks(); else landmarkLayer.clearLayers();
+}
+
+function scheduleLandmarkFetch() {
+  clearTimeout(_lmDebounce);
+  _lmDebounce = setTimeout(fetchLandmarks, 500);
+}
+
+map.on('zoomend', scheduleLandmarkFetch);
+map.on('moveend', scheduleLandmarkFetch);
+
 // ── Zone state ────────────────────────────────────────────────────────────────
 let ZONES = [];
 const polyLayers = {};
@@ -2729,6 +2845,12 @@ function updateOnlineStatus() {
 window.addEventListener('online',  updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 updateOnlineStatus();
+
+// ── Initialize landmark toggle state ─────────────────────────────────────────
+(function () {
+  const cb = document.getElementById('landmarks-toggle');
+  if (cb) cb.checked = landmarksVisible;
+})();
 
 // ── Initialize traveler toggle state from localStorage ────────────────────────
 (function () {
