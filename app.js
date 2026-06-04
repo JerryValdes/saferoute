@@ -1013,6 +1013,18 @@ let ZONES = [];
 const polyLayers = {};
 let activeZone = null;
 
+// Static search index built from all zoneDefs — available before any GeoJSON loads
+const ZONE_INDEX = [];
+for (const [cityId, city] of Object.entries(CITIES)) {
+  if (!city.zoneDefs) continue;
+  for (const [name, def] of Object.entries(city.zoneDefs)) {
+    ZONE_INDEX.push({ name, cityId, cityLabel: city.label, level: def.level });
+  }
+}
+
+// Set when a search result selects a zone not yet loaded; cleared in buildAndDrawZones
+let pendingZone = null;
+
 // ── Build and draw zones from GeoJSON ─────────────────────────────────────────
 function buildAndDrawZones(geoJSON, city, cityId) {
   const cityZones = geoJSON.features.map(feature => {
@@ -1068,6 +1080,17 @@ function buildAndDrawZones(geoJSON, city, cityId) {
       showZone(zone);
     });
   });
+
+  // Auto-open a zone selected via search before this city was loaded
+  if (pendingZone?.cityId === cityId) {
+    const match = cityZones.find(z => z.name === pendingZone.name);
+    if (match) {
+      pendingZone = null;
+      const layer = polyLayers[`${cityId}:${match.name}`];
+      if (layer?.getBounds) map.fitBounds(layer.getBounds(), { padding: [50, 50] });
+      showZone(match);
+    }
+  }
 
   const show = map.getZoom() >= 12;
   document.querySelectorAll('.zone-label').forEach(el => {
@@ -1904,25 +1927,36 @@ searchInput.addEventListener('input', () => {
   searchDrop.classList.remove('open');
   clearTimeout(_geocodeTimer);
   if (!q) return;
-  const hits = ZONES.filter(z => z.name.toLowerCase().includes(q)).slice(0, 7);
-  hits.forEach(z => {
+
+  const hits = ZONE_INDEX.filter(z => z.name.toLowerCase().includes(q)).slice(0, 6);
+  hits.forEach(({ name, cityId, cityLabel, level }) => {
     const item = document.createElement('div');
     item.className = 'search-item';
-    item.textContent = `${z.name} — ${z.cityLabel}`;
+    item.innerHTML = `<span class="si-dot si-dot-${level}"></span><span class="si-name">${name}</span><span class="si-city">${cityLabel}</span>`;
     item.addEventListener('click', () => {
-      const layer = polyLayers[`${z.cityId}:${z.name}`] || polyLayers[`tract:${z.cityId.replace('census-','')}`];
-      if (layer?.getBounds) map.fitBounds(layer.getBounds(), { padding: [50, 50] });
-      showZone(z);
       searchInput.value = '';
       searchDrop.innerHTML = '';
       searchDrop.classList.remove('open');
+      const loaded = ZONES.find(z => z.cityId === cityId && z.name === name);
+      if (loaded) {
+        const layer = polyLayers[`${cityId}:${name}`];
+        if (layer?.getBounds) map.fitBounds(layer.getBounds(), { padding: [50, 50] });
+        showZone(loaded);
+      } else {
+        pendingZone = { cityId, name };
+        const city = CITIES[cityId];
+        map.setView(city.center, Math.max(city.zoom || 12, 13));
+        fetchVisibleCityData();
+        loadUkCoverage();
+      }
     });
     searchDrop.appendChild(item);
   });
-  // Always add a "go to destination" option at the bottom
+
+  // Always include a "go to destination" geocoder fallback
   const geoItem = document.createElement('div');
   geoItem.className = 'search-item search-item-geo';
-  geoItem.innerHTML = `<span style="margin-right:6px">🌍</span>Go to <strong>${searchInput.value.trim()}</strong> on map`;
+  geoItem.innerHTML = `<span>🌍</span>Go to <strong>${searchInput.value.trim()}</strong> on map`;
   geoItem.addEventListener('click', () => {
     const query = searchInput.value.trim();
     searchInput.value = '';
