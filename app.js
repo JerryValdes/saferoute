@@ -808,41 +808,57 @@ function decodeHtml(str) {
 }
 
 // Build GeoJSON from data.police.uk neighbourhood boundary API, filtered to a bbox
+// Shared per-force cache so multiple cities using the same police force
+// only trigger one set of API calls instead of N×26 simultaneous requests.
+const _policeUkAllFeatures = {};
+
 async function fetchPoliceUkGeo(force, bbox) {
   const [north, west, south, east] = bbox;
-  setStatus('loading', `Loading ${force} neighbourhood boundaries…`);
 
-  const listRes = await fetch(`https://data.police.uk/api/${force}/neighbourhoods`);
-  if (!listRes.ok) throw new Error(`police.uk ${force} list ${listRes.status}`);
-  const list = await listRes.json();
+  // If the full boundary set for this force isn't being fetched yet, start it.
+  if (!_policeUkAllFeatures[force]) {
+    _policeUkAllFeatures[force] = (async () => {
+      setStatus('loading', `Loading ${force} neighbourhood boundaries…`);
+      const listRes = await fetch(`https://data.police.uk/api/${force}/neighbourhoods`);
+      if (!listRes.ok) throw new Error(`police.uk ${force} list ${listRes.status}`);
+      const list = await listRes.json();
 
-  // Batch boundary fetches (20 at a time) to avoid overwhelming the API
-  const BATCH = 20;
-  const features = [];
-  for (let i = 0; i < list.length; i += BATCH) {
-    const batch = list.slice(i, i + BATCH);
-    const results = await Promise.allSettled(
-      batch.map(async ({ id, name }) => {
-        const r = await fetch(`https://data.police.uk/api/${force}/${encodeURIComponent(id)}/boundary`);
-        if (!r.ok) return null;
-        const pts = await r.json();
-        if (!pts.length) return null;
-        const coords = pts.map(p => [parseFloat(p.longitude), parseFloat(p.latitude)]);
-        const first = coords[0], last = coords[coords.length - 1];
-        if (first[0] !== last[0] || first[1] !== last[1]) coords.push(first);
-        const cLat = coords.reduce((s, c) => s + c[1], 0) / coords.length;
-        const cLng = coords.reduce((s, c) => s + c[0], 0) / coords.length;
-        if (cLat < south || cLat > north || cLng < west || cLng > east) return null;
-        return {
-          type: 'Feature',
-          properties: { name: decodeHtml(name) },
-          geometry: { type: 'Polygon', coordinates: [coords] },
-        };
-      })
-    );
-    results.forEach(r => { if (r.status === 'fulfilled' && r.value) features.push(r.value); });
-    if (i + BATCH < list.length) await new Promise(r => setTimeout(r, 120));
+      const BATCH = 20;
+      const all = [];
+      for (let i = 0; i < list.length; i += BATCH) {
+        const batch = list.slice(i, i + BATCH);
+        const results = await Promise.allSettled(
+          batch.map(async ({ id, name }) => {
+            const r = await fetch(`https://data.police.uk/api/${force}/${encodeURIComponent(id)}/boundary`);
+            if (!r.ok) return null;
+            const pts = await r.json();
+            if (!pts.length) return null;
+            const coords = pts.map(p => [parseFloat(p.longitude), parseFloat(p.latitude)]);
+            const first = coords[0], last = coords[coords.length - 1];
+            if (first[0] !== last[0] || first[1] !== last[1]) coords.push(first);
+            return {
+              type: 'Feature',
+              properties: { name: decodeHtml(name) },
+              geometry: { type: 'Polygon', coordinates: [coords] },
+            };
+          })
+        );
+        results.forEach(r => { if (r.status === 'fulfilled' && r.value) all.push(r.value); });
+        if (i + BATCH < list.length) await new Promise(r => setTimeout(r, 120));
+      }
+      return all;
+    })();
   }
+
+  const allFeatures = await _policeUkAllFeatures[force];
+
+  // Filter to features whose centroid falls within this city's bbox.
+  const features = allFeatures.filter(f => {
+    const coords = f.geometry.coordinates[0];
+    const cLat = coords.reduce((s, c) => s + c[1], 0) / coords.length;
+    const cLng = coords.reduce((s, c) => s + c[0], 0) / coords.length;
+    return !(cLat < south || cLat > north || cLng < west || cLng > east);
+  });
 
   if (!features.length) throw new Error(`No ${force} neighbourhoods found in city area`);
   return { type: 'FeatureCollection', features };
@@ -1190,6 +1206,8 @@ map.on('zoomend', scheduleLandmarkFetch);
 map.on('moveend', scheduleLandmarkFetch);
 
 // ── Zone state ────────────────────────────────────────────────────────────────
+let routeActive = false;
+let tripActive  = false;
 let ZONES = [];
 const polyLayers = {};
 let activeZone = null;
@@ -2416,8 +2434,6 @@ function setTimeMode(mode) {
 const routeLayer       = L.layerGroup().addTo(map);
 const directRouteLayer = L.layerGroup().addTo(map); // ghost line for comparison
 const routeMarkers     = L.layerGroup().addTo(map);
-let routeActive = false;
-
 // ── Route preference ──────────────────────────────────────────────────────────
 let routePreference = localStorage.getItem('saferoute_routepref') || 'fastest';
 
@@ -2541,7 +2557,6 @@ function toggleRouteMode() {
 }
 
 // ── Trip planner ──────────────────────────────────────────────────────────────
-let tripActive = false;
 let tripStops = ['', ''];
 const STOP_COLORS = ['#3b82f6','#8b5cf6','#f59e0b','#ef4444','#10b981','#f97316','#ec4899','#06b6d4'];
 
