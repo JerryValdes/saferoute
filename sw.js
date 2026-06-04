@@ -1,4 +1,4 @@
-const SHELL_CACHE  = 'saferoute-shell-v1';
+const SHELL_CACHE  = 'saferoute-shell-v2';
 const TILE_CACHE   = 'saferoute-tiles-v1';
 const GEO_CACHE    = 'saferoute-geo-v1';
 const CRIME_CACHE  = 'saferoute-crime-v1';
@@ -7,6 +7,8 @@ const MAX_TILES    = 1500; // ~30MB at ~20KB/tile
 const SHELL_URLS = [
   '/saferoute/',
   '/saferoute/index.html',
+  '/saferoute/zones.js',
+  '/saferoute/app.js',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
 ];
