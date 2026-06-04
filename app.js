@@ -1615,8 +1615,10 @@ async function loadCityData(cityId) {
   }
   if (qolRes) applyQoLScores(computeQoLScores(qolRes, city, cityId), cityId);
   if (amenityRes) applyAmenityScores(computeAmenityScores(amenityRes, cityId), cityId);
-  if (!crimeRes && !qolRes && !amenityRes) crimeLoaded.delete(cityId);
-  else cityFetchTimes[cityId] = Date.now();
+  if (!crimeRes && !qolRes && !amenityRes) { crimeLoaded.delete(cityId); return; }
+  cityFetchTimes[cityId] = Date.now();
+  // Nudge nearby census tracts toward the live zone scores we just loaded
+  applyNeighborBlending(cityId);
 }
 
 function fetchVisibleCityData() {
@@ -1799,9 +1801,74 @@ function buildCensusTractZones(features, acsMap) {
       _area: estimateZoneAreaKm2(feature.geometry),
     };
     ZONES.push(zone);
-    geoLayer.on('mouseover', () => geoLayer.setStyle({ fillOpacity: HOVER_OPACITY[level], weight: 1.5 }));
-    geoLayer.on('mouseout',  () => geoLayer.setStyle({ ...st, weight: 0.5 }));
+    // If live city data is already loaded for a nearby city, blend immediately
+    blendTractWithNeighbors(zone);
+    geoLayer.on('mouseover', () => geoLayer.setStyle({ fillOpacity: HOVER_OPACITY[zone.level], weight: 1.5 }));
+    geoLayer.on('mouseout',  () => geoLayer.setStyle({ ...STYLES[zone.level], weight: 0.5 }));
     geoLayer.on('click', e => { L.DomEvent.stopPropagation(e); showZone(zone); });
+  });
+}
+
+// ── Spatial neighbor blending for census tracts ───────────────────────────────
+// Nudges tract scores toward nearby named zones that have live crime data,
+// fixing the county-averaging problem at city/suburb borders.
+const BLEND_RADIUS_KM = 2.5;
+const MAX_BLEND       = 0.30; // tract's own data stays ≥ 70% dominant
+
+function blendTractWithNeighbors(tract) {
+  if (!tract.geoid || !tract._center) return;
+  const { lat, lng } = tract._center;
+  const DEG = BLEND_RADIUS_KM / 111.32; // ~0.0225°
+
+  let weightedSum = 0, totalWeight = 0;
+
+  for (const z of ZONES) {
+    // Only named zones (no geoid) where live police data has been loaded
+    if (z.geoid || z.crimeScore === null || !z._center) continue;
+    // Cheap bbox pre-filter before expensive distance calc
+    const dLat = z._center.lat - lat;
+    const dLng = z._center.lng - lng;
+    if (Math.abs(dLat) > DEG || Math.abs(dLng) > DEG * 1.4) continue;
+    const distKm = latLngDistKm({ lat, lng }, z._center);
+    if (distKm > BLEND_RADIUS_KM) continue;
+    const w = 1 - distKm / BLEND_RADIUS_KM; // linear falloff → 0 at radius edge
+    weightedSum += z.score * w;
+    totalWeight += w;
+  }
+
+  if (totalWeight < 0.08) return; // no meaningful neighbors
+
+  const neighborAvg  = weightedSum / totalWeight;
+  // blend factor scales with how many/how close the neighbors are, capped at MAX_BLEND
+  const blendFactor  = Math.min(MAX_BLEND, totalWeight * 0.09);
+  const blended      = (1 - blendFactor) * tract.score + blendFactor * neighborAvg;
+  const newScore     = Math.round(Math.min(5, Math.max(1, blended)) * 10) / 10;
+
+  if (Math.abs(newScore - tract.score) < 0.05) return; // ignore negligible changes
+
+  tract.score = newScore;
+  tract.level = scoreToLevel(newScore);
+
+  const layer = polyLayers[`tract:${tract.geoid}`];
+  if (!layer || typeof layer.setStyle !== 'function') return;
+  layer.setStyle({ ...STYLES[tract.level], weight: 0.5 });
+  // Refresh hover handlers so they reflect the updated level
+  layer.off('mouseover').off('mouseout');
+  const lvl = tract.level;
+  layer.on('mouseover', () => layer.setStyle({ fillOpacity: HOVER_OPACITY[lvl], weight: 1.5 }));
+  layer.on('mouseout',  () => layer.setStyle({ ...STYLES[lvl], weight: 0.5 }));
+}
+
+function applyNeighborBlending(cityId) {
+  const city = CITIES[cityId];
+  if (!city?.bbox) return;
+  const [n, w, s, e] = city.bbox;
+  const buf = BLEND_RADIUS_KM / 111.32;
+  ZONES.forEach(z => {
+    if (!z.geoid || !z._center) return;
+    const { lat, lng } = z._center;
+    if (lat < s - buf || lat > n + buf || lng < w - buf || lng > e + buf) return;
+    blendTractWithNeighbors(z);
   });
 }
 
