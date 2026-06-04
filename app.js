@@ -129,6 +129,60 @@ function setColorblindMode(on) {
 let unitPref = localStorage.getItem('saferoute_unit') || 'mi';
 const cityFetchTimes = {};
 
+// ── Traveler type ─────────────────────────────────────────────────────────────
+const TRAVELER_PROFILES = {
+  'solo-adult':  { label: 'Solo traveler',      icon: '🚶',  safe: 3.5, caution: 2.5 },
+  'solo-female': { label: 'Solo female',         icon: '👩',  safe: 4.0, caution: 3.0 },
+  'family':      { label: 'Family with kids',    icon: '👨‍👧',  safe: 3.8, caution: 2.7 },
+  'senior':      { label: 'Senior traveler',     icon: '🧓',  safe: 3.9, caution: 2.9 },
+};
+
+let travelerType = localStorage.getItem('saferoute_traveler') || 'solo-adult';
+
+function scoreToLevel(score) {
+  const { safe, caution } = TRAVELER_PROFILES[travelerType] || TRAVELER_PROFILES['solo-adult'];
+  return score >= safe ? 'safe' : score >= caution ? 'caution' : 'avoid';
+}
+
+const TRAVELER_ADVICE = {
+  'solo-female': {
+    safe:    "Safe by solo female standards. Stick to main streets after dark and trust your instincts.",
+    caution: "Use extra caution as a solo female. Elevated risk of harassment or assault on quieter streets. Rideshare recommended at night.",
+    avoid:   "High-risk for solo female travelers. Significantly elevated assault rates. Avoid walking alone here.",
+  },
+  'family': {
+    safe:    "Suitable for families with children.",
+    caution: "Elevated crime or rough street character — review conditions before bringing young children here.",
+    avoid:   "High crime area. Not recommended for families with young children.",
+  },
+  'senior': {
+    safe:    "Generally safe for senior travelers. Mind uneven terrain and stay in populated areas.",
+    caution: "Seniors face elevated risk of theft and opportunistic crime here. Consider rideshare over walking.",
+    avoid:   "High-risk for senior travelers. Significantly elevated theft and robbery. Strongly recommend avoiding.",
+  },
+};
+
+function setTravelerType(type) {
+  travelerType = type;
+  localStorage.setItem('saferoute_traveler', type);
+  document.querySelectorAll('#traveler-toggle .tt-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.ttype === type);
+  });
+  // Re-level every rendered zone
+  ZONES.forEach(z => {
+    if (!z.score) return;
+    const newLevel = scoreToLevel(z.score);
+    if (newLevel === z.level) return;
+    z.level = newLevel;
+    const key = z.lsoaCode ? `lsoa:${z.lsoaCode}` : z.geoid ? `tract:${z.geoid}` : `${z.cityId}:${z.name}`;
+    const layer = polyLayers[key];
+    if (layer && typeof layer.setStyle === 'function') {
+      layer.setStyle({ ...STYLES[z.level], weight: z.lsoaCode ? 0.5 : 1.5 });
+    }
+  });
+  if (activeZone) showZone(activeZone);
+}
+
 function fmtDistKm(km) {
   if (unitPref === 'mi') {
     const mi = km * 0.621371;
@@ -226,8 +280,7 @@ function computeScores(crimes, city, cityId, hourFilter) {
     const areaFactor = medianArea / z._area;
     const w = Math.max(weighted[z.name] * areaFactor, 1);
     const score = Math.max(1, Math.min(5, 5 - K * Math.log10(w / BASELINE)));
-    const level = score >= 3.5 ? 'safe' : score >= 2.5 ? 'caution' : 'avoid';
-    result[z.name] = { score: Math.round(score * 10) / 10, count: rawCount[z.name], level, weighted: weighted[z.name] };
+    result[z.name] = { score: Math.round(score * 10) / 10, count: rawCount[z.name], level: scoreToLevel(score), weighted: weighted[z.name] };
   });
   return result;
 }
@@ -931,7 +984,7 @@ function computeComposite(zone) {
 }
 function applyComposite(zone) {
   zone.score = computeComposite(zone);
-  zone.level = zone.score >= 3.5 ? 'safe' : zone.score >= 2.5 ? 'caution' : 'avoid';
+  zone.level = scoreToLevel(zone.score);
   polyLayers[`${zone.cityId}:${zone.name}`]?.setStyle(STYLES[zone.level]);
 }
 function applyQoLScores(scoreMap, cityId) {
@@ -1199,9 +1252,9 @@ function reviewsHtml(zone) {
   const reviews = typeof ZONE_REVIEWS !== 'undefined' ? ZONE_REVIEWS[key] : null;
 
   const avgRating = reviews ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) : null;
-  const sentimentFromScore = zone.score >= 3.5
+  const sentimentFromScore = zone.level === 'safe'
     ? { cls: 'rs-positive', label: 'Travelers generally feel safe here' }
-    : zone.score >= 2.5
+    : zone.level === 'caution'
     ? { cls: 'rs-mixed', label: 'Mixed — most recommend extra caution' }
     : { cls: 'rs-negative', label: 'Most travelers advise against walking here' };
 
@@ -1263,6 +1316,15 @@ function fmtFreshness(zone) {
   return m ? `${m[1]} historical data` : 'Historical data';
 }
 
+function travelerNoteHtml(zone) {
+  if (travelerType === 'solo-adult') return '';
+  const advice = TRAVELER_ADVICE[travelerType]?.[zone.level];
+  if (!advice) return '';
+  const p = TRAVELER_PROFILES[travelerType];
+  const cls = zone.level === 'safe' ? 'tn-safe' : zone.level === 'caution' ? 'tn-caution' : 'tn-avoid';
+  return `<div class="traveler-note ${cls}">${p.icon} <span><strong>${p.label}:</strong> ${advice}</span></div>`;
+}
+
 function showZone(zone) {
   activeZone = zone;
   const dispCount = activeCrimeCount(zone);
@@ -1297,6 +1359,7 @@ function showZone(zone) {
       </div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:6px">${zone.cityLabel}</div>
       <span class="badge badge-${zone.level}"><span class="badge-dot"></span>${LEVEL_LABELS[zone.level]}</span>
+      ${travelerNoteHtml(zone)}
       <div class="score-row">
         <span class="stars">${starsHtml(zone.score)}</span>
         <span class="score-num">Safety ${zone.score} / 5</span>
@@ -1508,7 +1571,7 @@ function computeTractScore(acs, fbiData) {
   }
 
   const s = Math.round(raw * 10) / 10;
-  return { score: s, level: s >= 3.5 ? 'safe' : s >= 2.5 ? 'caution' : 'avoid', hasCrime };
+  return { score: s, level: scoreToLevel(s), hasCrime };
 }
 
 function isCoveredByCity(lat, lng) {
@@ -1663,8 +1726,7 @@ async function applySocrataCrimeToTracts(cityKey, config) {
     const crimeScore = Math.max(1, Math.min(5, 5 - 2.5 * Math.log10(normalizedCount / config.baseline)));
     const raw = count > 0 ? 0.55 * crimeScore + 0.45 * zone.acsScore : zone.acsScore;
     const score = Math.round(raw * 10) / 10;
-    const level = score >= 3.5 ? 'safe' : score >= 2.5 ? 'caution' : 'avoid';
-    zone.score = score; zone.level = level;
+    zone.score = score; zone.level = scoreToLevel(score);
     zone.crimeCount = count; zone.crimeScore = Math.round(crimeScore * 10) / 10;
     zone.dataSource = config.label + ' PD + ACS';
     zone.tips = [
@@ -1801,7 +1863,7 @@ function ukScore(rank, total) {
   const pct = rank / total;
   const raw = 1 + 4 * pct;
   const score = Math.round(Math.min(5, Math.max(1, raw)) * 10) / 10;
-  return { score, level: score >= 3.5 ? 'safe' : score >= 2.5 ? 'caution' : 'avoid' };
+  return { score, level: scoreToLevel(score) };
 }
 
 function buildUkLsoaZone(feature, imdMap) {
@@ -2667,6 +2729,14 @@ function updateOnlineStatus() {
 window.addEventListener('online',  updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 updateOnlineStatus();
+
+// ── Initialize traveler toggle state from localStorage ────────────────────────
+(function () {
+  const saved = localStorage.getItem('saferoute_traveler') || 'solo-adult';
+  document.querySelectorAll('#traveler-toggle .tt-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.ttype === saved);
+  });
+})();
 
 // ── First-load disclaimer ─────────────────────────────────────────────────────
 function dismissDisclaimer() {

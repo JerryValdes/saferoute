@@ -742,6 +742,30 @@
     /* ─── Data vintage note ─── */
     .data-vintage { font-size: 11px; color: var(--muted); margin-bottom: 14px; }
 
+    /* ─── Traveler type toggle ─── */
+    #traveler-section {
+      padding: 8px 14px 0;
+      flex-shrink: 0;
+    }
+    #traveler-section .toggle-section-label {
+      font-size: 9.5px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .65px; color: var(--muted); margin-bottom: 5px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    #traveler-toggle { display: flex; gap: 0; }
+    #traveler-toggle .tt-btn { flex: 1; }
+
+    /* ─── Traveler note in zone panel ─── */
+    .traveler-note {
+      display: flex; gap: 7px; align-items: flex-start;
+      padding: 7px 10px; border-radius: 7px;
+      font-size: 12px; line-height: 1.55;
+      margin: 7px 0 4px;
+    }
+    .tn-safe    { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+    .tn-caution { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+    .tn-avoid   { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+
     /* ─── Tourist Reviews ─── */
     .reviews-section { margin-top: 18px; }
     .reviews-heading {
@@ -850,6 +874,15 @@
       <button id="trip-go-btn" onclick="planTrip()">Plan my trip →</button>
       <div id="trip-status"></div>
       <div id="trip-results"></div>
+    </div>
+    <div id="traveler-section">
+      <div class="toggle-section-label">Who's traveling?</div>
+      <div id="traveler-toggle">
+        <button class="tt-btn active" data-ttype="solo-adult"  onclick="setTravelerType('solo-adult')">Solo<span class="tt-sub">adult</span></button>
+        <button class="tt-btn"        data-ttype="solo-female" onclick="setTravelerType('solo-female')">Solo ♀<span class="tt-sub">female</span></button>
+        <button class="tt-btn"        data-ttype="family"      onclick="setTravelerType('family')">Family<span class="tt-sub">w/ kids</span></button>
+        <button class="tt-btn"        data-ttype="senior"      onclick="setTravelerType('senior')">Senior<span class="tt-sub">65+</span></button>
+      </div>
     </div>
     <div id="time-toggle">
       <button class="tt-btn active" onclick="setTimeMode('all')">All hours</button>
