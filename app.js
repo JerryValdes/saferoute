@@ -127,6 +127,7 @@ function setColorblindMode(on) {
 
 // ── Unit preference ───────────────────────────────────────────────────────────
 let unitPref = localStorage.getItem('saferoute_unit') || 'mi';
+const cityFetchTimes = {};
 
 function fmtDistKm(km) {
   if (unitPref === 'mi') {
@@ -1199,6 +1200,20 @@ function trendBadge(trend) {
   return '<span class="trend-badge trend-worsening">↑ Crime trending up</span>';
 }
 
+function fmtFreshness(zone) {
+  const t = cityFetchTimes[zone.cityId];
+  if (t) {
+    const mins = Math.round((Date.now() - t) / 60000);
+    if (mins < 2) return 'Just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.round(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.round(hrs / 24)}d ago`;
+  }
+  const m = (zone.dataSource || '').match(/\b(20\d\d)\b/);
+  return m ? `${m[1]} historical data` : 'Historical data';
+}
+
 function showZone(zone) {
   activeZone = zone;
   const dispCount = activeCrimeCount(zone);
@@ -1219,6 +1234,7 @@ function showZone(zone) {
       ${zone.amenityScore !== null ? `<div class="crime-row"><span>Tourist amenities</span><span class="crime-val">${zone.amenityScore}/5</span></div>` : ''}
       ${multiSrc ? `<div class="crime-row"><span><strong>Composite score</strong></span><span class="crime-val"><strong>${zone.score}/5</strong></span></div>` : ''}
       <div class="crime-row"><span>Source</span><span class="crime-val">${sources}</span></div>
+      <div class="crime-row"><span>Data loaded</span><span class="crime-val">${fmtFreshness(zone)}</span></div>
     </div>` : '';
 
   document.getElementById('panel').innerHTML = `
@@ -1239,6 +1255,7 @@ function showZone(zone) {
       <div class="divider"></div>
       <div class="desc">${zone.desc}</div>
       ${crimeBox}
+      ${!crimeBox ? `<p class="data-vintage">Data: ${fmtFreshness(zone)}</p>` : ''}
       <div class="tips-heading">Tourist Tips</div>
       ${zone.tips.map(t => `<div class="tip"><span class="tip-icon">${t.icon}</span><span>${t.text}</span></div>`).join('')}
       ${nearbyHtml(zone)}
@@ -1324,6 +1341,7 @@ async function loadCityData(cityId) {
   if (qolRes) applyQoLScores(computeQoLScores(qolRes, city, cityId), cityId);
   if (amenityRes) applyAmenityScores(computeAmenityScores(amenityRes, cityId), cityId);
   if (!crimeRes && !qolRes && !amenityRes) crimeLoaded.delete(cityId);
+  else cityFetchTimes[cityId] = Date.now();
 }
 
 function fetchVisibleCityData() {
@@ -2599,3 +2617,12 @@ function updateOnlineStatus() {
 window.addEventListener('online',  updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 updateOnlineStatus();
+
+// ── First-load disclaimer ─────────────────────────────────────────────────────
+function dismissDisclaimer() {
+  localStorage.setItem('saferoute_disc_v1', '1');
+  document.getElementById('disclaimer-overlay').classList.remove('open');
+}
+if (!localStorage.getItem('saferoute_disc_v1')) {
+  document.getElementById('disclaimer-overlay').classList.add('open');
+}

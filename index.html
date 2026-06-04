@@ -712,6 +712,36 @@
       #route-btn { padding: 5px 8px; }
     }
 
+    /* ─── First-load disclaimer ─── */
+    #disclaimer-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.65);
+      display: none; align-items: center; justify-content: center;
+      z-index: 10000; padding: 16px;
+    }
+    #disclaimer-overlay.open { display: flex; }
+    #disclaimer-modal {
+      background: #fff; border-radius: 14px;
+      padding: 32px 28px; max-width: 420px; width: 100%;
+      text-align: center;
+      box-shadow: 0 24px 64px rgba(0,0,0,.35);
+    }
+    .disc-icon { font-size: 38px; margin-bottom: 12px; line-height: 1; }
+    .disc-title { font-size: 18px; font-weight: 700; margin-bottom: 14px; color: var(--text); }
+    .disc-body { font-size: 13.5px; line-height: 1.75; color: #334155; margin-bottom: 10px; text-align: left; }
+    .disc-divider { height: 1px; background: var(--border); margin: 16px 0; }
+    #disc-btn {
+      display: block; width: 100%; margin-top: 20px;
+      padding: 12px; border: none; border-radius: 8px;
+      background: var(--dark); color: #fff;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      font-family: inherit; letter-spacing: .01em;
+    }
+    #disc-btn:hover { background: #1e293b; }
+
+    /* ─── Data vintage note ─── */
+    .data-vintage { font-size: 11px; color: var(--muted); margin-bottom: 14px; }
+
     /* ─── Offline banner ─── */
     #offline-banner {
       position: fixed; bottom: 0; left: 0; right: 0;
@@ -871,6 +901,18 @@
 
 <script src="zones.js" defer></script>
 <script src="app.js" defer></script>
+
+<div id="disclaimer-overlay">
+  <div id="disclaimer-modal">
+    <div class="disc-icon">⚠</div>
+    <div class="disc-title">About This Safety Data</div>
+    <p class="disc-body">SafeRoute uses <strong>historical crime data</strong> to estimate neighborhood safety. Scores reflect past reported incidents — they are <strong>not a guarantee</strong> of current or future safety conditions.</p>
+    <p class="disc-body">Data coverage and reporting rates vary by city. Always exercise personal judgment, check current travel advisories, and stay aware of your surroundings.</p>
+    <div class="disc-divider"></div>
+    <p class="disc-body" style="font-size:12px;color:var(--muted);margin:0">By continuing, you acknowledge that SafeRoute is for informational purposes only and does not constitute professional safety advice.</p>
+    <button id="disc-btn" onclick="dismissDisclaimer()">I understand — Show the map</button>
+  </div>
+</div>
 
 <div id="offline-banner">
   <span class="offline-dot"></span>
