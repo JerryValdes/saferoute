@@ -2260,9 +2260,113 @@ function setTimeMode(mode) {
 
 
 // ── Route safety ─────────────────────────────────────────────────────────────
-const routeLayer   = L.layerGroup().addTo(map);
-const routeMarkers = L.layerGroup().addTo(map);
+const routeLayer       = L.layerGroup().addTo(map);
+const directRouteLayer = L.layerGroup().addTo(map); // ghost line for comparison
+const routeMarkers     = L.layerGroup().addTo(map);
 let routeActive = false;
+
+// ── Route preference ──────────────────────────────────────────────────────────
+let routePreference = localStorage.getItem('saferoute_routepref') || 'fastest';
+
+function setRouteMode(mode) {
+  routePreference = mode;
+  localStorage.setItem('saferoute_routepref', mode);
+  document.querySelectorAll('#route-mode-toggle .tt-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.rmode === mode);
+  });
+  const goBtn = document.getElementById('route-go-btn');
+  if (goBtn) goBtn.textContent = mode === 'safest' ? 'Find safest route →' : 'Get walking route';
+}
+
+// ── Safe route optimizer helpers ──────────────────────────────────────────────
+function summarizeRoute(coords) {
+  const step = Math.max(1, Math.floor(coords.length / 150));
+  const pts = [];
+  for (let i = 0; i < coords.length; i += step) {
+    const [lng, lat] = coords[i];
+    const zone = getZoneForCoord(lat, lng);
+    pts.push({ lat, lng, level: zone?.level || 'unknown', zone: zone || null });
+  }
+  const counts = {}, zoneMap = new Map();
+  pts.forEach(p => {
+    counts[p.level] = (counts[p.level] || 0) + 1;
+    if (p.zone) {
+      const k = `${p.zone.cityId}:${p.zone.name}`;
+      if (!zoneMap.has(k)) zoneMap.set(k, { zone: p.zone, count: 0 });
+      zoneMap.get(k).count++;
+    }
+  });
+  return { counts, total: pts.length, zones: [...zoneMap.values()].sort((a, b) => b.count - a.count) };
+}
+
+function _clusterBadPoints(coords) {
+  const clusters = [];
+  let cur = null;
+  for (let i = 0; i < coords.length; i++) {
+    const [lng, lat] = coords[i];
+    const zone = getZoneForCoord(lat, lng);
+    if (zone?.level === 'avoid') {
+      if (!cur) cur = { points: [], startIdx: i };
+      cur.points.push({ lat, lng, idx: i });
+    } else {
+      if (cur && cur.points.length >= 3) clusters.push(cur);
+      cur = null;
+    }
+  }
+  if (cur && cur.points.length >= 3) clusters.push(cur);
+  return clusters;
+}
+
+function _findSafeWaypoint(cluster, allCoords) {
+  const pts = cluster.points;
+  const midLat = pts.reduce((s, p) => s + p.lat, 0) / pts.length;
+  const midLng = pts.reduce((s, p) => s + p.lng, 0) / pts.length;
+
+  const fi = Math.max(0, pts[0].idx - 8);
+  const li = Math.min(allCoords.length - 1, pts[pts.length - 1].idx + 8);
+  const [fLng, fLat] = allCoords[fi];
+  const [lLng, lLat] = allCoords[li];
+
+  const dLat = lLat - fLat;
+  const dLng = (lLng - fLng) * Math.cos(midLat * Math.PI / 180);
+  const len  = Math.sqrt(dLat * dLat + dLng * dLng) || 1;
+  // Perpendicular unit vector
+  const pLat = -dLng / len, pLng = dLat / len;
+  const K = 111.0;
+
+  for (const km of [0.3, 0.5, 0.8, 1.2, 1.8]) {
+    for (const side of [1, -1]) {
+      const lat = midLat + (km / K) * pLat * side;
+      const lng = midLng + (km / (K * Math.cos(midLat * Math.PI / 180))) * pLng * side;
+      const zone = getZoneForCoord(lat, lng);
+      if (!zone || zone.level === 'safe' || zone.level === 'caution') return [lat, lng];
+    }
+  }
+  return null;
+}
+
+async function computeSafeDetour(directRoute, fromCoord, toCoord) {
+  const coords = directRoute.geometry.coordinates;
+  const clusters = _clusterBadPoints(coords);
+  if (!clusters.length) return { tag: 'already_safe' };
+
+  const waypoints = clusters.map(c => _findSafeWaypoint(c, coords)).filter(Boolean);
+  if (!waypoints.length) return { tag: 'no_detour' };
+
+  // Build OSRM URL: fromCoord/toCoord are [lat,lng]; OSRM wants lng,lat
+  const allPts = [fromCoord, ...waypoints, toCoord];
+  const coordStr = allPts.map(([lat, lng]) => `${lng},${lat}`).join(';');
+  try {
+    const res = await fetch(
+      `https://router.project-osrm.org/route/v1/foot/${coordStr}?geometries=geojson&overview=full`
+    );
+    if (!res.ok) return { tag: 'no_detour' };
+    const json = await res.json();
+    const route = json.routes?.[0];
+    if (!route) return { tag: 'no_detour' };
+    return { tag: 'improved', route };
+  } catch { return { tag: 'no_detour' }; }
+}
 
 function toggleRouteMode() {
   if (tripActive) toggleTripMode(); // close trip mode first
@@ -2273,6 +2377,7 @@ function toggleRouteMode() {
   if (routeActive && window.innerWidth <= 700) window.setSheetState?.('half');
   if (!routeActive) {
     routeLayer.clearLayers();
+    directRouteLayer.clearLayers();
     routeMarkers.clearLayers();
     document.getElementById('route-from').value = '';
     document.getElementById('route-to').value = '';
@@ -2296,6 +2401,7 @@ function toggleTripMode() {
   if (tripActive && window.innerWidth <= 700) window.setSheetState?.('half');
   if (!tripActive) {
     routeLayer.clearLayers();
+    directRouteLayer.clearLayers();
     routeMarkers.clearLayers();
     tripStops = ['', ''];
     document.getElementById('trip-results').innerHTML = '';
@@ -2547,7 +2653,7 @@ function colorRoute(coords) {
 
 let lastRoute = null, lastRouteSummary = null;
 
-function showRouteSummary(route, { counts, total, zones = [] }) {
+function showRouteSummary(route, { counts, total, zones = [] }, comparison = null) {
   lastRoute = route;
   lastRouteSummary = { counts, total, zones };
   const distStr = fmtDistM(route.distance);
@@ -2578,8 +2684,55 @@ function showRouteSummary(route, { counts, total, zones = [] }) {
       </div>`;
     }).join('')}` : '';
 
+  // ── Comparison banner (safe route mode) ───────────────────────────────────
+  let comparisonHtml = '';
+  if (comparison) {
+    if (comparison.tag === 'already_safe') {
+      comparisonHtml = `<div class="rt-safe-banner rt-safe-banner-ok">✅ Route already avoids red zones — no detour needed.</div>`;
+    } else if (comparison.tag === 'no_detour') {
+      comparisonHtml = `<div class="rt-safe-banner rt-safe-banner-warn">⚠ No significantly safer path found for this route.</div>`;
+    } else if (comparison.tag === 'improved' && comparison.direct) {
+      const dc = comparison.direct.counts, dt = comparison.direct.total || 1;
+      const dsp = Math.round((dc.safe    || 0) / dt * 100);
+      const dcp = Math.round((dc.caution || 0) / dt * 100);
+      const dap = Math.round((dc.avoid   || 0) / dt * 100);
+      const dup = 100 - dsp - dcp - dap;
+      const dMins = Math.round(comparison.direct.route.duration / 60);
+      const dDist = fmtDistM(comparison.direct.route.distance);
+      const extraMins = mins - dMins;
+      const extraStr  = extraMins > 0 ? `+${extraMins} min` : `${extraMins} min`;
+      const extraDist = fmtDistM(route.distance - comparison.direct.route.distance);
+      const avoidSaved = dap - ap;
+      comparisonHtml = `
+        <div class="rt-compare-box">
+          <div class="rt-compare-headline">
+            <span class="rt-compare-pill">🛡 Safer route found</span>
+            <span class="rt-compare-delta">${extraStr} · ${extraDist > 0 ? '+' : ''}${extraDist}</span>
+          </div>
+          <div class="rt-compare-rows">
+            <div class="rt-compare-label">Safest <span class="rt-compare-pct">${sp}% safe${ap > 0 ? ' · ' + ap + '% red' : ''}</span></div>
+            <div class="rt-bar rt-bar-sm">
+              ${sp  > 0 ? `<div class="rt-bar-safe"    style="width:${sp}%"></div>` : ''}
+              ${cp  > 0 ? `<div class="rt-bar-caution" style="width:${cp}%"></div>` : ''}
+              ${ap  > 0 ? `<div class="rt-bar-avoid"   style="width:${ap}%"></div>` : ''}
+              ${up  > 0 ? `<div class="rt-bar-unknown" style="width:${up}%"></div>` : ''}
+            </div>
+            <div class="rt-compare-label rt-compare-label-dim">Direct <span class="rt-compare-pct">${dsp}% safe${dap > 0 ? ' · <strong style=color:#991b1b>' + dap + '% red</strong>' : ''}</span></div>
+            <div class="rt-bar rt-bar-sm" style="opacity:.55">
+              ${dsp > 0 ? `<div class="rt-bar-safe"    style="width:${dsp}%"></div>` : ''}
+              ${dcp > 0 ? `<div class="rt-bar-caution" style="width:${dcp}%"></div>` : ''}
+              ${dap > 0 ? `<div class="rt-bar-avoid"   style="width:${dap}%"></div>` : ''}
+              ${dup > 0 ? `<div class="rt-bar-unknown" style="width:${dup}%"></div>` : ''}
+            </div>
+          </div>
+          ${avoidSaved > 0 ? `<div class="rt-compare-win">Cuts red-zone exposure by ${avoidSaved}%</div>` : ''}
+        </div>`;
+    }
+  }
+
   document.getElementById('route-summary').innerHTML = `
     <div class="rt-summary">
+      ${comparisonHtml}
       <div class="rt-stat"><span>Distance</span><strong>${distStr}</strong></div>
       <div class="rt-stat"><span>Walking time</span><strong>${timeStr}</strong></div>
       <div class="rt-stat"><span>Overall safety</span>
@@ -2611,6 +2764,7 @@ async function computeRoute() {
   btn.disabled = true;
   status.textContent = 'Geocoding addresses…';
   routeLayer.clearLayers();
+  directRouteLayer.clearLayers();
   routeMarkers.clearLayers();
 
   try {
@@ -2623,32 +2777,58 @@ async function computeRoute() {
 
     const [fromCoord, toCoord] = await Promise.all([geocode(fromVal), geocode(toVal)]);
 
-    status.textContent = 'Fetching walking route…';
-    const osrm = `https://router.project-osrm.org/route/v1/foot/${fromCoord[1]},${fromCoord[0]};${toCoord[1]},${toCoord[0]}?geometries=geojson&overview=full`;
-    const res  = await fetch(osrm);
-    if (!res.ok) throw new Error('Routing service unavailable');
-    const json = await res.json();
-    if (!json.routes?.length) throw new Error('No walking route found between those locations');
-
-    const route  = json.routes[0];
-    const coords = route.geometry.coordinates;
+    status.textContent = 'Fetching route…';
+    const directRes = await fetch(
+      `https://router.project-osrm.org/route/v1/foot/${fromCoord[1]},${fromCoord[0]};${toCoord[1]},${toCoord[0]}?geometries=geojson&overview=full`
+    );
+    if (!directRes.ok) throw new Error('Routing service unavailable');
+    const directJson = await directRes.json();
+    if (!directJson.routes?.length) throw new Error('No walking route found between those locations');
+    const directRoute = directJson.routes[0];
 
     L.circleMarker(fromCoord, { radius: 7, color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 1, weight: 2 }).addTo(routeMarkers);
     L.circleMarker(toCoord,   { radius: 7, color: '#ef4444', fillColor: '#ef4444', fillOpacity: 1, weight: 2 }).addTo(routeMarkers);
 
-    // Initial draw with whatever is already loaded (may have gray/unknown segments)
-    status.textContent = 'Scoring route…';
-    colorRoute(coords);
-    map.fitBounds(L.latLngBounds([fromCoord, toCoord]), { padding: [60, 60] });
+    status.textContent = 'Loading safety data…';
+    await loadRouteCorridor(directRoute.geometry.coordinates);
 
-    // Load city + census tract data for every area along the route
-    status.textContent = 'Loading safety data for route area…';
-    await loadRouteCorridor(coords);
+    if (routePreference === 'safest') {
+      status.textContent = 'Finding safest path…';
+      const detour = await computeSafeDetour(directRoute, fromCoord, toCoord);
 
-    // Re-draw now that data is loaded — clear old segments first
-    routeLayer.clearLayers();
-    const summary = colorRoute(coords);
-    showRouteSummary(route, summary);
+      if (detour.tag === 'improved') {
+        // Load safety data for the safe route corridor too
+        await loadRouteCorridor(detour.route.geometry.coordinates);
+
+        // Ghost: thin dashed gray line for the direct route
+        L.polyline(
+          directRoute.geometry.coordinates.map(([lng, lat]) => [lat, lng]),
+          { color: '#94a3b8', weight: 3, opacity: 0.55, dashArray: '7 5', lineCap: 'round' }
+        ).addTo(directRouteLayer);
+
+        // Primary: safety-colored safe route
+        const safeSummary   = colorRoute(detour.route.geometry.coordinates);
+        const directSummary = summarizeRoute(directRoute.geometry.coordinates);
+        map.fitBounds(L.latLngBounds([fromCoord, toCoord]), { padding: [80, 80] });
+        showRouteSummary(detour.route, safeSummary, {
+          tag: 'improved',
+          direct: { route: directRoute, counts: directSummary.counts, total: directSummary.total },
+        });
+      } else {
+        // No improvement — draw direct route normally
+        const summary = colorRoute(directRoute.geometry.coordinates);
+        map.fitBounds(L.latLngBounds([fromCoord, toCoord]), { padding: [60, 60] });
+        showRouteSummary(directRoute, summary, { tag: detour.tag });
+      }
+    } else {
+      // Fastest mode — original behaviour
+      colorRoute(directRoute.geometry.coordinates);
+      map.fitBounds(L.latLngBounds([fromCoord, toCoord]), { padding: [60, 60] });
+      routeLayer.clearLayers();
+      const summary = colorRoute(directRoute.geometry.coordinates);
+      showRouteSummary(directRoute, summary);
+    }
+
     status.textContent = '';
   } catch (e) {
     status.textContent = `⚠ ${e.message}`;
@@ -2845,6 +3025,16 @@ function updateOnlineStatus() {
 window.addEventListener('online',  updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 updateOnlineStatus();
+
+// ── Initialize route mode button state ───────────────────────────────────────
+(function () {
+  const saved = localStorage.getItem('saferoute_routepref') || 'fastest';
+  document.querySelectorAll('#route-mode-toggle .tt-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.rmode === saved);
+  });
+  const goBtn = document.getElementById('route-go-btn');
+  if (goBtn && saved === 'safest') goBtn.textContent = 'Find safest route →';
+})();
 
 // ── Initialize landmark toggle state ─────────────────────────────────────────
 (function () {
