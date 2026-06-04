@@ -2038,6 +2038,87 @@ const DERRY_ZONE_DEFS = {
   'Strand Road':{ level:'safe', score:3.8, desc:"Derry/Londonderry — one of Ireland\'s most atmospheric cities and the only completely walled city in Britain or Ireland. The 17th-century City Walls, the Guildhall, the Bogside murals, the Derry Girls mural, and the Peace Bridge are all within easy walking distance of each other in the historic city centre.", tips:[{icon:'🏰',text:'The City Walls (1613–1619) are the best preserved in Britain and Ireland — a free unmissable walk'},{icon:'🎨',text:'Free Derry murals in the Bogside are internationally famous — very safe and important to visit'},{icon:'🌉',text:'Peace Bridge (2011) is a striking footbridge linking the Cityside to the Waterside'},{icon:'🎭',text:'The Derry Girls mural on Orchard Street is a hugely popular photo stop'}] },
 };
 
+// ── Isle of Man zone definitions ─────────────────────────────────────────────
+const IOM_ZONE_DEFS = {
+  'Douglas':{ level:'safe', score:4.1, desc:"The capital and main commercial centre of the Isle of Man — the Victorian promenade, the Sea Terminal, Strand Street shopping, the Casino, and the Manx Museum are all here. A well-kept, attractive harbour city with a strong financial services economy. Very safe with low crime.", tips:[{icon:'✅',text:'Very safe — well-policed, low crime by any UK or Irish standard'},{icon:'🏛️',text:'Manx Museum on Kingswood Grove is excellent and free — a full day of Manx history and culture'},{icon:'🌊',text:'The 2km Victorian promenade from the Sea Terminal to Onchan Head is an essential walk'},{icon:'🏎️',text:'TT Race Week (late May / early June) transforms the island — extraordinary if you love motorsport'}] },
+  'Onchan':{ level:'safe', score:4.3, desc:"Residential suburb rising steeply from the north end of Douglas Bay to Onchan Head headland. Quiet, attractive village character with sea views. The TT Course passes through on race days.", tips:[{icon:'✅',text:'Very safe residential suburb — very low crime'},{icon:'🌅',text:'Onchan Head gives panoramic views over Douglas Bay and the Irish Sea'},{icon:'🏎️',text:'The TT Course passes through — Governor\'s Bridge section is famous'},{icon:'🌳',text:'Onchan Park has good facilities including a boating lake'}] },
+  'Laxey':{ level:'safe', score:4.5, desc:"Charming east coast valley village, home to the Lady Isabella Laxey Wheel — the largest working waterwheel in the world (22m diameter, built 1854 to pump water from a lead mine). Accessible by the Manx Electric Railway, a heritage tramway running from Douglas since 1893. Also the lower terminus of the Snaefell Mountain Railway.", tips:[{icon:'🎡',text:'Lady Isabella Laxey Wheel is unmissable — the largest working waterwheel in the world, beautifully restored'},{icon:'🚃',text:'Manx Electric Railway from Douglas (heritage trams since 1893) — one of the world\'s greatest railway experiences'},{icon:'⛰️',text:'The Snaefell Mountain Railway departs from here for the island\'s summit (621m)'},{icon:'🍺',text:'The Shore Hotel is an excellent local pub right by the beach'}] },
+  'Ramsey':{ level:'safe', score:4.3, desc:"The island's second town and northern market town — a working harbour and fishing port at the foot of the northern plain. Parliament Square is the pleasant town centre. The Ramsey Hairpin is one of the most famous sections of the TT Mountain Course, where spectators crowd in huge numbers.", tips:[{icon:'🚃',text:'Northern terminus of the Manx Electric Railway from Douglas via Laxey — a spectacular ride'},{icon:'🐬',text:'Ramsey Bay has excellent dolphin and porpoise sightings in summer'},{icon:'🏎️',text:'Ramsey Hairpin is one of the great TT Course spectating spots — especially during Race Week and Manx GP'},{icon:'🏖️',text:'Ramsey beach is a long stretch of sand backed by the town — good swimming'}] },
+  'Peel':{ level:'safe', score:4.5, desc:"Arguably the most beautiful town on the Island — a working fishing port on the west coast, dominated by the spectacular ruins of Peel Castle and St German's Cathedral on St Patrick's Isle (connected by a causeway). Famous for Manx kippers, smoked by Moore's Traditional Curers for over 150 years.", tips:[{icon:'🏰',text:'Peel Castle and Cathedral ruins on St Patrick\'s Isle — stunning setting on a tidal island — unmissable'},{icon:'🐟',text:'Manx kippers smoked at Moore\'s Traditional Curers — buy fresh from the shop'},{icon:'🌅',text:'Peel beach gives outstanding sunsets over the Irish Sea and the castle'},{icon:'🍺',text:'The Creek Inn by the harbour is one of the Island\'s best pubs'}] },
+  'St Johns':{ level:'safe', score:4.6, desc:"Small village in the central western valley, famous worldwide as the site of Tynwald Hill — the outdoor parliament mound where the Manx parliament (Tynwald, founded c. 979 AD, the world's oldest continuous parliament) holds its annual open-air ceremony on 5th July. Visitors are very welcome.", tips:[{icon:'🏛️',text:'Tynwald Hill — the world\'s oldest continuous parliament meets here in open air every 5th July — free to attend'},{icon:'⛪',text:'St John\'s Church opposite Tynwald Hill — traditional white-washed building in a perfect rural setting'},{icon:'🌿',text:'Silverburn River walks and Cooil Road are beautiful for a quiet stroll'},{icon:'🏎️',text:'The TT Course passes through — the Cooil section is a fast, scenic stretch'}] },
+  'Castletown':{ level:'safe', score:4.5, desc:"The ancient capital of the Isle of Man and one of the finest small towns in the British Isles. Castle Rushen (dating from around 1200) is one of the best-preserved medieval castles anywhere — a fully interactive museum with stunning interior. The tiny harbour and cobbled square are extremely atmospheric.", tips:[{icon:'🏰',text:'Castle Rushen is outstanding — one of the best-preserved medieval castles in the British Isles; give it two hours'},{icon:'⚓',text:'Nautical Museum by the harbour houses the Peggy — an 18th century yacht preserved in her original boathouse'},{icon:'🌊',text:'Walk to Scarlett Point nature reserve (rare volcanic landscape) and the Langness Peninsula'},{icon:'🍺',text:'The Smelt on The Quay is an excellent and historic harbour pub'}] },
+  'Port Erin':{ level:'safe', score:4.4, desc:"Elegant Victorian resort town with a wide, sheltered sandy bay and the historic Railway Museum at the terminus of the Steam Railway from Douglas. Bradda Head — the dramatic headland to the south — gives outstanding views over the bay and out to the Calf of Man.", tips:[{icon:'🚂',text:'Isle of Man Steam Railway from Douglas — a narrow-gauge steam experience since 1874; the journey through southern countryside is exceptional'},{icon:'🏔️',text:'Bradda Head walk (45 mins from town) gives spectacular views — the Milner Tower crowns the headland'},{icon:'🏖️',text:'Port Erin Bay is sheltered, clean, and sandy — one of the island\'s best swimming beaches'},{icon:'🦭',text:'Calf of Man viewable from Bradda Head — seabirds, seals, and lighthouse'}] },
+  'Port St Mary':{ level:'safe', score:4.4, desc:"Charming traditional harbour village with an excellent sailing club and the famous annual regatta. Chapel Bay beach is outstanding. Very close to Castletown. An authentically Manx community with a strong maritime character.", tips:[{icon:'⛵',text:'Port St Mary sailing club and annual regatta (August) — a wonderful community event'},{icon:'🏖️',text:'Chapel Bay beach is one of the island\'s most beautiful — sheltered and sandy'},{icon:'🌊',text:'Coastal walk north to Castletown (3km) through the Balladoole area is excellent'},{icon:'☕',text:'Good cafes and authentic local character — no tourist traps here'}] },
+  'Ballasalla':{ level:'safe', score:4.5, desc:"South-central village close to Ronaldsway Airport, the Island's main airport. Silverdale Glen — a beautiful wooded ravine with a waterfall and restored watermill — is immediately adjacent. Rushen Abbey ruins (12th-century Cistercian monastery) are close by.", tips:[{icon:'🌊',text:'Silverdale Glen — a beautiful wooded glen with a waterfall and restored 19th century mill; free to enter'},{icon:'⛪',text:'Rushen Abbey — 12th century Cistercian monastery ruins in a beautiful riverside setting; very atmospheric'},{icon:'🌳',text:'Ballasalla Glen and the Silverburn River walk are excellent for a quiet walk'},{icon:'✈️',text:'Ronaldsway Airport (Manx National Heritage museum) is immediately adjacent'}] },
+  'Snaefell & Highlands':{ level:'safe', score:4.3, desc:"The mountainous interior of the Isle of Man, centred on Snaefell (621m, the island's highest peak). On a clear day from the summit you can see England, Ireland, Scotland, and Wales simultaneously. The Snaefell Mountain Railway from Laxey takes you to the top. The famous TT Mountain Course passes through this area on race days.", tips:[{icon:'⛰️',text:'Snaefell Mountain Railway from Laxey (narrow gauge electric, built 1895) — spectacular mountain summit experience; views of five countries on a clear day'},{icon:'🏎️',text:'TT Mountain Course — the Bungalow, Guthrie\'s, and Mountain Box sections are here; the most dramatic racing scenery in the world'},{icon:'🌿',text:'Sulby Reservoir and Glen are outstanding — excellent walking and some of the island\'s finest scenery'},{icon:'🏔️',text:'Snaefell summit walk is well-marked and takes about 2 hours from Laxey'}] },
+  'Ayre':{ level:'safe', score:4.6, desc:"The remote far north of the Isle of Man, centred on Point of Ayre — the island's northernmost point, marked by the Grade II listed Point of Ayre Lighthouse (1815, still operating). The Point of Ayre National Nature Reserve has important colonies of breeding seabirds and grey seals.", tips:[{icon:'🦭',text:'Grey seals haul out on the shingle beach at Point of Ayre — extraordinary close-up wildlife viewing'},{icon:'🌊',text:'Point of Ayre Lighthouse (1815) — a working lighthouse in a remote and beautiful setting'},{icon:'🐦',text:'Point of Ayre NNR — important breeding seabird colony including terns; nesting season April–August'},{icon:'🌾',text:'Extremely remote and peaceful — one of the island\'s finest spots for solitude and natural beauty'}] },
+  'Andreas & Michael':{ level:'safe', score:4.5, desc:"Rural northwest parishes including Kirk Michael (a famous TT Course stage — the Ballaugh Bridge jump is here) and Andreas (the flat northern plain). The Curraghs Wildlife Park is an unexpected gem — exotic wildlife including wallabies and flamingos in a Manx reed-bed setting.", tips:[{icon:'🦘',text:'Curraghs Wildlife Park (near Ballaugh) is outstanding — wallabies, flamingos, and wetland birds in a reed-bed nature reserve; excellent for families'},{icon:'🏎️',text:'Ballaugh Bridge on the TT Course — bikes launch into the air here; spectacular spectating spot'},{icon:'⛪',text:'Kirk Michael village has a pleasant church and traditional Manx character'},{icon:'🌿',text:'Lhen Trench National Nature Reserve — important wetland with otters and waders'}] },
+};
+
+// ── Newry zone definitions (PSNI) ────────────────────────────────────────────
+const NEWRY_ZONE_DEFS = {
+  'Newry':{ level:'safe', score:3.7, desc:"The main commercial and shopping centre for south Down and south Armagh — a cathedral city on the Newry River and Canal, close to the border with the Republic. A busy, lively city with good restaurants, a strong retail sector, and the beautiful Newry & Mourne Museum.", tips:[{icon:'✅',text:'Generally safe — busy commercial city centre'},{icon:'🏛️',text:'Newry Cathedral (1829) — the first Catholic cathedral built in Ireland after Catholic Emancipation, very impressive interior'},{icon:'🏔️',text:'Gateway to the Mourne Mountains — one of Ireland\'s finest mountain ranges'},{icon:'⚠️',text:'Use caution in the Monaghan Street / Water Street area late on weekend nights'}] },
+  'Kilkeel':{ level:'safe', score:4.1, desc:"Attractive fishing port at the foot of the Mourne Mountains on the south Down coast — home to the largest fishing fleet in Northern Ireland. A working harbour town with genuine maritime character, excellent fresh seafood, and the spectacular Silent Valley mountain reservoir nearby.", tips:[{icon:'🐟',text:'Buy fresh fish direct from the harbour — one of Ireland\'s finest fishing ports'},{icon:'🏔️',text:'Silent Valley Reservoir and the Mourne Wall — extraordinary mountain scenery accessible by car'},{icon:'🏰',text:'Greencastle Fort (14th century) — ruined but dramatic on the lough shore at nearby Carlingford'},{icon:'🌊',text:'Coastal walks along the Mourne shore are outstanding — Bloody Bridge to Annalong is a classic'}] },
+  'Downpatrick':{ level:'safe', score:3.9, desc:"The county town of Down — a small, attractive city deeply associated with Saint Patrick, whose supposed burial place in the grounds of Down Cathedral draws pilgrims from around the world. The Down County Museum is housed in an 18th-century jail and is one of Ulster's finest local history museums.", tips:[{icon:'⛪',text:'Down Cathedral and the grave of Saint Patrick (marked by a large granite stone in the churchyard) — a major pilgrimage and heritage site'},{icon:'🏛️',text:'Down County Museum in the 18th-century jail — one of the best local history museums in Ulster; free'},{icon:'☘️',text:'Saint Patrick Centre — interactive museum telling the story of the patron saint of Ireland'},{icon:'🌊',text:'Strangford Lough National Nature Reserve is close by — castle ward and ferry to Portaferry'}] },
+};
+
+// ── Armagh zone definitions (PSNI) ───────────────────────────────────────────
+const ARMAGH_ZONE_DEFS = {
+  'Armagh':{ level:'safe', score:3.9, desc:"Ireland's ecclesiastical capital — both the Roman Catholic and Church of Ireland primates of All Ireland have their cathedrals here, on hilltops facing each other across the city. One of Ireland's oldest and most historically significant places and a UNESCO City of Literature. The Armagh Observatory and Planetarium are internationally important.", tips:[{icon:'⛪',text:'Church of Ireland Cathedral (founded 444 AD, present building largely medieval) — the primacy of all Ireland; free'},{icon:'⛪',text:'Roman Catholic Cathedral of Saint Patrick (1904) — extraordinary interior of Italian marble, Venetian mosaics, and Irish art; free'},{icon:'🔭',text:'Armagh Observatory (1790) and Planetarium — internationally important; public shows bookable'},{icon:'📚',text:'Armagh Public Library has manuscripts of Jonathan Swift — one of Ireland\'s greatest archival collections'}] },
+  'Banbridge':{ level:'safe', score:4.1, desc:"Attractive market town in the Bann Valley with a distinctive central road cut through the hill (The Cut) to allow stage coaches to pass. The gateway to the Brontë Homeland — Patrick Brontë (father of Charlotte, Emily, and Anne) was born near here at Drumballyroney.", tips:[{icon:'✅',text:'Very safe market town — genuine community character'},{icon:'🚗',text:'The Cut — the central hill was excavated to allow the stage coaches to pass, leaving a unique road notch through the town centre'},{icon:'📖',text:'Brontë Homeland Interpretive Centre at Drumballyroney (nearby) — where Patrick Brontë, father of the novelists, was born'},{icon:'🌳',text:'Banbridge\'s riverside parks on the Bann are pleasant for a walk'}] },
+  'Craigavon':{ level:'caution', score:3.2, desc:"A planned New Town built in the 1960s to house Belfast overspill, centred on two large lakes. The town has struggled with social deprivation in some areas but the parkland and lakeside setting are genuinely attractive. Rushmere Shopping Centre is the commercial hub.", tips:[{icon:'🌊',text:'Craigavon City Park with the lakes, watersports, and walking paths is genuinely excellent — free'},{icon:'🛒',text:'Rushmere Shopping Centre — main retail hub for the area'},{icon:'⚠️',text:'Some residential areas have elevated crime — stick to the commercial and lake areas'},{icon:'🐦',text:'Oxford Island National Nature Reserve on Lough Neagh shore is outstanding for birdwatching'}] },
+  'Lurgan':{ level:'caution', score:3.0, desc:"Historic market town in the Craigavon borough, known for linen manufacturing and historically for interface tensions between nationalist and unionist communities. Lurgan Park is one of Ireland's finest Victorian parks. The town centre has improved significantly.", tips:[{icon:'🌳',text:'Lurgan Park — a magnificent 62-hectare Victorian park with boating lake; one of Ireland\'s finest urban parks; free'},{icon:'⚠️',text:'Use caution in interface areas — stick to the park and main commercial area'},{icon:'🌙',text:'Avoid quiet residential streets at night, particularly near interface areas'},{icon:'🚗',text:'Day visit to the park and town centre is fine — evening visits less recommended in residential areas'}] },
+  'Portadown':{ level:'caution', score:3.1, desc:"Historic industrial town on the River Bann — an important railway junction linking Belfast to Dublin. Known historically for the Drumcree controversy. The commercial centre has been regenerated with riverside development, but some areas retain interface tensions.", tips:[{icon:'🌊',text:'The Bann riverside and Portadown Leisure Centre area has been well developed — good for a riverside walk'},{icon:'⚠️',text:'Be aware of interface areas in residential districts — use caution at night'},{icon:'🛒',text:'Portadown town centre has good independent shops and the Marketplace'},{icon:'🍽️',text:'Bridge Street has some good restaurants and cafes'}] },
+};
+
+// ── Antrim & Newtownabbey zone definitions (PSNI) ────────────────────────────
+const ANTRIM_ZONE_DEFS = {
+  'Antrim':{ level:'safe', score:4.0, desc:"Pleasant market town on the northeastern shore of Lough Neagh — the largest freshwater lake in the British Isles. Antrim Castle Gardens (17th-century formal gardens, beautifully restored) and the nearby 9th-century Round Tower (one of the finest in Ireland) are the main attractions. Very safe.", tips:[{icon:'🌿',text:'Antrim Castle Gardens — exceptional 17th-century formal gardens with Anglo-Dutch canal and parterre; beautifully restored; free'},{icon:'🏛️',text:'Antrim Round Tower (c. 900 AD) — one of Ireland\'s finest 9th-century round towers in a lovely setting nearby'},{icon:'🌊',text:'Lough Neagh shore — Ireland\'s largest lake; eels fished commercially here since prehistory; scenic walks'},{icon:'🏰',text:'Shane\'s Castle estate (ruins and nature reserve) on the lough shore is open seasonally'}] },
+  'Newtownabbey':{ level:'safe', score:3.8, desc:"Large suburban district stretching north of Belfast along the M2 motorway and Shore Road corridor. The Valley area has good retail. Generally safe suburban area well connected to Belfast.", tips:[{icon:'✅',text:'Generally safe suburban area — low crime by comparison with Belfast proper'},{icon:'🌊',text:'Newtownabbey Loughshore Park gives good views over Belfast Lough to the Scottish Hills on clear days'},{icon:'🛒',text:'Valley Retail Park has good shopping and restaurants'},{icon:'🚌',text:'Metro bus service connects to Belfast city centre in 20 minutes'}] },
+  'Glengormley':{ level:'safe', score:3.9, desc:"Suburban area in the north of Newtownabbey district, with good local retail and restaurants. A comfortable residential commuter suburb with easy access to Belfast and Antrim.", tips:[{icon:'✅',text:'Very safe suburban residential area'},{icon:'🛒',text:'Good local retail on the Antrim Road'},{icon:'🚌',text:'Regular Translink bus to Belfast city centre'},{icon:'🌳',text:'Cave Hill and Carr\'s Glen linear park are accessible from the upper suburb for hillwalking'}] },
+};
+
+// ── North Down & Ards zone definitions (PSNI) ────────────────────────────────
+const NORTH_DOWN_ZONE_DEFS = {
+  'Bangor':{ level:'safe', score:4.2, desc:"Belfast's traditional seaside resort and one of Northern Ireland's most desirable towns — a beautiful marina, long seafront promenade, and the excellent North Down Museum at Bangor Castle make it a popular day-trip from Belfast. Ward Park is meticulously maintained. Generally very safe.", tips:[{icon:'✅',text:'Very safe — one of Northern Ireland\'s most desirable and best-maintained towns'},{icon:'⛵',text:'Bangor Marina is beautiful — yachts, restaurants, and the seafront promenade extend from here'},{icon:'🏛️',text:'North Down Museum at Bangor Castle — free and excellent on Viking Age and early Christian Bangor'},{icon:'🌊',text:'Seapark area has a beach and recreational facilities — good for families'}] },
+  'Newtownards':{ level:'safe', score:3.9, desc:"Attractive market town at the head of Strangford Lough — gateway to the Ards Peninsula and close to Mount Stewart (National Trust), one of the finest gardens in the British Isles, and Scrabo Tower viewpoint.", tips:[{icon:'🌿',text:'Mount Stewart National Trust gardens — one of the finest gardens in the British Isles, with extraordinary plant diversity and the Lake Walk; well worth a full day'},{icon:'🏰',text:'Scrabo Tower and Country Park — spectacular views over Strangford Lough and the Ards Peninsula; outstanding walking'},{icon:'✅',text:'Generally very safe market town with good local character'},{icon:'🌊',text:'Strangford Lough National Nature Reserve — the largest sea lough in the British Isles; wildfowl and seals'}] },
+  'Holywood':{ level:'safe', score:4.3, desc:"Affluent village/suburb between Belfast and Bangor — birthplace of George Best. A beautiful Main Street lined with galleries, independent shops, and excellent restaurants. The Ulster Folk & Transport Museum at Cultra, immediately adjacent, is one of Ireland's finest museums.", tips:[{icon:'🏛️',text:'Ulster Folk & Transport Museum at Cultra — one of the great open-air museums of the British Isles; give it a full day'},{icon:'🛍️',text:'Holywood Main Street — excellent independent shops, galleries, and some of the best restaurants in the Belfast area'},{icon:'⚽',text:'George Best birthplace plaque — the greatest footballer of his generation grew up here'},{icon:'🌊',text:'Redburn Country Park gives good views over Belfast Lough'}] },
+  'Comber':{ level:'safe', score:4.2, desc:"Small, pleasant market town at the northern end of Strangford Lough — gateway to the best of the lough's wildlife. The Castle Espie Wildfowl & Wetlands Trust is immediately adjacent. Comber Square is an attractive Georgian town centre.", tips:[{icon:'🦆',text:'Castle Espie Wildfowl & Wetlands Trust — outstanding birdwatching on the lough shore; regular species include whooper swans, brent geese, and pintail; excellent family day out'},{icon:'🌊',text:'Strangford Lough coastal path — the loughshore drive and walks are beautiful'},{icon:'✅',text:'Very safe and pleasant small town'},{icon:'🍺',text:'Old Crow pub on The Square is a great local stop'}] },
+};
+
+// ── Mid & East Antrim zone definitions (PSNI) ────────────────────────────────
+const MID_EAST_ANTRIM_ZONE_DEFS = {
+  'Ballymena':{ level:'safe', score:3.8, desc:"The county town of Antrim — a busy market town with a strong cultural identity. The Braid Arts Centre has good exhibition and performance spaces. Gateway to the Antrim Glens, some of the most beautiful glen scenery in Ireland, and Slemish Mountain (traditionally associated with Saint Patrick's time as a shepherd in Ireland).", tips:[{icon:'🎨',text:'The Braid Arts Centre and Museum — local history and exhibitions; a good starting point for understanding this part of Ulster'},{icon:'⛰️',text:'Glenariff Forest Park (20 min drive) — the queen of the Antrim Glens; outstanding waterfalls and woodland walks; free parking'},{icon:'🏔️',text:'Slemish Mountain (near Broughshane) — where St Patrick tended sheep as a slave; short but steep summit walk; views excellent'},{icon:'🛒',text:'Good town centre market character — Ballymena Market Saturday is lively'}] },
+  'Larne':{ level:'safe', score:3.7, desc:"A busy ferry port linking Northern Ireland to Cairnryan in Scotland. The start of the spectacular Causeway Coastal Route (A2) northward to the Giant's Causeway, passing through the Antrim Glens. The Curran — a long sandy spit enclosing the harbour — is a pleasant walk.", tips:[{icon:'⛴️',text:'Main Stena Line and P&O ferry port for Scotland — well-organised and efficient'},{icon:'🌊',text:'Start of the Causeway Coastal Route (A2) — one of the great coastal drives in the British Isles'},{icon:'🏰',text:'Carnlough and Glenarm Castle (walled garden) are 20 minutes north — very beautiful'},{icon:'🌳',text:'Larne Lough and the Curran are good for a walk in good weather'}] },
+  'Carrickfergus':{ level:'safe', score:4.0, desc:"One of Northern Ireland's most historic towns — Carrickfergus Castle (built from 1177) is one of the best-preserved Norman castles in Ireland, sitting dramatically on a basalt promontory over Belfast Lough. William of Orange landed here in June 1690. The marina and harbour area are excellent.", tips:[{icon:'🏰',text:'Carrickfergus Castle — built 1177, superbly preserved; one of the great Norman castles of Ireland; museum inside; unmissable'},{icon:'⚓',text:'The marina and harbour setting give the best views of the castle from the water; coffee on the quayside is excellent'},{icon:'👑',text:'Andrew Jackson Centre — US President Andrew Jackson\'s parents emigrated from here; good heritage experience'},{icon:'🧱',text:'Town Walls (1607) survive in places — historically the best-preserved town walls in Ulster after Derry'}] },
+};
+
+// ── Causeway Coast & Glens zone definitions (PSNI) ───────────────────────────
+const CAUSEWAY_COAST_ZONE_DEFS = {
+  'Coleraine':{ level:'safe', score:3.8, desc:"The main commercial hub of the Causeway Coast and Glens — a university town on the River Bann with good shopping and restaurants. The gateway to the Giant's Causeway (30 minutes west). Generally safe.", tips:[{icon:'✅',text:'Generally safe university town'},{icon:'🌊',text:'Riverside walks along the Bann are very pleasant'},{icon:'🏛️',text:'Mountsandel (immediately south) is one of the world\'s oldest known human settlement sites (c. 7000 BCE) — information boards only but deeply significant'},{icon:'🛒',text:'Good town centre retail and restaurants — Bridge Street and Church Street'}] },
+  'Ballymoney':{ level:'safe', score:4.0, desc:"Compact market town in the Bann Valley — the hometown of road racing legend Joey Dunlop (five-time TT Formula One World Champion), whose bronze statue stands in the town. The Ballymoney Museum has excellent TT racing history. Gateway to the Dark Hedges.", tips:[{icon:'🏍️',text:'Joey Dunlop Memorial and statue — the greatest road racer of all time is deeply honoured here'},{icon:'🌳',text:'The Dark Hedges (Bregagh Road) — ancient beech avenue immortalised in Game of Thrones; 20 min from town; spectacular'},{icon:'🏛️',text:'Ballymoney Museum — local history and excellent road racing heritage; free'},{icon:'✅',text:'Very safe and welcoming market town'}] },
+  'Ballycastle':{ level:'safe', score:4.2, desc:"Beautiful coastal town at the foot of Knocklayde Mountain — the gateway to the Antrim Glens and the starting point for the Rathlin Island ferry. Old Lammas Fair (August) is one of Ireland's oldest traditional fairs. The Giant's Causeway is 25 minutes west, and Kinbane Castle is nearby.", tips:[{icon:'🐦',text:'Rathlin Island ferry from Ballycastle — the island has Northern Ireland\'s largest puffin colony and a spectacular seabird centre; unmissable May–July'},{icon:'🏛️',text:'Old Lammas Fair (last Monday and Tuesday of August) — Ireland\'s oldest fair; traditional fairground and yellow man toffee'},{icon:'🏰',text:'Kinbane Castle — dramatic ruin on a chalk headland above the sea; free; extraordinary coastal views'},{icon:'🌊',text:'Murlough Bay — arguably the most beautiful and remote bay in Northern Ireland; a 30-min drive from town'}] },
+  'Limavady':{ level:'safe', score:4.0, desc:"Attractive market town in the Roe Valley — where Jane Ross transcribed the Londonderry Air (Danny Boy) in 1851. The Roe Valley Country Park is one of Northern Ireland's finest, with a beautiful river gorge and remains of old linen mills.", tips:[{icon:'🎵',text:'Jane Ross Cottage — where the melody of Danny Boy was transcribed from a passing street musician in 1851'},{icon:'🌿',text:'Roe Valley Country Park — outstanding river gorge walking through old linen mill ruins; free; one of Ulster\'s finest parks'},{icon:'⛰️',text:'Binevenagh Mountain (close by) offers spectacular views over the Lough Foyle estuary and across to Donegal'},{icon:'✅',text:'Very safe and genuine market town with good local character'}] },
+};
+
+// ── Lisburn zone definitions (PSNI) ──────────────────────────────────────────
+const LISBURN_ZONE_DEFS = {
+  'Lisburn':{ level:'safe', score:3.9, desc:"A large city southwest of Belfast on the River Lagan — the heart of the Irish linen industry in the 18th century. The Irish Linen Centre & Lisburn Museum is world-class. Lisburn Cathedral (1623) is one of the finest Church of Ireland cathedrals in Ulster. The Lagan Valley Regional Park provides a beautiful green corridor all the way into Belfast.", tips:[{icon:'🧵',text:'Irish Linen Centre & Lisburn Museum — world-class textile and social history; housed in the 17th-century Market House; outstanding and free'},{icon:'⛪',text:'Lisburn Cathedral (1623, rebuilt 1708) — one of the finest Early English Gothic cathedrals in Ulster; free'},{icon:'🌿',text:'Lagan Valley Regional Park — excellent canal towpath cycling and walking all the way into Belfast city centre (16km one-way)'},{icon:'✅',text:'Very safe city — consistently among the lowest crime rates in Northern Ireland'}] },
+};
+
+// ── Enniskillen & Fermanagh zone definitions (PSNI) ──────────────────────────
+const ENNISKILLEN_ZONE_DEFS = {
+  'Enniskillen':{ level:'safe', score:4.0, desc:"One of Northern Ireland's most beautiful towns, built on an island in the River Erne between the Upper and Lower Lough Erne. The castle houses two outstanding museums. Florence Court and Castle Coole (National Trust) are nearby. Despite the tragic 1987 Remembrance Day bombing, Enniskillen has become a powerful symbol of reconciliation and remains a very welcoming, very safe town.", tips:[{icon:'🏰',text:'Enniskillen Castle — two museums: Fermanagh County Museum and the Inniskillings Regiment Museum; both outstanding; strongly recommended'},{icon:'⛪',text:'Portora Royal School — famous alumni include Oscar Wilde and Samuel Beckett; the grounds are open'},{icon:'⛵',text:'Erne boat trips — Lough Erne is one of Ireland\'s finest lake systems; excellent cruising and island monasteries'},{icon:'🏛️',text:'Devenish Island (ferry from Castle Archdale) — 6th-century monastic site with a perfect 12th-century round tower; exceptional'}] },
+  'Omagh':{ level:'safe', score:3.9, desc:"The county town of Tyrone on the Strule River — known worldwide for the devastating 1998 Real IRA bomb but now a welcoming, forward-looking market town. The Ulster American Folk Park just outside the town is one of the great open-air folk museums in the British Isles, telling the story of Ulster-Scots emigration to America.", tips:[{icon:'🏛️',text:'Ulster American Folk Park — one of the finest open-air folk museums in Ireland or Britain; a full-day experience covering Ulster-Scots emigration and the making of America; excellent'},{icon:'🎭',text:'Strule Arts Centre — good theatre and exhibitions in the town centre'},{icon:'🌿',text:'Gortin Glens Forest Park (20 min) — beautiful Sperrin Mountains scenery with waymarked walks'},{icon:'✅',text:'Generally safe and welcoming market town'}] },
+};
+
+// ── Mid Ulster zone definitions (PSNI) ───────────────────────────────────────
+const MID_ULSTER_ZONE_DEFS = {
+  'Cookstown':{ level:'safe', score:3.8, desc:"A small market town in central Ulster, famous for its extraordinarily wide, straight main street — said to be the longest in Ireland at over 1.6km. The Wellbrook Beetling Mill (National Trust, water-powered linen processing mill) is an exceptional industrial heritage site.", tips:[{icon:'🛍️',text:'The main street — over 1.6km long and very wide; said to be the longest in Ireland; remarkable town planning from 1750'},{icon:'⚙️',text:'Wellbrook Beetling Mill (National Trust) — a water-powered linen processing mill in a beautiful glen; excellent industrial heritage; free admission for NT members'},{icon:'🌿',text:'Beaghmore Stone Circles (nearby) — extraordinary Bronze Age complex of seven stone circles on the Sperrins'},{icon:'✅',text:'Generally very safe market town'}] },
+  'Dungannon':{ level:'safe', score:3.8, desc:"Historic town — the ancient seat of the O'Neill clan, the most powerful Gaelic family in Ulster. Tyrone Crystal visitor experience is well-regarded. The town has industrial heritage and the surrounding countryside includes Killymoon Castle.", tips:[{icon:'🏰',text:'Dungannon\'s hilltop position was the seat of the O\'Neill dynasty — the most powerful Gaelic Irish family — for centuries'},{icon:'💎',text:'Tyrone Crystal visitor experience — hand-cut crystal manufacturing; tours and shop'},{icon:'🌳',text:'Killymoon Castle (Nash, 1803) grounds — the historic seat in a beautiful parkland setting'},{icon:'✅',text:'Generally safe town with industrial and heritage character'}] },
+  'Magherafelt':{ level:'safe', score:4.0, desc:"Prosperous market town in the Sperrins foothills — the commercial hub of mid-Ulster. Close to the Seamus Heaney HomePlace at Bellaghy (a must-visit for lovers of poetry) and the shores of Lough Neagh.", tips:[{icon:'📖',text:'Seamus Heaney HomePlace at nearby Bellaghy — outstanding arts centre dedicated to the Nobel Prize-winning poet; one of the finest literary heritage experiences in Ireland'},{icon:'🌊',text:'Lough Neagh shore is accessible close by — the largest lake in the British Isles; very scenic'},{icon:'⛰️',text:'Springhill House (National Trust, near Moneymore) — a 17th-century plantation house with a beautiful walled garden'},{icon:'✅',text:'Very safe and prosperous market town'}] },
+};
+
 // ── City configurations ──────────────────────────────────────────────────────
 const CITIES = {
   'new-orleans': {
@@ -3116,5 +3197,151 @@ const CITIES = {
     baseline: 150,
     dataSource: 'data.police.uk (PSNI)',
     zoneDefs: DERRY_ZONE_DEFS,
+  },
+  'newry': {
+    label: 'Newry, N. Ireland',
+    center: [54.1751, -6.3402], zoom: 12,
+    geoURL: 'police_uk_geo:northern-ireland',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[54.175, -6.340], [54.060, -6.155], [54.324, -5.707]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [54.38, -6.56, 54.04, -5.62],
+    baseline: 120,
+    dataSource: 'data.police.uk (PSNI)',
+    zoneDefs: NEWRY_ZONE_DEFS,
+  },
+  'armagh': {
+    label: 'Armagh & Craigavon, N. Ireland',
+    center: [54.3503, -6.6528], zoom: 11,
+    geoURL: 'police_uk_geo:northern-ireland',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[54.350, -6.653], [54.348, -6.475], [54.413, -6.270]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [54.48, -6.82, 54.26, -6.18],
+    baseline: 120,
+    dataSource: 'data.police.uk (PSNI)',
+    zoneDefs: ARMAGH_ZONE_DEFS,
+  },
+  'antrim': {
+    label: 'Antrim & Newtownabbey, N. Ireland',
+    center: [54.7196, -6.2044], zoom: 12,
+    geoURL: 'police_uk_geo:northern-ireland',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[54.720, -6.204], [54.659, -5.975]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [54.83, -6.44, 54.57, -5.80],
+    baseline: 130,
+    dataSource: 'data.police.uk (PSNI)',
+    zoneDefs: ANTRIM_ZONE_DEFS,
+  },
+  'north-down': {
+    label: 'Bangor & North Down, N. Ireland',
+    center: [54.6533, -5.6687], zoom: 12,
+    geoURL: 'police_uk_geo:northern-ireland',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[54.653, -5.669], [54.592, -5.693]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [54.74, -5.90, 54.50, -5.42],
+    baseline: 120,
+    dataSource: 'data.police.uk (PSNI)',
+    zoneDefs: NORTH_DOWN_ZONE_DEFS,
+  },
+  'mid-east-antrim': {
+    label: 'Mid & East Antrim, N. Ireland',
+    center: [54.8636, -6.2776], zoom: 11,
+    geoURL: 'police_uk_geo:northern-ireland',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[54.864, -6.278], [54.858, -5.818], [54.714, -5.810]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [55.02, -6.54, 54.64, -5.72],
+    baseline: 120,
+    dataSource: 'data.police.uk (PSNI)',
+    zoneDefs: MID_EAST_ANTRIM_ZONE_DEFS,
+  },
+  'causeway-coast': {
+    label: 'Causeway Coast, N. Ireland',
+    center: [55.1329, -6.6630], zoom: 11,
+    geoURL: 'police_uk_geo:northern-ireland',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[55.133, -6.663], [55.070, -6.514], [55.206, -6.276]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [55.26, -7.05, 54.96, -6.16],
+    baseline: 110,
+    dataSource: 'data.police.uk (PSNI)',
+    zoneDefs: CAUSEWAY_COAST_ZONE_DEFS,
+  },
+  'lisburn': {
+    label: 'Lisburn, N. Ireland',
+    center: [54.5165, -6.0482], zoom: 12,
+    geoURL: 'police_uk_geo:northern-ireland',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[54.517, -6.048]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [54.60, -6.19, 54.43, -5.92],
+    baseline: 130,
+    dataSource: 'data.police.uk (PSNI)',
+    zoneDefs: LISBURN_ZONE_DEFS,
+  },
+  'enniskillen': {
+    label: 'Enniskillen & Fermanagh, N. Ireland',
+    center: [54.3441, -7.6326], zoom: 11,
+    geoURL: 'police_uk_geo:northern-ireland',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[54.344, -7.633], [54.596, -7.305]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [54.70, -8.18, 54.10, -7.17],
+    baseline: 100,
+    dataSource: 'data.police.uk (PSNI)',
+    zoneDefs: ENNISKILLEN_ZONE_DEFS,
+  },
+  'mid-ulster': {
+    label: 'Mid Ulster, N. Ireland',
+    center: [54.6428, -6.7455], zoom: 11,
+    geoURL: 'police_uk_geo:northern-ireland',
+    crimeEndpoint: 'https://data.police.uk/api/crimes-street/all-crime',
+    apiType: 'police_uk',
+    months: 3,
+    queryPoints: [[54.643, -6.745], [54.507, -6.764], [54.762, -6.562]],
+    dateField: 'month',
+    typeFields: ['category'],
+    bbox: [54.88, -7.05, 54.42, -6.44],
+    baseline: 110,
+    dataSource: 'data.police.uk (PSNI)',
+    zoneDefs: MID_ULSTER_ZONE_DEFS,
+  },
+
+  // ── Isle of Man ──────────────────────────────────────────────────────────────
+  'isle-of-man': {
+    label: 'Isle of Man',
+    center: [54.2261, -4.5484], zoom: 11,
+    geoURL: 'https://raw.githubusercontent.com/JerryValdes/saferoute/main/iom.geojson',
+    noApi: true,
+    bbox: [54.43, -4.83, 54.05, -4.29],
+    dataSource: 'Isle of Man Constabulary — curated safety data',
+    zoneDefs: IOM_ZONE_DEFS,
   },
 };

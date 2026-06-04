@@ -1,0 +1,70 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Douglas" },
+      "geometry": { "type": "Polygon", "coordinates": [[[-4.53,54.13],[-4.43,54.13],[-4.43,54.175],[-4.53,54.175],[-4.53,54.13]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Onchan" },
+      "geometry": { "type": "Polygon", "coordinates": [[[-4.52,54.175],[-4.43,54.175],[-4.43,54.22],[-4.52,54.22],[-4.52,54.175]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Laxey" },
+      "geometry": { "type": "Polygon", "coordinates": [[[-4.45,54.22],[-4.36,54.22],[-4.36,54.26],[-4.45,54.26],[-4.45,54.22]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Ramsey" },
+      "geometry": { "type": "Polygon", "coordinates": [[[-4.47,54.29],[-4.33,54.29],[-4.33,54.36],[-4.47,54.36],[-4.47,54.29]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Peel" },
+      "geometry": { "type": "Polygon", "coordinates": [[[-4.76,54.19],[-4.65,54.19],[-4.65,54.25],[-4.76,54.25],[-4.76,54.19]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "St Johns" },
+      "geometry": { "type": "Polygon", "coordinates": [[[-4.65,54.19],[-4.52,54.19],[-4.52,54.25],[-4.65,54.25],[-4.65,54.19]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Castletown" },
+      "geometry": { "type": "Polygon", "coordinates": [[[-4.72,54.05],[-4.63,54.05],[-4.63,54.09],[-4.72,54.09],[-4.72,54.05]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Port Erin" },
+      "geometry": { "type": "Polygon", "coordinates": [[[-4.82,54.08],[-4.72,54.08],[-4.72,54.13],[-4.82,54.13],[-4.82,54.08]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Port St Mary" },
+      "geometry": { "type": "Polygon", "coordinates": [[[-4.76,54.055],[-4.72,54.055],[-4.72,54.08],[-4.76,54.08],[-4.76,54.055]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Ballasalla" },
+      "geometry": { "type": "Polygon", "coordinates": [[[-4.63,54.09],[-4.52,54.09],[-4.52,54.14],[-4.63,54.14],[-4.63,54.09]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Snaefell & Highlands" },
+      "geometry": { "type": "Polygon", "coordinates": [[[-4.65,54.25],[-4.47,54.25],[-4.47,54.36],[-4.65,54.36],[-4.65,54.25]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Ayre" },
+      "geometry": { "type": "Polygon", "coordinates": [[[-4.58,54.36],[-4.29,54.36],[-4.29,54.43],[-4.58,54.43],[-4.58,54.36]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Andreas & Michael" },
+      "geometry": { "type": "Polygon", "coordinates": [[[-4.82,54.25],[-4.65,54.25],[-4.65,54.36],[-4.82,54.36],[-4.82,54.25]]] }
+    }
+  ]
+}
