@@ -2263,7 +2263,7 @@ function colorRoute(coords) {
   for (let i = 0; i < coords.length; i += step) {
     const [lng, lat] = coords[i];
     const zone = getZoneForCoord(lat, lng);
-    pts.push({ lat, lng, level: zone?.level || 'unknown' });
+    pts.push({ lat, lng, level: zone?.level || 'unknown', zone: zone || null });
   }
 
   let seg = [pts[0]], segLevel = pts[0].level;
@@ -2286,15 +2286,24 @@ function colorRoute(coords) {
   });
 
   const counts = {};
-  pts.forEach(p => counts[p.level] = (counts[p.level] || 0) + 1);
-  return { counts, total: pts.length };
+  const zoneMap = new Map();
+  pts.forEach(p => {
+    counts[p.level] = (counts[p.level] || 0) + 1;
+    if (p.zone) {
+      const key = `${p.zone.cityId}:${p.zone.name}`;
+      if (!zoneMap.has(key)) zoneMap.set(key, { zone: p.zone, count: 0 });
+      zoneMap.get(key).count++;
+    }
+  });
+  const zones = Array.from(zoneMap.values()).sort((a, b) => b.count - a.count);
+  return { counts, total: pts.length, zones };
 }
 
 let lastRoute = null, lastRouteSummary = null;
 
-function showRouteSummary(route, { counts, total }) {
+function showRouteSummary(route, { counts, total, zones = [] }) {
   lastRoute = route;
-  lastRouteSummary = { counts, total };
+  lastRouteSummary = { counts, total, zones };
   const distStr = fmtDistM(route.distance);
   const mins = Math.round(route.duration / 60);
   const timeStr = mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins} min`;
@@ -2305,6 +2314,23 @@ function showRouteSummary(route, { counts, total }) {
   const rScore = (sp * 5 + cp * 3 + ap * 1 + up * 3.5) / 100;
   const rLevel = rScore >= 3.5 ? 'safe' : rScore >= 2.5 ? 'caution' : 'avoid';
   const rLabel = { safe: 'Mostly safe', caution: 'Use caution', avoid: 'High risk' }[rLevel];
+
+  // Zone list: all avoid + caution zones, then up to 3 safe zones
+  const orderedZones = [
+    ...zones.filter(({ zone }) => zone.level === 'avoid'),
+    ...zones.filter(({ zone }) => zone.level === 'caution'),
+    ...zones.filter(({ zone }) => zone.level === 'safe').slice(0, 3),
+  ];
+  const zonesHtml = orderedZones.length ? `
+    <div class="rt-zones-heading">Zones along route</div>
+    ${orderedZones.map(({ zone, count }) => {
+      const p = Math.round(count / total * 100);
+      return `<div class="rt-zone-row">
+        <span class="badge badge-${zone.level}" style="font-size:10px;padding:2px 6px;flex-shrink:0"><span class="badge-dot"></span>${zone.score}/5</span>
+        <span class="rt-zone-name">${zone.name}</span>
+        <span class="rt-zone-pct">${p}%</span>
+      </div>`;
+    }).join('')}` : '';
 
   document.getElementById('route-summary').innerHTML = `
     <div class="rt-summary">
@@ -2325,6 +2351,7 @@ function showRouteSummary(route, { counts, total }) {
         ${ap > 0 ? `<span style="color:#991b1b">■ ${ap}% avoid</span>` : ''}
         ${up > 0 ? `<span>■ ${up}% unmapped</span>` : ''}
       </div>
+      ${zonesHtml}
     </div>`;
 }
 

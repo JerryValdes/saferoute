@@ -514,6 +514,11 @@
     .rt-bar-avoid   { background: var(--avoid); }
     .rt-bar-unknown { background: #cbd5e1; }
     .rt-legend { font-size: 11px; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; }
+    .rt-zones-heading { font-size: 11.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin: 10px 0 5px; }
+    .rt-zone-row { display: flex; align-items: center; gap: 7px; font-size: 12.5px; padding: 4px 0; border-bottom: 1px solid var(--border); }
+    .rt-zone-row:last-child { border-bottom: none; }
+    .rt-zone-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rt-zone-pct  { font-size: 11px; color: var(--muted); flex-shrink: 0; }
 
     /* ─── Trip button ─── */
     #trip-btn {
@@ -756,11 +761,11 @@
     <div id="route-panel">
       <div class="rt-row">
         <div class="rt-dot rt-dot-a"></div>
-        <input id="route-from" class="rt-input" placeholder="Start — address or place" autocomplete="off">
+        <input id="route-from" class="rt-input" placeholder="Start — address or place" autocomplete="off" onkeydown="if(event.key==='Enter')computeRoute()">
       </div>
       <div class="rt-row">
         <div class="rt-dot rt-dot-b"></div>
-        <input id="route-to"   class="rt-input" placeholder="End — address or place" autocomplete="off">
+        <input id="route-to"   class="rt-input" placeholder="End — address or place" autocomplete="off" onkeydown="if(event.key==='Enter')computeRoute()">
       </div>
       <button id="route-go-btn" onclick="computeRoute()">Get walking route</button>
       <div id="route-status"></div>
