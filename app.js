@@ -1663,40 +1663,63 @@ async function fetchTractGeoJSON(bounds) {
   return data;
 }
 
-// Census API — 1 request per county covers all its tracts; includes income, poverty, unemployment, vacancy
+// Census API — 1 request per county covers all its tracts
+// Variables: population, income, poverty, unemployment, vacancy, owner-occupancy, education
 async function fetchACSForCounty(stateCode, countyCode) {
   const ACS_TTL = 30 * 24 * 60 * 60 * 1000;
-  const cacheKey = `saferoute_acs5_${stateCode}_${countyCode}`;
+  const cacheKey = `saferoute_acs5v2_${stateCode}_${countyCode}`; // v2 — new vars
   const cached = await getCached(cacheKey, ACS_TTL);
   if (cached) return cached;
-  const vars = 'B01003_001E,B19013_001E,B17001_002E,B17001_001E,B23025_005E,B23025_003E,B25002_003E,B25002_001E';
+  const vars = [
+    'B01003_001E',                                           // total population
+    'B19013_001E',                                           // median household income
+    'B17001_002E', 'B17001_001E',                           // poverty pop / total
+    'B23025_005E', 'B23025_003E',                           // unemployed / in labour force
+    'B25002_003E', 'B25002_001E',                           // vacant / total housing units
+    'B25003_002E', 'B25003_001E',                           // owner-occupied / total occupied
+    'B15003_022E', 'B15003_023E', 'B15003_024E',            // bachelor / master / professional
+    'B15003_025E', 'B15003_001E',                           // doctorate / total pop 25+
+  ].join(',');
   const res = await fetch(`https://api.census.gov/data/2022/acs/acs5?get=${vars}&for=tract:*&in=state:${stateCode}&in=county:${countyCode}&key=6f40113c1e1bd9bd1784637176039eba443f4e4b`);
   if (!res.ok) throw new Error(`ACS ${res.status}`);
   const rows = await res.json();
   const hdr = rows[0];
-  const iPop  = hdr.indexOf('B01003_001E');
-  const iInc  = hdr.indexOf('B19013_001E'), iPovPop = hdr.indexOf('B17001_002E');
-  const iPovTot = hdr.indexOf('B17001_001E'), iSt = hdr.indexOf('state');
-  const iCo = hdr.indexOf('county'), iTr = hdr.indexOf('tract');
-  const iLF = hdr.indexOf('B23025_003E'), iUnemp = hdr.indexOf('B23025_005E');
-  const iHU = hdr.indexOf('B25002_001E'), iVac = hdr.indexOf('B25002_003E');
+  const iPop     = hdr.indexOf('B01003_001E');
+  const iInc     = hdr.indexOf('B19013_001E');
+  const iPovPop  = hdr.indexOf('B17001_002E'), iPovTot = hdr.indexOf('B17001_001E');
+  const iUnemp   = hdr.indexOf('B23025_005E'), iLF     = hdr.indexOf('B23025_003E');
+  const iVac     = hdr.indexOf('B25002_003E'), iHU     = hdr.indexOf('B25002_001E');
+  const iOwn     = hdr.indexOf('B25003_002E'), iOwnTot = hdr.indexOf('B25003_001E');
+  const iBach    = hdr.indexOf('B15003_022E'), iMast   = hdr.indexOf('B15003_023E');
+  const iProf    = hdr.indexOf('B15003_024E'), iDoc    = hdr.indexOf('B15003_025E');
+  const iEdTot   = hdr.indexOf('B15003_001E');
+  const iSt = hdr.indexOf('state'), iCo = hdr.indexOf('county'), iTr = hdr.indexOf('tract');
   const acsMap = {};
   rows.slice(1).forEach(row => {
-    const geoid = row[iSt] + row[iCo] + row[iTr];
-    const pop    = parseInt(row[iPop])  || 0;
-    const income = parseInt(row[iInc]);
-    const povPop = parseInt(row[iPovPop]) || 0;
-    const povTot = parseInt(row[iPovTot]) || 1;
-    const lf = parseInt(row[iLF]) || 0;
-    const unemp = parseInt(row[iUnemp]) || 0;
-    const hu = parseInt(row[iHU]) || 0;
-    const vac = parseInt(row[iVac]) || 0;
+    const geoid   = row[iSt] + row[iCo] + row[iTr];
+    const pop     = parseInt(row[iPop])    || 0;
+    const income  = parseInt(row[iInc]);
+    const povPop  = parseInt(row[iPovPop]) || 0;
+    const povTot  = parseInt(row[iPovTot]) || 1;
+    const unemp   = parseInt(row[iUnemp])  || 0;
+    const lf      = parseInt(row[iLF])     || 0;
+    const vac     = parseInt(row[iVac])    || 0;
+    const hu      = parseInt(row[iHU])     || 0;
+    const own     = parseInt(row[iOwn])    || 0;
+    const ownTot  = parseInt(row[iOwnTot]) || 0;
+    const bach    = parseInt(row[iBach])   || 0;
+    const mast    = parseInt(row[iMast])   || 0;
+    const prof    = parseInt(row[iProf])   || 0;
+    const doc     = parseInt(row[iDoc])    || 0;
+    const edTot   = parseInt(row[iEdTot])  || 0;
     acsMap[geoid] = {
-      population: pop > 0 ? pop : -1,
-      income: income > 0 ? income : -1,
-      povertyRate: povPop / Math.max(povTot, 1),
-      unemploymentRate: lf > 0 ? unemp / lf : -1,
-      vacancyRate: hu > 0 ? vac / hu : -1,
+      population:          pop > 0    ? pop    : -1,
+      income:              income > 0 ? income : -1,
+      povertyRate:         povPop / Math.max(povTot, 1),
+      unemploymentRate:    lf > 0     ? unemp / lf      : -1,
+      vacancyRate:         hu > 0     ? vac / hu        : -1,
+      ownerOccupancyRate:  ownTot > 0 ? own / ownTot    : -1,
+      bachelorsRate:       edTot > 0  ? (bach + mast + prof + doc) / edTot : -1,
     };
   });
   await setCached(cacheKey, acsMap);
@@ -1704,24 +1727,39 @@ async function fetchACSForCounty(stateCode, countyCode) {
 }
 
 function computeTractScore(acs, fbiData) {
-  const { income = -1, povertyRate = 0.12, unemploymentRate = -1, vacancyRate = -1 } = acs || {};
+  const {
+    income = -1, povertyRate = 0.12, unemploymentRate = -1,
+    vacancyRate = -1, ownerOccupancyRate = -1, bachelorsRate = -1,
+  } = acs || {};
 
-  // ACS composite (always available as fallback)
+  // ACS composite — 6 socioeconomic signals, weighted and normalized
   const pov = Math.max(povertyRate * 100, 0.1);
-  const povertyScore = Math.min(5, Math.max(1, 5 - 2 * Math.log10(pov / 3)));
-  const incomeScore = income > 0
+  const povertyScore  = Math.min(5, Math.max(1, 5 - 2   * Math.log10(pov / 3)));
+  const incomeScore   = income >= 0
     ? Math.min(5, Math.max(1, 1 + 4 * (Math.log10(income) - 4) / (Math.log10(200000) - 4)))
     : null;
   const unemployScore = unemploymentRate >= 0
     ? Math.min(5, Math.max(1, 5 - 1.5 * Math.log10(Math.max(0.5, unemploymentRate * 100) / 4)))
     : null;
-  const vacancyScore = vacancyRate >= 0
+  const vacancyScore  = vacancyRate >= 0
     ? Math.min(5, Math.max(1, 5 - 1.5 * Math.log10(Math.max(0.5, vacancyRate * 100) / 6)))
     : null;
-  let acsW = 0.4, acsSum = povertyScore * 0.4;
-  if (incomeScore   != null) { acsSum += incomeScore   * 0.3; acsW += 0.3; }
-  if (unemployScore != null) { acsSum += unemployScore * 0.2; acsW += 0.2; }
-  if (vacancyScore  != null) { acsSum += vacancyScore  * 0.1; acsW += 0.1; }
+  // Owner-occupancy: 0 %→1, 50 %→3, 100 %→5
+  const ownerScore    = ownerOccupancyRate >= 0
+    ? Math.min(5, Math.max(1, 1 + 4 * ownerOccupancyRate))
+    : null;
+  // Bachelor's+: 0 %→1, ~33 % (US avg)→3, 67 %→5
+  const educScore     = bachelorsRate >= 0
+    ? Math.min(5, Math.max(1, 1 + 6 * bachelorsRate))
+    : null;
+
+  // Weights reduced proportionally to make room for two new factors
+  let acsW = 0.30, acsSum = povertyScore * 0.30;
+  if (incomeScore   != null) { acsSum += incomeScore   * 0.22; acsW += 0.22; }
+  if (unemployScore != null) { acsSum += unemployScore * 0.15; acsW += 0.15; }
+  if (vacancyScore  != null) { acsSum += vacancyScore  * 0.08; acsW += 0.08; }
+  if (ownerScore    != null) { acsSum += ownerScore    * 0.15; acsW += 0.15; }
+  if (educScore     != null) { acsSum += educScore     * 0.10; acsW += 0.10; }
   const acsComposite = acsSum / acsW;
 
   let raw, hasCrime = false;
