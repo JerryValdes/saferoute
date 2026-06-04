@@ -1194,6 +1194,55 @@ function starsHtml(score) {
   return '★'.repeat(n) + '☆'.repeat(5 - n);
 }
 
+function reviewsHtml(zone) {
+  const key = `${zone.cityId}:${zone.name}`;
+  const reviews = typeof ZONE_REVIEWS !== 'undefined' ? ZONE_REVIEWS[key] : null;
+
+  const avgRating = reviews ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) : null;
+  const sentimentFromScore = zone.score >= 3.5
+    ? { cls: 'rs-positive', label: 'Travelers generally feel safe here' }
+    : zone.score >= 2.5
+    ? { cls: 'rs-mixed', label: 'Mixed — most recommend extra caution' }
+    : { cls: 'rs-negative', label: 'Most travelers advise against walking here' };
+
+  const sentimentFromReviews = avgRating !== null
+    ? avgRating >= 4
+      ? { cls: 'rs-positive', label: `Highly rated by travelers · avg ${avgRating.toFixed(1)}/5` }
+      : avgRating >= 3
+      ? { cls: 'rs-mixed', label: `Mixed reviews · avg ${avgRating.toFixed(1)}/5` }
+      : { cls: 'rs-negative', label: `Cautious reviews · avg ${avgRating.toFixed(1)}/5` }
+    : sentimentFromScore;
+
+  const sentiment = sentimentFromReviews;
+  const dot = sentiment.cls === 'rs-positive' ? '●' : sentiment.cls === 'rs-mixed' ? '●' : '●';
+  const sentimentHtml = `<div class="review-sentiment ${sentiment.cls}">${dot} ${sentiment.label}</div>`;
+
+  if (!reviews || reviews.length === 0) {
+    return `<div class="reviews-section">
+      <div class="reviews-heading">What Travelers Say</div>
+      ${sentimentHtml}
+    </div>`;
+  }
+
+  const cards = reviews.map(r => {
+    const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+    return `<div class="review-card">
+      <div class="review-text">${r.text}</div>
+      <div class="review-meta">
+        <span class="review-stars">${stars}</span>
+        <span class="review-type">${r.type}</span>
+        <span>${r.when}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<div class="reviews-section">
+    <div class="reviews-heading">What Travelers Say</div>
+    ${sentimentHtml}
+    ${cards}
+  </div>`;
+}
+
 function trendBadge(trend) {
   if (!trend || trend === 'stable') return '<span class="trend-badge trend-stable">→ Stable trend</span>';
   if (trend === 'improving') return '<span class="trend-badge trend-improving">↓ Crime trending down</span>';
@@ -1258,6 +1307,7 @@ function showZone(zone) {
       ${!crimeBox ? `<p class="data-vintage">Data: ${fmtFreshness(zone)}</p>` : ''}
       <div class="tips-heading">Tourist Tips</div>
       ${zone.tips.map(t => `<div class="tip"><span class="tip-icon">${t.icon}</span><span>${t.text}</span></div>`).join('')}
+      ${reviewsHtml(zone)}
       ${nearbyHtml(zone)}
     </div>`;
 

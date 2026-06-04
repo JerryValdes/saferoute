@@ -742,6 +742,49 @@
     /* ─── Data vintage note ─── */
     .data-vintage { font-size: 11px; color: var(--muted); margin-bottom: 14px; }
 
+    /* ─── Tourist Reviews ─── */
+    .reviews-section { margin-top: 18px; }
+    .reviews-heading {
+      font-size: 10.5px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .65px;
+      color: var(--muted); margin-bottom: 10px;
+    }
+    .review-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+    }
+    .review-text {
+      font-size: 12.5px;
+      line-height: 1.65;
+      color: #334155;
+      margin-bottom: 7px;
+      font-style: italic;
+    }
+    .review-text::before { content: '\201C'; }
+    .review-text::after  { content: '\201D'; }
+    .review-meta {
+      display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+      font-size: 11px; color: var(--muted);
+    }
+    .review-stars { color: #f59e0b; letter-spacing: 1px; line-height: 1; font-size: 12px; }
+    .review-type {
+      background: #e2e8f0; border-radius: 99px;
+      padding: 1px 7px; font-size: 10.5px; font-weight: 600;
+      color: #475569; white-space: nowrap;
+    }
+    .review-sentiment {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11.5px; font-weight: 600;
+      padding: 5px 10px; border-radius: 6px;
+      margin-bottom: 10px;
+    }
+    .rs-positive { background: #dcfce7; color: #166534; }
+    .rs-mixed    { background: #fef9c3; color: #92400e; }
+    .rs-negative { background: #fee2e2; color: #991b1b; }
+
     /* ─── Offline banner ─── */
     #offline-banner {
       position: fixed; bottom: 0; left: 0; right: 0;
@@ -900,6 +943,7 @@
 </div>
 
 <script src="zones.js" defer></script>
+<script src="reviews.js" defer></script>
 <script src="app.js" defer></script>
 
 <div id="disclaimer-overlay">
