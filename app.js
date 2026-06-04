@@ -129,6 +129,17 @@ function setColorblindMode(on) {
 let unitPref = localStorage.getItem('saferoute_unit') || 'mi';
 const cityFetchTimes = {};
 
+// ── US state FIPS → abbreviation ──────────────────────────────────────────────
+const STATE_FIPS = {
+  '01':'AL','02':'AK','04':'AZ','05':'AR','06':'CA','08':'CO','09':'CT','10':'DE',
+  '11':'DC','12':'FL','13':'GA','15':'HI','16':'ID','17':'IL','18':'IN','19':'IA',
+  '20':'KS','21':'KY','22':'LA','23':'ME','24':'MD','25':'MA','26':'MI','27':'MN',
+  '28':'MS','29':'MO','30':'MT','31':'NE','32':'NV','33':'NH','34':'NJ','35':'NM',
+  '36':'NY','37':'NC','38':'ND','39':'OH','40':'OK','41':'OR','42':'PA','44':'RI',
+  '45':'SC','46':'SD','47':'TN','48':'TX','49':'UT','50':'VT','51':'VA','53':'WA',
+  '54':'WV','55':'WI','56':'WY','72':'PR',
+};
+
 // ── Traveler type ─────────────────────────────────────────────────────────────
 const TRAVELER_PROFILES = {
   'solo-adult':  { label: 'Solo traveler',      icon: '🚶',  safe: 3.5, caution: 2.5 },
@@ -1348,7 +1359,7 @@ function nearbyHtml(zone) {
   candidates.sort((a, b) => b.z.score - a.z.score);
   const rows = candidates.slice(0, 8).map(({ z, km, i }) => {
     const dist = fmtDistKm(km);
-    const cityPart = z.cityLabel && z.cityLabel !== 'US Census Tract' ? `<span class="nearby-city">${z.cityLabel}</span>` : '';
+    const cityPart = z.cityLabel && !z.cityLabel.startsWith('Census Tract ·') ? `<span class="nearby-city">${z.cityLabel}</span>` : '';
     return `<div class="nearby-item" onclick="showZoneByIdx(${i})">` +
       `<span class="nearby-dot" style="background:${COLOR[z.level] || '#94a3b8'}"></span>` +
       `<span class="nearby-name">${z.name}${cityPart}</span>` +
@@ -1432,6 +1443,38 @@ function fmtFreshness(zone) {
   return m ? `${m[1]} historical data` : 'Historical data';
 }
 
+async function enrichTractName(zone) {
+  if (!zone.geoid || !zone._center) return;
+  if (!zone.name.startsWith('Census Tract')) return;
+
+  const cacheKey = `tractname3:${zone.geoid}`;
+  let cached = await getCached(cacheKey, 30 * 24 * 60 * 60 * 1000);
+
+  if (!cached) {
+    try {
+      const { lat, lng } = zone._center;
+      const r = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=14&addressdetails=1`,
+        { headers: { 'Accept-Language': 'en' } }
+      );
+      if (!r.ok) return;
+      const d = await r.json();
+      const a = d.address || {};
+      const name = a.neighbourhood || a.suburb || a.city_district || a.hamlet || a.town || a.village || '';
+      const city = a.city || a.town || a.municipality || '';
+      const stAbbr = STATE_FIPS[zone.geoid.slice(0, 2)] || '';
+      cached = { name, cityLabel: city ? `${city}${stAbbr ? ', ' + stAbbr : ''}` : '' };
+      await setCached(cacheKey, cached);
+    } catch { return; }
+  }
+
+  if (cached.name) {
+    zone.name = cached.name;
+    if (cached.cityLabel) zone.cityLabel = cached.cityLabel;
+    if (activeZone?.geoid === zone.geoid) showZone(zone);
+  }
+}
+
 function travelerNoteHtml(zone) {
   if (travelerType === 'solo-adult') return '';
   const advice = TRAVELER_ADVICE[travelerType]?.[zone.level];
@@ -1505,6 +1548,9 @@ function showZone(zone) {
     });
     if (!hasHourly && timeMode !== 'all') setTimeMode('all');
   }
+
+  // Lazily resolve "Census Tract 1234.56" to a real neighborhood name
+  if (zone.geoid && zone.name.startsWith('Census Tract')) enrichTractName(zone);
 }
 
 // ── Apply live scores + trend ─────────────────────────────────────────────────
@@ -1732,7 +1778,7 @@ function buildCensusTractZones(features, acsMap) {
       geoid,
       acsScore: score,
       cityId: `census-${geoid.slice(0, 5)}`,
-      cityLabel: 'US Census Tract',
+      cityLabel: `Census Tract · ${STATE_FIPS[geoid.slice(0, 2)] || 'US'}`,
       dataSource: hasCrime ? 'CHR/FBI UCR 2022 + ACS 2022' : 'ACS 5-Year 2022',
       level, score,
       desc: crimeDesc,
