@@ -419,6 +419,7 @@
     .tt-btn + .tt-btn   { border-left: none; }
     .tt-btn.active      { background: var(--dark); color: #fff; border-color: var(--dark); z-index: 1; }
     .tt-btn:not(.active):hover { background: var(--border); color: var(--text); }
+    .tt-btn:disabled    { opacity: .38; cursor: not-allowed; pointer-events: none; }
     .tt-sub { display: block; font-size: 9.5px; font-weight: 400; opacity: .75; margin-top: 1px; }
 
     /* ─── Share button ─── */
@@ -614,29 +615,87 @@
     .nearby-city { font-size: 11px; color: var(--muted); display: block; }
     .nearby-meta { font-weight: 600; font-size: 12px; color: var(--muted); flex-shrink: 0; text-align: right; line-height: 1.3; }
 
-    /* ─── Mobile ─── */
+    /* ─── Color-blind mode ─── */
+    body.colorblind { --safe:#0088cc; --caution:#ee8822; --avoid:#cc2200; }
+
+    /* ─── Settings toggle switch ─── */
+    .cb-row {
+      display: flex; align-items: center;
+      justify-content: space-between; padding: 4px 0;
+    }
+    .cb-row-label { font-size: 13px; color: var(--text); }
+    .cb-row-hint  { font-size: 11px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
+    .sw { position: relative; width: 38px; height: 22px; flex-shrink: 0; }
+    .sw input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .sw-track {
+      position: absolute; inset: 0;
+      background: #cbd5e1; border-radius: 22px;
+      transition: background .2s; cursor: pointer;
+    }
+    .sw-track:before {
+      content: ''; position: absolute;
+      width: 16px; height: 16px; left: 3px; bottom: 3px;
+      background: #fff; border-radius: 50%;
+      transition: transform .2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    }
+    .sw input:checked ~ .sw-track { background: var(--dark); }
+    .sw input:checked ~ .sw-track:before { transform: translateX(16px); }
+
+    /* ─── Sheet handle (hidden on desktop) ─── */
+    #sheet-handle {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 0 8px;
+      cursor: pointer;
+      flex-shrink: 0;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .sheet-pill {
+      width: 36px; height: 4px;
+      background: #cbd5e1;
+      border-radius: 2px;
+      transition: background .15s;
+    }
+    #sheet-handle:active .sheet-pill { background: #94a3b8; }
+
+    /* ─── Mobile — bottom sheet ─── */
     @media (max-width: 700px) {
-      body { overflow: auto; overflow-x: hidden; }
-      html, body { height: auto; }
-      #main { flex-direction: column; overflow: visible; }
-      #map  { height: 52vw; min-height: 240px; max-height: 340px; }
-      #sidebar { width: 100%; border-left: none; border-top: 1px solid var(--border); overflow: visible; }
-      #panel { overflow: visible; padding: 14px; }
+      #sheet-handle { display: flex; }
+      body { overflow: hidden; }
+      html, body { height: 100%; }
+      #main { flex-direction: row; overflow: hidden; }
+      #map  { flex: 1; min-width: 0; }
+      #sidebar {
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        width: 100%;
+        height: 85vh;
+        border-left: none;
+        border-top: none;
+        border-radius: 16px 16px 0 0;
+        box-shadow: 0 -4px 24px rgba(0,0,0,.2);
+        transform: translateY(calc(100% - 80px));
+        transition: transform .32s cubic-bezier(.4,0,.2,1);
+        will-change: transform;
+        overflow: hidden;
+        z-index: 800;
+      }
+      #panel { overflow-y: auto; padding: 0 16px 20px; }
       .placeholder { min-height: 100px; }
       #status-pill { display: none; }
       #info-btn, #settings-btn { width: 30px; height: 30px; font-size: 14px; }
       #info-modal { padding: 20px 16px; }
-      /* compact route + trip panels */
       #route-panel, #trip-panel { padding: 8px 12px 10px; }
       .rt-row { margin-bottom: 4px; }
       .rt-input { padding: 5px 8px; font-size: 12px; }
-      /* compact time toggle */
       .tt-sub { display: none; }
       .tt-btn { padding: 7px 0; }
-      /* compact legend */
       #legend { padding: 8px 14px; }
       .method-note { display: none; }
-      /* icon-only route button on narrow screens */
       .rt-label { display: none; }
       #route-btn { padding: 5px 8px; }
     }
@@ -682,6 +741,7 @@
 <div id="main">
   <div id="map"><div id="map-loading"><div class="map-spinner"></div>Loading neighborhoods…</div></div>
   <div id="sidebar">
+    <div id="sheet-handle"><div class="sheet-pill"></div></div>
     <div id="search-wrap">
       <input id="search-input" type="search" placeholder="Search neighborhoods or any destination…" autocomplete="off">
       <div id="search-results"></div>
@@ -735,6 +795,15 @@
       <button class="tt-btn active" id="unit-mi" onclick="setUnitPref('mi')">Miles</button>
       <button class="tt-btn" id="unit-km" onclick="setUnitPref('km')">Kilometers</button>
     </div>
+    <div class="settings-label">Accessibility</div>
+    <div class="cb-row">
+      <span class="cb-row-label">Color-blind mode</span>
+      <label class="sw">
+        <input type="checkbox" id="cb-mode-toggle" onchange="setColorblindMode(this.checked)">
+        <span class="sw-track"></span>
+      </label>
+    </div>
+    <p class="cb-row-hint">Replaces green/yellow/red with blue/amber/red — safer for deuteranopia (red-green color blindness, affects ~8% of men).</p>
   </div>
 </div>
 
@@ -2551,17 +2620,42 @@ const EDINBURGH_ZONE_DEFS = {
   'Inverleith':{ level:'safe', score:4.5, desc:"Elegant north Edinburgh neighbourhood with the Royal Botanic Garden and Inverleith Park — some of Edinburgh's finest Georgian and Victorian houses. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌿',text:'Royal Botanic Garden Edinburgh is world-class and free'},{icon:'🏡',text:'Beautiful Georgian houses around Inverleith Row'},{icon:'🌳',text:'Inverleith Park has great skyline views of the Old Town'}] },
   'Fountainbridge/Craiglockhart':{ level:'safe', score:4.1, desc:"West Edinburgh neighbourhood with Fountainbridge canal and the Water of Leith walkway. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌊',text:'Union Canal towpath — excellent cycling and walking to the Pentland Hills'},{icon:'🌳',text:'Water of Leith Walkway is one of Edinburgh\'s great natural assets'},{icon:'🏛️',text:'Edinburgh College of Art nearby'}] },
   'Portobello/Craigmillar':{ level:'caution', score:3.1, desc:"East Edinburgh — Portobello Beach (Edinburgh's seaside resort) is lovely; Craigmillar has elevated crime. Use judgement.", tips:[{icon:'🏖️',text:'Portobello Beach is Edinburgh\'s sandy seaside retreat — great on a sunny day'},{icon:'⚠️',text:'Craigmillar (inland) has elevated crime — stick to the seafront'},{icon:'🌊',text:'Portobello promenade is excellent for walking'},{icon:'🚗',text:'Rideshare recommended for Craigmillar areas'}] },
+  'Almond':{ level:'safe', score:4.5, desc:"Outer west Edinburgh suburbs — Kirkliston, Ratho, and Newbridge. Almost entirely residential with little tourist value, but extremely safe. The Almond Valley Heritage Centre is the main draw.", tips:[{icon:'✅',text:'Very safe'},{icon:'🏭',text:'Almond Valley Heritage Centre tells the story of the Scottish shale oil industry'},{icon:'🌳',text:'Almond River walks are pleasant'},{icon:'🚗',text:'Car required — no practical public transport to the main sites'}] },
+  'Pentland Hills':{ level:'safe', score:4.5, desc:"Southwest Edinburgh suburbs — Currie, Balerno, and Juniper Green — with easy access to the Pentland Hills Regional Park. Very safe with outstanding walking country nearby.", tips:[{icon:'✅',text:'Very safe'},{icon:'🏔️',text:'Pentland Hills Regional Park is outstanding — the best hill walking within reach of Edinburgh'},{icon:'🌊',text:'Harlaw and Threipmuir reservoirs make for a beautiful circular walk'},{icon:'🚗',text:'Car recommended — regular buses to the city but limited within the area'}] },
+  'Drum Brae/Gyle':{ level:'safe', score:4.1, desc:"West Edinburgh — The Gyle shopping centre, Edinburgh Business Park, and Drum Brae residential areas. Generally safe with limited tourist attractions.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🛍️',text:'The Gyle Shopping Centre is a large retail park'},{icon:'🚇',text:'Edinburgh Park tram and train station provides easy city centre connections'},{icon:'🏡',text:'Quiet residential streets — primarily a commuter suburb'}] },
+  'Forth':{ level:'safe', score:3.9, desc:"North Edinburgh including Trinity, Newhaven, and the regenerating Granton waterfront. Trinity is one of Edinburgh's most desirable residential areas with excellent restaurants.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌊',text:'Newhaven Harbour and the Firth of Forth waterfront are atmospheric'},{icon:'🍽️',text:'Trinity has excellent independent restaurants'},{icon:'🚢',text:'Historic connections to the Forth ferries — the Forth Bridges are a short drive'}] },
+  'Corstorphine/Murrayfield':{ level:'safe', score:4.4, desc:"West Edinburgh — Edinburgh Zoo, Murrayfield Stadium (Scotland's rugby home), and Corstorphine village. Very safe and popular with families.", tips:[{icon:'✅',text:'Very safe'},{icon:'🐼',text:'Edinburgh Zoo is home to giant pandas and Scotland\'s most popular family attraction'},{icon:'🏉',text:'Murrayfield Stadium hosts Scotland rugby internationals — a brilliant match day experience'},{icon:'🍽️',text:'Corstorphine village has good local restaurants and pubs'}] },
+  'Sighthill/Gorgie':{ level:'caution', score:3.1, desc:"West Edinburgh working-class neighbourhoods — Gorgie hosts Tynecastle Park (Heart of Midlothian FC). Some elevated crime, particularly at night. Sighthill is primarily residential.", tips:[{icon:'⚽',text:'Tynecastle Park is home to Heart of Midlothian FC — atmospheric on match days'},{icon:'⚠️',text:'Some elevated crime — exercise caution on quieter streets at night'},{icon:'🍺',text:'Some traditional pubs around Gorgie Road'},{icon:'🚗',text:'Car or rideshare recommended after dark'}] },
+  'Colinton/Fairmilehead':{ level:'safe', score:4.5, desc:"South Edinburgh's most affluent suburbs — Colinton village on the Water of Leith, Fairmilehead, and Oxgangs. Outstanding walking access to the Pentlands. Very safe.", tips:[{icon:'✅',text:'Very safe — one of Edinburgh\'s most desirable areas'},{icon:'🌳',text:'Colinton Dell is a beautiful wooded gorge on the Water of Leith'},{icon:'🏔️',text:'Pentland Hills direct access from Bonaly — excellent walking and mountain biking'},{icon:'🏡',text:'Beautiful Victorian and Edwardian houses throughout'}] },
+  'Craigentinny/Duddingston':{ level:'safe', score:4.0, desc:"East Edinburgh — Duddingston Village (one of Scotland's oldest settlements) with its 12th-century church and Duddingston Loch. Craigentinny is more residential. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'⛪',text:'Duddingston Kirk (12th-century) overlooks the loch — deeply atmospheric'},{icon:'🌊',text:'Duddingston Loch is a beautiful bird sanctuary'},{icon:'🏔️',text:'Holyrood Park and Arthur\'s Seat are a short walk from Duddingston Village'}] },
+  'Liberton/Gilmerton':{ level:'safe', score:4.1, desc:"Southeast Edinburgh suburbs — Liberton and Gilmerton are quiet residential areas with the curious Gilmerton Cove underground complex. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🪨',text:'Gilmerton Cove is a mysterious 18th-century underground cave system — guided tours available'},{icon:'🌳',text:'Craigmillar Park is pleasant'},{icon:'🚗',text:'Car recommended — bus connections to the city centre'}] },
 };
 
 // ── Glasgow zone definitions (ward names) ─────────────────────────────────────
 const GLASGOW_ZONE_DEFS = {
   'Anderston/City/Yorkhill':{ level:'safe', score:3.8, desc:"Glasgow's city centre and riverside — George Square, the Merchant City, SEC Armadillo, and Kelvingrove Museum. Generally safe in the main tourist areas.", tips:[{icon:'✅',text:'Generally safe in the main tourist areas'},{icon:'🏛️',text:'Kelvingrove Art Gallery is free and one of Scotland\'s best museums'},{icon:'🎵',text:'SEC Centre hosts major concerts and events'},{icon:'🛍️',text:'Buchanan Street and Argyle Street for shopping'}] },
   'Hillhead':{ level:'safe', score:4.4, desc:"Glasgow's West End — Byres Road restaurants and bars, the Botanic Gardens, Oran Mor, and the University of Glasgow. Very safe and beloved.", tips:[{icon:'✅',text:'Very safe — Glasgow\'s most visited neighbourhood'},{icon:'🌿',text:'Glasgow Botanic Gardens is lovely and free'},{icon:'🍽️',text:'Byres Road and Ashton Lane are Glasgow\'s best dining and bar streets'},{icon:'🎭',text:'Oran Mor converted church is one of Glasgow\'s best live music and arts venues'}] },
-  'Glasgow Kelvin':{ level:'safe', score:4.2, desc:"Kelvinside and Hyndland — elegant Victorian tenements, the Kelvin Walkway, and excellent local restaurants. Very safe.", tips:[{icon:'✅',text:'Very safe and beautiful'},{icon:'🌊',text:'Kelvin Walkway along the River Kelvin is excellent'},{icon:'🏡',text:'Beautiful red sandstone tenements throughout'},{icon:'🍽️',text:'Good independent restaurants on Great Western Road'}] },
   'Partick East/Kelvindale':{ level:'safe', score:4.1, desc:"Partick and Dumbarton Road — a lively neighbourhood with good pubs, the Kelvin Hall, and easy West End access. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏟️',text:'Kelvin Hall has a major sports facility and soft play'},{icon:'🍺',text:'Great traditional pubs along Dumbarton Road'},{icon:'🚇',text:'Partick subway and rail station for easy city connections'}] },
   'Southside Central':{ level:'safe', score:3.9, desc:"Glasgow South Side including Shawlands and Pollokshields — good restaurants, Pollok Country Park, and the Burrell Collection. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏛️',text:'Burrell Collection at Pollok Park is extraordinary — free and world-class'},{icon:'🌳',text:'Pollok Country Park has Highland cattle and fine gardens'},{icon:'🍽️',text:'Shawlands has excellent independent restaurants'}] },
   'Calton':{ level:'caution', score:2.8, desc:"East Glasgow neighbourhood with significant socioeconomic challenges. Limited tourist attractions; the Barras market is nearby.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🛒',text:'The Barras market (weekends) is a famous Glasgow institution'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🌙',text:'Use caution after dark'}] },
   'Shettleston':{ level:'caution', score:2.7, desc:"East Glasgow residential area with elevated crime. Limited tourist attractions.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🌙',text:'Not recommended after dark'}] },
+  'Linn':{ level:'caution', score:2.8, desc:"South Glasgow including Castlemilk — a large post-war housing estate with some elevated crime. Linn Park and its waterfall are the main tourist draw.", tips:[{icon:'🌿',text:'Linn Park has a beautiful waterfall and is one of Glasgow\'s more underrated green spaces'},{icon:'⚠️',text:'Castlemilk has elevated crime — exercise caution on residential streets'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+  'Newlands/Auldburn':{ level:'safe', score:4.3, desc:"Upscale south Glasgow suburbs — Newlands and Auldburn are quiet, leafy residential areas popular with families. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌳',text:'Newlands Park is a pleasant local green space'},{icon:'🏡',text:'Beautiful detached houses throughout'},{icon:'🚗',text:'Car recommended — bus connections to the city centre'}] },
+  'Greater Pollok':{ level:'caution', score:2.6, desc:"Southwest Glasgow — Greater Pollok includes Priesthill, Nitshill, and Darnley. Elevated crime throughout. Pollok Country Park (with the Burrell Collection) is in the adjacent Southside ward.", tips:[{icon:'⚠️',text:'Elevated crime — not recommended for tourists'},{icon:'🏛️',text:'Burrell Collection (adjacent Pollok Park) is world-class and free — go there instead'},{icon:'🚗',text:'Rideshare only if visiting the area'},{icon:'🌙',text:'Avoid after dark'}] },
+  'Cardonald':{ level:'safe', score:3.8, desc:"West Glasgow residential area adjacent to the Clyde. Quiet and generally safe with limited tourist attractions.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌊',text:'Short walk from the Clyde riverside path'},{icon:'🚇',text:'Good public transport connections to the city centre'},{icon:'🏡',text:'Quiet residential streets'}] },
+  'Govan':{ level:'caution', score:3.0, desc:"Glasgow's historic shipbuilding heartland — the extraordinary Govan Stones (9th-century carved stones), Fairfield Shipyard, and the Pearce Institute are here. Gentrification is ongoing but crime remains elevated.", tips:[{icon:'🏛️',text:'Govan Old Parish Church houses the Govan Stones — extraordinary early medieval carved stones'},{icon:'🏭',text:'Fairfield Shipyard heritage visitor experience'},{icon:'⚠️',text:'Elevated crime — stick to the main heritage sites'},{icon:'🚇',text:'Govan subway station for easy city centre connections'}] },
+  'Pollokshields':{ level:'safe', score:4.0, desc:"South Glasgow's culturally diverse neighbourhood — a large South Asian community with outstanding Indian and Pakistani restaurants along Paisley Road West. The Victorian mansion district is architectural Glasgow at its finest. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🍛',text:'Outstanding Indian and Pakistani restaurants — among the best in Scotland'},{icon:'🏡',text:'The Victorian tenement district around Albert Drive is one of Glasgow\'s finest areas'},{icon:'🌳',text:'Maxwell Park is nearby and pleasant'}] },
+  'Langside':{ level:'safe', score:4.3, desc:"South Glasgow's most desirable area — Queens Park (with hilltop views over the city), the Battle of Langside monument, and excellent restaurants along Battlefield Road. Very safe.", tips:[{icon:'✅',text:'Very safe — one of Glasgow\'s most sought-after areas'},{icon:'🌳',text:'Queens Park has spectacular views across Glasgow from the hilltop flagpole'},{icon:'🍽️',text:'Excellent independent restaurants along Battlefield Road'},{icon:'⚔️',text:'Battle of Langside monument marks where Mary Queen of Scots was defeated in 1568'}] },
+  'Victoria Park':{ level:'safe', score:3.9, desc:"West Glasgow neighbourhood home to Fossil Grove — the world's oldest in-situ fossilised trees (330 million years old). Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🦕',text:'Fossil Grove has the world\'s oldest in-situ fossilised trees — remarkable and free'},{icon:'🌳',text:'Victoria Park itself is well-kept and pleasant'},{icon:'🚂',text:'Jordanhill rail station nearby'}] },
+  'Garscadden/Scotstounhill':{ level:'caution', score:3.1, desc:"Northwest Glasgow residential areas with some elevated crime. Limited tourist attractions.", tips:[{icon:'⚠️',text:'Some elevated crime — exercise caution'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'},{icon:'🏡',text:'Primarily residential — limited tourist amenities'}] },
+  'Drumchapel/Anniesland':{ level:'caution', score:2.9, desc:"Northwest Glasgow — Drumchapel is a large post-war estate with persistently elevated crime; Anniesland (south) is considerably safer with good transport links.", tips:[{icon:'⚠️',text:'Drumchapel has elevated crime — exercise significant caution'},{icon:'🚂',text:'Anniesland has good train connections to the city centre'},{icon:'🌙',text:'Avoid Drumchapel after dark'},{icon:'🚗',text:'Rideshare recommended for Drumchapel areas'}] },
+  'Maryhill':{ level:'caution', score:3.0, desc:"North Glasgow — Maryhill has interesting industrial heritage and the Forth and Clyde Canal, but elevated crime persists. The Maryhill Locks area is being regenerated.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🌊',text:'Forth and Clyde Canal towpath for walking or cycling'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+  'Canal':{ level:'avoid', score:2.3, desc:"North Glasgow including Possilpark — areas with some of Glasgow's highest crime rates. Possil Marsh nature reserve is a hidden gem but visiting independently is not recommended.", tips:[{icon:'🚫',text:'High crime — not recommended for independent tourist visits'},{icon:'🦢',text:'Possil Marsh is an SSSI urban nature reserve — visit on a guided tour only'},{icon:'🚗',text:'Rideshare only — do not walk around'},{icon:'📞',text:'Emergency: 999'}] },
+  'Springburn/Robroyston':{ level:'caution', score:2.8, desc:"Northeast Glasgow — Springburn was the city's locomotive manufacturing heartland. Some elevated crime throughout, though Robroyston (north) is quieter.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚂',text:'Springburn has historical connections to railway manufacturing — some heritage remains'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+  'East Centre':{ level:'caution', score:3.1, desc:"East Glasgow including the Glasgow Cathedral area. The Cathedral and Necropolis are outstanding — streets further east become progressively rougher.", tips:[{icon:'⛪',text:'Glasgow Cathedral is the finest medieval building in Scotland — free and extraordinary'},{icon:'🏛️',text:'The Glasgow Necropolis is one of Europe\'s great Victorian cemeteries — outstanding views'},{icon:'⚠️',text:'Elevated crime away from the Cathedral area'},{icon:'🚗',text:'Rideshare recommended for areas east of the Cathedral'}] },
+  'Baillieston':{ level:'caution', score:2.7, desc:"East Glasgow residential area with elevated crime. Limited tourist attractions.", tips:[{icon:'⚠️',text:'Elevated crime — not recommended for tourists'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🌙',text:'Use caution after dark'},{icon:'🏡',text:'Primarily residential — limited tourist amenities'}] },
+  'Dennistoun':{ level:'safe', score:3.7, desc:"East Glasgow's most rapidly improving neighbourhood — excellent independent cafes along Duke Street, a growing arts scene, and handsome Victorian tenements. A genuine hidden gem.", tips:[{icon:'✅',text:'Generally safe and improving rapidly'},{icon:'☕',text:'Duke Street has outstanding independent cafes and bars — Glasgow\'s best-kept secret'},{icon:'🎵',text:'The Barrowland Ballroom (world-famous venue) is nearby'},{icon:'🏡',text:'Beautiful red sandstone tenements — some of Glasgow\'s finest'}] },
+  'North East':{ level:'caution', score:2.6, desc:"Far northeast Glasgow including Easterhouse — one of Glasgow's largest housing schemes with persistently elevated crime. Limited tourist attractions.", tips:[{icon:'⚠️',text:'Elevated crime — not recommended for tourists'},{icon:'🚗',text:'Rideshare only'},{icon:'🌙',text:'Avoid after dark'},{icon:'🏡',text:'Primarily residential — no tourist amenities'}] },
 };
 
 // ── Bristol zone definitions ───────────────────────────────────────────────────
@@ -2575,6 +2669,11 @@ const BRISTOL_ZONE_DEFS = {
   'Southville':{ level:'safe', score:4.2, desc:"South Bristol's most desirable residential neighbourhood — beautiful Victorian terraces and excellent restaurants along East Street. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🍽️',text:'East Street and North Street have excellent independent restaurants'},{icon:'🏡',text:'Beautiful Victorian terraces throughout'},{icon:'🌊',text:'Short walk to the Harbourside'}] },
   'Henleaze and Westbury-on-Trym':{ level:'safe', score:4.5, desc:"Upscale north Bristol suburb with the historic Westbury village, Durdham Down, and excellent local shops. Very safe.", tips:[{icon:'✅',text:'Very safe — one of Bristol\'s safest suburbs'},{icon:'🌳',text:'Durdham Down is a large open common popular with dog walkers and cyclists'},{icon:'🛍️',text:'Westbury village has good independent shops'},{icon:'☕',text:'Good cafes along Henleaze Road'}] },
   'Knowle':{ level:'safe', score:3.8, desc:"South Bristol residential neighbourhood. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌳',text:'Knowle Park is pleasant'},{icon:'🛒',text:'Local shops along Wells Road'},{icon:'🚗',text:'Car or bus recommended'}] },
+  'St Pauls':{ level:'caution', score:3.2, desc:"Inner Bristol with a rich Afro-Caribbean heritage — St Pauls is famous for its 1980 riots and the annual St Pauls Carnival (Britain's second-largest street carnival). Some elevated crime but rapidly improving.", tips:[{icon:'🎊',text:'St Pauls Carnival (July) is one of Britain\'s great street festivals — extraordinary sound systems'},{icon:'🎨',text:'Some of Bristol\'s best street art and community murals'},{icon:'⚠️',text:'Some elevated crime — exercise caution especially at night'},{icon:'🚗',text:'Rideshare recommended after dark'}] },
+  'Easton and Redfield':{ level:'caution', score:3.1, desc:"Inner east Bristol — Easton has a diverse community and an emerging independent food and drink scene along Stapleton Road. Improving rapidly but some elevated crime.", tips:[{icon:'🍽️',text:'Stapleton Road has an outstanding multicultural food scene'},{icon:'🎨',text:'Great street art throughout, particularly around Easton Community Centre'},{icon:'⚠️',text:'Some elevated crime — exercise caution on quieter streets at night'},{icon:'🚗',text:'Rideshare recommended after dark'}] },
+  'Horfield':{ level:'safe', score:3.9, desc:"North Bristol suburb — a quiet residential neighbourhood. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌳',text:'Horfield Common is a pleasant local green space'},{icon:'🚌',text:'Good bus connections to Bristol city centre'},{icon:'🏡',text:'Primarily residential — limited tourist attractions'}] },
+  'Brislington West':{ level:'safe', score:4.0, desc:"Southeast Bristol residential suburb. Generally safe with Arnos Vale Victorian cemetery nearby.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌳',text:'Arnos Vale Cemetery is a beautiful Victorian cemetery with heritage events and woodland walks'},{icon:'🚌',text:'Good bus connections along the Bath Road'},{icon:'🏡',text:'Quiet residential streets'}] },
+  'Brislington East':{ level:'safe', score:4.0, desc:"Southeast Bristol suburb adjacent to the Bath Road. A quiet residential area. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌊',text:'River Avon is accessible from the eastern edge'},{icon:'🚌',text:'Good bus connections to Bristol and Bath'},{icon:'🏡',text:'Primarily residential — limited tourist amenities'}] },
 };
 
 // ── Bath zone definitions ─────────────────────────────────────────────────────
@@ -2623,6 +2722,17 @@ const NOTTINGHAM_ZONE_DEFS = {
   'Arboretum':{ level:'safe', score:3.8, desc:"Victorian neighbourhood with the Nottingham Arboretum park and the University campus. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌳',text:'Nottingham Arboretum is one of the oldest public parks in England'},{icon:'🎓',text:'Nottingham Trent University campus nearby'},{icon:'🍽️',text:'Good independent cafes along Forest Road'}] },
   'West Bridgford':{ level:'safe', score:4.4, desc:"Nottinghamshire's most desirable suburb — excellent restaurants along Bridgford Road and Central Avenue, and Trent Bridge cricket ground. Very safe.", tips:[{icon:'✅',text:'Very safe — consistently one of England\'s most desirable suburbs'},{icon:'🏏',text:'Trent Bridge Cricket Ground is a beautiful Test venue'},{icon:'🍽️',text:'Central Avenue has outstanding independent restaurants'},{icon:'🛍️',text:'Good independent shops and boutiques'}] },
   'Sherwood':{ level:'safe', score:4.0, desc:"North Nottingham with the famous Sherwood Forest connection and excellent restaurants on Mansfield Road. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌳',text:'Near Sherwood Forest — Robin Hood connections throughout'},{icon:'🍽️',text:'Good restaurants along Mansfield Road'},{icon:'🎭',text:'Broadway Cinema is Nottingham\'s excellent independent cinema'}] },
+  'Arnold & Woodthorpe':{ level:'safe', score:3.9, desc:"North Nottingham suburban towns — Arnold has a good high street; Woodthorpe Park has beautiful gardens and a boating lake. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌳',text:'Woodthorpe Park has lovely rose gardens and a well-used boating lake'},{icon:'🛍️',text:'Arnold High Street has good local shopping'},{icon:'🚌',text:'Good bus connections into Nottingham city centre'}] },
+  'Carlton and Porchester':{ level:'safe', score:3.9, desc:"East Nottingham suburb — Carlton is a quiet residential area with good local shops. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌳',text:'Carlton Hill has pleasant walks with views over the Trent valley'},{icon:'🛍️',text:'Carlton Hill and High Street have good local shops'},{icon:'🚌',text:'Good bus connections into Nottingham'}] },
+  'Gedling, Burton Joyce and Villages':{ level:'safe', score:4.1, desc:"East Nottingham suburbs and villages — Burton Joyce is a picturesque village on the Trent with excellent riverside walks. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌊',text:'River Trent towpath walks through Burton Joyce are beautiful'},{icon:'🏡',text:'Burton Joyce is a charming village with a good local pub'},{icon:'🚗',text:'Car recommended — limited public transport'}] },
+  'Beeston':{ level:'safe', score:4.0, desc:"Southwest Nottingham — a thriving town with an excellent independent food and drink scene along Middle Street and Station Road, adjacent to the University of Nottingham's beautiful campus. Generally safe.", tips:[{icon:'✅',text:'Generally safe and thriving'},{icon:'🍽️',text:'Middle Street and Station Road have excellent independent restaurants and bars'},{icon:'🎓',text:'University of Nottingham campus is beautiful — lakes and fine architecture'},{icon:'🚇',text:'Beeston tram stop for quick connections to the city centre'}] },
+  'Bulwell':{ level:'caution', score:2.8, desc:"North Nottingham working-class area with some elevated crime. Limited tourist attractions.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚇',text:'Bulwell tram stop on the Nottingham Express Transit'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+  'Bulwell Forest':{ level:'caution', score:2.9, desc:"North Nottingham — Bulwell Forest and Bestwood Village sit north of the city with a mix of housing estates and greenbelt land. Some elevated crime.", tips:[{icon:'⚠️',text:'Some elevated crime — exercise caution'},{icon:'🌳',text:'Bestwood Country Park has pleasant woodland walks'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+  'Bestwood':{ level:'caution', score:2.7, desc:"North Nottingham housing estate with elevated crime. Bestwood Country Park is adjacent and worth visiting during the day.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🌳',text:'Bestwood Country Park is lovely for walking and cycling'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Avoid after dark'}] },
+  'Radford & Park':{ level:'caution', score:3.0, desc:"Inner Nottingham — The Park is one of England's finest Victorian private estates with Nottingham Castle on its fringe; Radford has elevated crime. Stay in the Park Estate and Castle area.", tips:[{icon:'🏰',text:'Nottingham Castle sits on a dramatic sandstone rock — museum inside, great views'},{icon:'🏛️',text:'The Park Estate is a beautifully preserved private Victorian suburb'},{icon:'⚠️',text:'Radford has elevated crime — stick to The Park and Castle area'},{icon:'🚗',text:'Car recommended for Radford streets'}] },
+  'Wollaton West':{ level:'safe', score:4.2, desc:"West Nottingham — Wollaton Hall (which doubled as Wayne Manor in the Nolan Batman films) and its deer park are here. A spectacular Elizabethan mansion with roaming deer. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🦌',text:'Wollaton Hall deer park is free to enter — hundreds of deer roam freely'},{icon:'🏛️',text:'Wollaton Hall (1580) is a spectacular Elizabethan mansion — now a natural history museum'},{icon:'🚌',text:'Bus connections from the city centre'}] },
+  'Wollaton East and Lenton Abbey':{ level:'safe', score:4.0, desc:"West Nottingham — residential areas adjacent to the University of Nottingham's Highfields campus, with its boating lake and cycle paths. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🎓',text:'University of Nottingham Highfields campus has a beautiful boating lake and parkland'},{icon:'🌊',text:'Highfields boating lake is free to visit and lovely for walking'},{icon:'🚇',text:'University of Nottingham tram stop nearby'}] },
+  'Clifton':{ level:'caution', score:2.9, desc:"South Nottingham — Clifton is a large post-war housing estate with elevated crime. Clifton Grove above the Trent is a beautiful hidden gem worth visiting by day.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution on residential streets'},{icon:'🌳',text:'Clifton Grove is a beautiful riverside grove above the Trent — worth visiting during the day'},{icon:'🌊',text:'Views over the Trent valley from the escarpment are excellent'},{icon:'🚗',text:'Car recommended'}] },
 };
 
 // ── Oxford zone definitions ───────────────────────────────────────────────────
@@ -2633,6 +2743,7 @@ const OXFORD_ZONE_DEFS = {
   'Oxford East':{ level:'safe', score:3.8, desc:"East Oxford including Headington — the Oxford United stadium and good local shops. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'⛽',text:'Headington Shark (a real shark sticking out of a rooftop) is a quirky Oxford landmark'},{icon:'🏛️',text:'Oxford Brookes University campus'},{icon:'🍽️',text:'Good local restaurants in Headington village'}] },
   'Oxford North East':{ level:'safe', score:4.3, desc:"Marston and New Marston — quiet residential north-east Oxford with great riverside pubs. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🍺',text:'Victoria Arms on the river is one of Oxford\'s most beautiful riverside pubs'},{icon:'🚣',text:'River Cherwell punting from Cherwell Boathouse'},{icon:'🌳',text:'Port Meadow and the River Thames are a short cycle away'}] },
   'Oxford South East':{ level:'safe', score:3.9, desc:"Iffley and south-east Oxford — beautiful Iffley Village with a Norman church, and riverside walks. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🏛️',text:'Iffley Norman Church (1170) is one of the finest Romanesque churches in England'},{icon:'🌊',text:'Iffley Lock on the Thames is a beautiful riverside spot'},{icon:'🚣',text:'Excellent Thames riverside walks'}] },
+  'Oxford Barton, Risinghurst and Sandhills':{ level:'safe', score:3.8, desc:"East Oxford suburbs — Barton, Risinghurst, and Sandhills are quiet residential areas east of Headington. Generally safe with few tourist attractions.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌳',text:'Oxford Nature Reserve (Kidneys) is a local wildlife site'},{icon:'🚌',text:'Bus connections into Oxford city centre'},{icon:'🏡',text:'Primarily residential — limited tourist amenities'}] },
 };
 
 // ── Cambridge zone definitions ────────────────────────────────────────────────
@@ -2651,6 +2762,10 @@ const BRIGHTON_ZONE_DEFS = {
   'Kemp Town':{ level:'safe', score:4.1, desc:"Brighton's LGBTQ+ hub and eastern seafront — Marine Parade, Kemp Town village, and the St James Street bars. Very safe.", tips:[{icon:'✅',text:'Very safe and very welcoming'},{icon:'🌈',text:'Kemp Town is the heart of Brighton\'s famous LGBTQ+ scene'},{icon:'🍽️',text:'St James Street has good independent restaurants and bars'},{icon:'🎭',text:'Brighton Pride in August is one of the UK\'s best Pride events'}] },
   'Hanover':{ level:'safe', score:4.3, desc:"Brighton's bohemian residential neighbourhood on the hill — excellent pubs, a community spirit, and beautiful Victorian terraces. Very safe.", tips:[{icon:'✅',text:'Very safe and charming'},{icon:'🍺',text:'Excellent independent pubs — the Hanover is a local favourite'},{icon:'🏡',text:'Beautiful painted Victorian terraces throughout'},{icon:'🌳',text:'Queen\'s Park is nearby and excellent'}] },
   'Preston Park':{ level:'safe', score:4.2, desc:"North Brighton with the beautiful Preston Park, the Preston Manor, and excellent residential streets. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌳',text:'Preston Park is beautiful — excellent for cycling and walking'},{icon:'🏛️',text:'Preston Manor is a fascinating Edwardian house museum'},{icon:'🌹',text:'Preston Park Walled Garden has a beautiful rose garden'}] },
+  'Regency Business':{ level:'safe', score:3.9, desc:"Brighton's central retail and business district — Western Road, Churchill Square shopping centre, and the western end of North Street. Generally safe during the day.", tips:[{icon:'✅',text:'Generally safe during the day'},{icon:'🛍️',text:'Churchill Square is Brighton\'s main shopping centre'},{icon:'☕',text:'Western Road has a good mix of cafes and independent shops'},{icon:'🌙',text:'Exercise normal caution at night around the club areas'}] },
+  'Kemp Town - The Village':{ level:'safe', score:4.2, desc:"The village core of Kemp Town — elegant Regency squares, excellent restaurants on St George's Road, and the heart of Brighton's LGBTQ+ neighbourhood. Very safe.", tips:[{icon:'✅',text:'Very safe and very welcoming'},{icon:'🏛️',text:'Sussex Square and Lewes Crescent are some of England\'s finest Regency architecture'},{icon:'🌈',text:'Heart of Brighton\'s famous LGBTQ+ scene — extremely inclusive'},{icon:'🍽️',text:'St George\'s Road has excellent independent restaurants'}] },
+  'East Brighton':{ level:'caution', score:3.1, desc:"East Brighton residential area — Brighton Marina (to the south) is excellent for waterside dining, but inland residential streets have some elevated crime.", tips:[{icon:'⚠️',text:'Some elevated crime on inland residential streets'},{icon:'⛵',text:'Brighton Marina has excellent waterside restaurants and a cinema'},{icon:'🌊',text:'Undercliff Walk eastward to Saltdean is a beautiful coastal walk'},{icon:'🚗',text:'Rideshare recommended at night'}] },
+  'Central Hove':{ level:'safe', score:4.1, desc:"Central Hove — Church Road and George Street have excellent independent dining and shopping. The grand Regency squares of Brunswick and Palmeira are here too. Generally safe.", tips:[{icon:'✅',text:'Generally safe and pleasant'},{icon:'🍽️',text:'Church Road has outstanding independent restaurants — Hove\'s answer to North Laine'},{icon:'🏛️',text:'Brunswick Square and Palmeira Square are grand Regency townhouse squares'},{icon:'🌊',text:'Seafront is a short walk away'}] },
 };
 
 // ── York zone definitions ─────────────────────────────────────────────────────
@@ -2671,6 +2786,13 @@ const CARDIFF_ZONE_DEFS = {
   'Adamsdown':{ level:'caution', score:2.9, desc:"Inner Cardiff east of the city centre with elevated crime.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🌙',text:'Use caution after dark'}] },
   'Heath':{ level:'safe', score:4.2, desc:"North Cardiff suburb with the University Hospital of Wales and good parks. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌳',text:'Roath Park is close by with the famous lighthouse and rose garden'},{icon:'🎓',text:'Cardiff University hospital and medical school'},{icon:'🏡',text:'Pleasant residential streets'}] },
   'Llandaff':{ level:'safe', score:4.4, desc:"The historic village of Llandaff — Llandaff Cathedral, the green, and beautiful walks along the Taff. Very safe.", tips:[{icon:'✅',text:'Very safe and beautiful'},{icon:'⛪',text:'Llandaff Cathedral has an extraordinary Epstein sculpture of Christ'},{icon:'🌳',text:'The Cathedral Close and Llandaff Green are lovely'},{icon:'🌊',text:'Taff Trail cycling and walking along the river'}] },
+  "Caerau (Cardiff)":{ level:'caution', score:2.8, desc:"West Cardiff — Caerau is a residential area with elevated crime. Caerau hillfort is one of Cardiff's most significant Iron Age monuments but visiting independently is not recommended.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🏛️',text:'Caerau hillfort is a remarkable Iron Age fort — visit with a group during the day only'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Avoid after dark'}] },
+  'Cyncoed':{ level:'safe', score:4.5, desc:"One of Cardiff's most desirable neighbourhoods — beautiful detached houses, Roath Park lake and its Victorian lighthouse, and excellent local shops. Very safe.", tips:[{icon:'✅',text:'Very safe — one of Cardiff\'s most sought-after areas'},{icon:'🌊',text:'Roath Park Lake has rowing boats and the beautiful Victorian lighthouse is a Cardiff icon'},{icon:'🌹',text:'Roath Park Rose Garden is beautiful in summer'},{icon:'☕',text:'Good cafes and restaurants along the main shopping parades'}] },
+  'Ely':{ level:'caution', score:2.6, desc:"West Cardiff — Ely is a large post-war housing estate with elevated crime and limited tourist attractions. Not recommended for independent tourist visits.", tips:[{icon:'⚠️',text:'Elevated crime — not recommended for tourists'},{icon:'🚗',text:'Rideshare only if visiting'},{icon:'🌙',text:'Avoid after dark'},{icon:'🏡',text:'Primarily residential — no tourist amenities'}] },
+  'Llandaff North':{ level:'safe', score:4.1, desc:"North Cardiff residential suburb — a quiet area with good local shops along Station Road and easy access to the River Taff trail. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌊',text:'Taff Trail cycling and walking path is accessible from here'},{icon:'🛍️',text:'Good local shops along Station Road'},{icon:'🚌',text:'Good transport connections into Cardiff city centre'}] },
+  'Pontprennau and Old St. Mellons':{ level:'safe', score:4.2, desc:"Northeast Cardiff — newer residential development alongside historic Old St. Mellons village. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'⛪',text:'Old St. Mellons village has a charming medieval church'},{icon:'🌳',text:'Good access to the Wentloog levels and coastal wetlands'},{icon:'🚗',text:'Car required — limited public transport'}] },
+  'Rhiwbina':{ level:'safe', score:4.4, desc:"One of Cardiff's most charming neighbourhoods — a 1920s Garden Village with Arts and Crafts cottages, excellent local shops along The Parade, and Wenallt Hill woodland. Very safe.", tips:[{icon:'✅',text:'Very safe and charming'},{icon:'🌳',text:'Wenallt is a beautiful ancient woodland with outstanding city views'},{icon:'☕',text:'The Parade has excellent independent cafes and boutiques'},{icon:'🏡',text:'Beautiful Arts and Crafts houses — walk the original Garden Village area'}] },
+  'Whitchurch and Tongwynlais':{ level:'safe', score:4.2, desc:"North Cardiff — Whitchurch has good local shops; Tongwynlais sits at the base of Castell Coch (Red Castle), one of Wales's most romantic Victorian Gothic buildings. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🏰',text:'Castell Coch (Red Castle) is a spectacular Victorian Gothic fantasy castle — exceptional'},{icon:'🌳',text:'Fforest Fawr woodland beside Castell Coch is excellent walking country'},{icon:'☕',text:'Good local cafes along Whitchurch High Street'}] },
 };
 
 // ── Leicester zone definitions ────────────────────────────────────────────────
@@ -2681,6 +2803,7 @@ const LEICESTER_ZONE_DEFS = {
   'Westcotes':{ level:'safe', score:3.8, desc:"West Leicester including the Golden Mile — the UK's finest Indian restaurants along Belgrave Road and Melton Road. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🍛',text:'The Golden Mile has the UK\'s greatest concentration of Indian restaurants and sweet shops — extraordinary'},{icon:'🎊',text:'Diwali celebrations on the Golden Mile are the largest outside India'},{icon:'🛒',text:'Excellent Indian sweet shops and grocery stores'}] },
   'Belgrave':{ level:'safe', score:3.8, desc:"North Leicester's Asian cultural hub — the Golden Mile continues here with outstanding vegetarian and South Asian cuisine. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🍽️',text:'Some of the best vegetarian Indian food in the UK'},{icon:'🎊',text:'Major Hindu cultural events throughout the year'},{icon:'🛒',text:'Excellent Asian grocery stores and fabric shops'}] },
   'Stoneygate':{ level:'safe', score:4.4, desc:"Leicester's most desirable neighbourhood — leafy Victorian streets, excellent independent restaurants, and Victoria Park. Very safe.", tips:[{icon:'✅',text:'Very safe and beautiful'},{icon:'🌳',text:'Victoria Park is beautiful — events throughout the year'},{icon:'🍽️',text:'Excellent independent restaurants on Francis Street'},{icon:'🏡',text:'Outstanding Victorian and Edwardian houses'}] },
+  'Leicester Forest East, Kirby Muxloe and Glenfield':{ level:'safe', score:4.1, desc:"West Leicester suburbs — Kirby Muxloe has a beautiful ruined 15th-century castle; Glenfield and Leicester Forest East are quiet residential areas. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🏰',text:'Kirby Muxloe Castle is a beautiful moated brick castle — free to visit'},{icon:'🌳',text:'Pleasant walking along the Grand Union Canal'},{icon:'🚗',text:'Car recommended — limited public transport'}] },
 };
 
 // ── Birmingham UK zone definitions ────────────────────────────────────────────
@@ -2693,6 +2816,10 @@ const BIRMINGHAM_UK_ZONE_DEFS = {
   'Small Heath and Highgate':{ level:'caution', score:2.7, desc:"Inner south-east Birmingham with elevated crime.", tips:[{icon:'⚠️',text:'Elevated crime — not recommended for tourists'},{icon:'🚗',text:'Car or rideshare only'},{icon:'🌙',text:'Avoid after dark'}] },
   'Nechells':{ level:'caution', score:2.6, desc:"Inner east Birmingham with elevated crime.", tips:[{icon:'⚠️',text:'High crime — not recommended for tourists'},{icon:'🚗',text:'Car or rideshare only'}] },
   'Erdington':{ level:'caution', score:3.0, desc:"North Birmingham suburb with some elevated crime. Limited tourist attractions.", tips:[{icon:'⚠️',text:'Some elevated crime — exercise caution'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+  'Handsworth Wood':{ level:'caution', score:3.0, desc:"North Birmingham — a largely residential area with a strong diverse community. Some elevated crime, particularly away from the main roads.", tips:[{icon:'⚠️',text:'Some elevated crime — exercise caution'},{icon:'🌳',text:'Handsworth Park has a beautiful lake and is well-used by the local community'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+  'Lozells and East Handsworth':{ level:'caution', score:2.7, desc:"Inner north Birmingham — Lozells has elevated crime and limited tourist attractions. Not recommended for independent tourist exploration.", tips:[{icon:'⚠️',text:'Elevated crime — not recommended for tourists'},{icon:'🚗',text:'Car or rideshare recommended'},{icon:'🌙',text:'Avoid after dark'},{icon:'🏡',text:'Primarily residential — limited tourist amenities'}] },
+  'Selly Oak':{ level:'safe', score:3.9, desc:"South Birmingham university neighbourhood — adjacent to the University of Birmingham's main campus with a strong student community and good local restaurants along Bristol Road. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🎓',text:'University of Birmingham\'s Edgbaston campus is beautiful — free to explore'},{icon:'🍽️',text:'Bristol Road and Selly Oak High Street have good inexpensive restaurants'},{icon:'🚌',text:'Good bus connections along Bristol Road'}] },
+  'Ladywood':{ level:'caution', score:2.8, desc:"Inner Birmingham — Ladywood includes parts of Birmingham's canal network and Brindleyplace (the tourist waterfront) on its northern edge. Elevated crime throughout most of the ward.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🌊',text:'Brindleyplace waterfront (northern edge) is safe and excellent for walking'},{icon:'🚗',text:'Rideshare recommended, especially at night'},{icon:'🌙',text:'Use caution after dark away from Brindleyplace'}] },
 };
 
 // ── Southampton zone definitions ──────────────────────────────────────────────
@@ -2738,12 +2865,23 @@ const ABERDEEN_ZONE_DEFS = {
   'George St/Harbour':{ level:'safe', score:3.8, desc:"Aberdeen city centre — the granite architecture of Union Street, Aberdeen Art Gallery, and the harbour. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏛️',text:'Aberdeen Art Gallery (reopened 2019) is excellent — free'},{icon:'🌊',text:'Aberdeen Harbour is one of the busiest in Europe — visible from the beach'},{icon:'⛺',text:'Aberdeen Beach is surprisingly good — golden sands'}] },
   'Midstocket/Rosemount':{ level:'safe', score:4.2, desc:"Aberdeen's most elegant residential neighbourhood — beautiful granite villas and the Anderson Drive tree avenue. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🏡',text:'Stunning grey granite Victorian and Edwardian houses'},{icon:'🌳',text:'Hazlehead Park has beautiful walks and a maze'},{icon:'☕',text:'Good independent cafes along the avenue'}] },
   'Torry/Ferryhill':{ level:'caution', score:3.1, desc:"South Aberdeen across the Dee — Ferryhill is upscale, Torry has some elevated crime.", tips:[{icon:'⚠️',text:'Torry has some elevated crime — stick to Ferryhill'},{icon:'🌊',text:'Footdee (Fittie) fishing village at the harbour mouth is charming'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark in Torry'}] },
+  'Dyce/Bucksburn/Danestone':{ level:'safe', score:4.1, desc:"North Aberdeen — Dyce is home to Aberdeen Airport with a strong oil industry presence. Danestone and Bucksburn are quiet residential areas. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'✈️',text:'Aberdeen Airport is here — convenient for early departures'},{icon:'🌳',text:'River Don walks nearby'},{icon:'🏡',text:'Quiet residential areas — limited tourist attractions'}] },
+  'Bridge of Don':{ level:'safe', score:4.2, desc:"North Aberdeen adjacent to Aberdeen Beach — the Aberdeen Sports Village and Donmouth nature reserve are here. A modern residential area popular with families. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🏖️',text:'Aberdeen Beach — golden sands stretching 2 miles — Scotland\'s best city beach'},{icon:'🏋️',text:'Aberdeen Sports Village has Olympic-standard facilities open to the public'},{icon:'🌳',text:'Donmouth Local Nature Reserve at the mouth of the River Don'}] },
+  'Kingswells/Sheddocksley/Summerhill':{ level:'safe', score:4.0, desc:"West Aberdeen suburbs — Kingswells is an affluent western suburb. Generally safe residential areas with Countesswells Woods nearby.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🌳',text:'Countesswells Woods is a beautiful ancient woodland with walking trails'},{icon:'🛍️',text:'Good local shops along Sheddocksley Road'},{icon:'🏡',text:'Modern residential development — limited tourist attractions'}] },
+  'Northfield/Mastrick North':{ level:'caution', score:2.9, desc:"Northwest Aberdeen — Northfield and Mastrick are post-war housing estates with elevated crime. Limited tourist attractions.", tips:[{icon:'⚠️',text:'Elevated crime — exercise caution'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'},{icon:'🏡',text:'Primarily residential — no tourist amenities'}] },
+  'Hilton/Woodside/Stockethill':{ level:'caution', score:3.1, desc:"North-central Aberdeen — a mix of older residential areas with some elevated crime. Old Aberdeen and King's College are a short distance away.", tips:[{icon:'⚠️',text:'Some elevated crime — exercise caution'},{icon:'🎓',text:'Old Aberdeen and King\'s College are nearby — well worth visiting'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+  'Tillydrone/Seaton/Old Aberdeen':{ level:'safe', score:3.8, desc:"One of Scotland's most remarkable historic areas — Old Aberdeen has King's College (1495), St Machar's Cathedral, and medieval cobbled streets. Tillydrone and Seaton have more elevated crime; stay near the university.", tips:[{icon:'✅',text:'Safe in Old Aberdeen and the University area'},{icon:'🎓',text:'King\'s College Chapel is one of the finest medieval buildings in Scotland'},{icon:'⛪',text:'St Machar\'s Cathedral has a spectacular heraldic ceiling — free'},{icon:'⚠️',text:'Tillydrone to the west has elevated crime — stay in the University area'}] },
+  'Lower Deeside':{ level:'safe', score:4.6, desc:"South Aberdeen along the River Dee — Cults, Bieldside, Milltimber, and Peterculter are Aberdeen's most affluent villages with beautiful walks along the Deeside Way. Extremely safe.", tips:[{icon:'✅',text:'Extremely safe — Aberdeen\'s most desirable area'},{icon:'🌊',text:'Deeside Way walking and cycling path follows the old railway through beautiful riverside scenery'},{icon:'🏡',text:'Beautiful granite houses and Victorian villas throughout'},{icon:'🚗',text:'Car recommended — limited public transport outside Cults'}] },
+  'Hazlehead/Queens Cross/Countesswells':{ level:'safe', score:4.3, desc:"West Aberdeen — Hazlehead Park with its rose garden, maze, and extensive woodland. Queens Cross and Countesswells are quiet residential areas. Very safe.", tips:[{icon:'✅',text:'Very safe'},{icon:'🌹',text:'Hazlehead Park has a beautiful rose garden and hedge maze — free'},{icon:'🌳',text:'Countesswells Woods is a beautiful woodland with walking trails'},{icon:'🏡',text:'Quiet, upscale residential area'}] },
+  'Airyhall/Broomhill/Garthdee':{ level:'safe', score:4.0, desc:"South Aberdeen — Robert Gordon University's Garthdee campus overlooks the River Dee. Airyhall and Broomhill are pleasant residential areas. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🎓',text:'Robert Gordon University has an attractive riverside campus'},{icon:'🌊',text:'River Dee walkways from Garthdee are beautiful'},{icon:'🏡',text:'Pleasant residential suburbs'}] },
+  'Kincorth/Nigg/Cove':{ level:'caution', score:3.2, desc:"South Aberdeen — Kincorth has some elevated crime but Cove Bay is a beautiful coastal village with dramatic granite sea stacks and rock arches. Use caution in the residential parts.", tips:[{icon:'🌊',text:'Cove Bay has spectacular granite sea stacks and rock arches — one of Scotland\'s best coastal walks'},{icon:'⚠️',text:'Kincorth has some elevated crime — exercise caution'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark in Kincorth'}] },
 };
 
 // ── Coventry zone definitions ─────────────────────────────────────────────────
 const COVENTRY_ZONE_DEFS = {
-  'Coventry City Centre':{ level:'safe', score:3.7, desc:"Coventry city centre — the ruined Old Cathedral alongside the new Basil Spence Cathedral, the Herbert Art Gallery, and the Transport Museum. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'⛪',text:'Coventry Cathedral (old and new) is one of the most moving architectural experiences in England'},{icon:'🏎️',text:'Coventry Transport Museum is outstanding and free — the largest collection of British road transport'},{icon:'🏛️',text:'Herbert Art Gallery & Museum is free and very good'}] },
-  'Spon End':{ level:'safe', score:3.9, desc:"West Coventry — near the University of Warwick and good local restaurants. Generally safe.", tips:[{icon:'✅',text:'Generally safe'},{icon:'🎓',text:'Warwick University campus is nearby'},{icon:'🌳',text:'War Memorial Park is large and beautiful'},{icon:'🍽️',text:'Good local restaurants along Holyhead Road'}] },
+  'Foleshill':{ level:'caution', score:2.9, desc:"North Coventry — a large South Asian community and some elevated crime. The Foleshill Road has outstanding Pakistani and Indian restaurants along its length.", tips:[{icon:'🍛',text:'Foleshill Road has excellent Pakistani and Indian restaurants'},{icon:'⚠️',text:'Elevated crime — stick to the main roads'},{icon:'🚗',text:'Car recommended'},{icon:'🌙',text:'Use caution after dark'}] },
+  'Binley, Willenhall, Cheylesmore and Earlsdon':{ level:'safe', score:3.7, desc:"East and south Coventry — Earlsdon is Coventry's most desirable neighbourhood with excellent restaurants along Earlsdon Street; Cheylesmore is safe. Binley and Willenhall have more elevated crime.", tips:[{icon:'✅',text:'Earlsdon and Cheylesmore are safe'},{icon:'🍽️',text:'Earlsdon Street has some of Coventry\'s best independent restaurants'},{icon:'🌳',text:'War Memorial Park is nearby and beautiful'},{icon:'⚠️',text:'Exercise caution in Binley and Willenhall areas'}] },
+  'Holbrook, Radford, Sherbourne and Bablake':{ level:'caution', score:3.1, desc:"Northwest Coventry — Bablake and Sherbourne are residential and generally safe; Radford has elevated crime. Bablake School is a landmark 15th-century building.", tips:[{icon:'🏛️',text:'Bablake School building is a beautiful 15th-century almshouse near the city centre'},{icon:'⚠️',text:'Radford has elevated crime — exercise caution'},{icon:'🚗',text:'Car recommended for Radford areas'},{icon:'🌙',text:'Use caution after dark in Radford'}] },
 };
 
 // ── City configurations ──────────────────────────────────────────────────────
@@ -3750,10 +3888,20 @@ function defaultDef(cityId, name) {
 }
 
 // ── Map styles ───────────────────────────────────────────────────────────────
-const STYLES = {
+const NORMAL_STYLES = {
   safe:    { color:'#16a34a', fillColor:'#22c55e', fillOpacity:.28, weight:1.5 },
   caution: { color:'#b45309', fillColor:'#eab308', fillOpacity:.32, weight:1.5 },
-  avoid:   { color:'#b91c1c', fillColor:'#ef4444', fillOpacity:.32, weight:1.5 }
+  avoid:   { color:'#b91c1c', fillColor:'#ef4444', fillOpacity:.32, weight:1.5 },
+};
+const CB_STYLES = {
+  safe:    { color:'#005fa3', fillColor:'#0088cc', fillOpacity:.30, weight:1.5 },
+  caution: { color:'#c45e00', fillColor:'#ee8822', fillOpacity:.34, weight:1.5 },
+  avoid:   { color:'#a01800', fillColor:'#cc2200', fillOpacity:.34, weight:1.5 },
+};
+const STYLES = {
+  safe:    { ...NORMAL_STYLES.safe },
+  caution: { ...NORMAL_STYLES.caution },
+  avoid:   { ...NORMAL_STYLES.avoid },
 };
 const HOVER_OPACITY = { safe:.48, caution:.52, avoid:.52 };
 const LEVEL_LABELS  = { safe:'Safe', caution:'Use Caution', avoid:'Avoid' };
@@ -3831,6 +3979,28 @@ function pointInGeoJSON(testLat, testLng, geometry) {
   return false;
 }
 
+// ── Color-blind mode ─────────────────────────────────────────────────────────
+let colorblindMode = localStorage.getItem('saferoute_cb') === '1';
+
+function applyColorblindMode(on) {
+  const src = on ? CB_STYLES : NORMAL_STYLES;
+  ['safe','caution','avoid'].forEach(k => Object.assign(STYLES[k], src[k]));
+  document.body.classList.toggle('colorblind', on);
+  // Restyle all rendered zone layers
+  ZONES.forEach(z => {
+    const key = z.lsoaCode ? `lsoa:${z.lsoaCode}` : `${z.cityId}:${z.name}`;
+    const layer = polyLayers[key];
+    if (layer) layer.setStyle({ ...STYLES[z.level], weight: z.lsoaCode ? 0.5 : 1.5 });
+  });
+}
+
+function setColorblindMode(on) {
+  colorblindMode = on;
+  localStorage.setItem('saferoute_cb', on ? '1' : '0');
+  document.getElementById('cb-mode-toggle').checked = on;
+  applyColorblindMode(on);
+}
+
 // ── Unit preference ───────────────────────────────────────────────────────────
 let unitPref = localStorage.getItem('saferoute_unit') || 'mi';
 
@@ -3855,6 +4025,7 @@ function setUnitPref(u) {
 function openSettings() {
   document.getElementById('unit-mi').classList.toggle('active', unitPref === 'mi');
   document.getElementById('unit-km').classList.toggle('active', unitPref === 'km');
+  document.getElementById('cb-mode-toggle').checked = colorblindMode;
   document.getElementById('settings-modal-overlay').classList.add('open');
 }
 function closeSettings() {
@@ -3940,18 +4111,55 @@ function computeScores(crimes, city, cityId, hourFilter) {
 const CACHE_TTL = 6  * 60 * 60 * 1000;
 const GEO_TTL   = 7  * 24 * 60 * 60 * 1000;
 
-function getCached(key, ttl) {
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    const { data, ts } = JSON.parse(raw);
-    return Date.now() - ts < ttl ? data : null;
-  } catch { return null; }
+// ── IndexedDB cache (falls back to localStorage on error) ────────────────────
+let _idb = null;
+
+function _openIdb() {
+  if (_idb) return Promise.resolve(_idb);
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('saferoute_cache', 1);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('cache'))
+        db.createObjectStore('cache', { keyPath: 'k' });
+    };
+    req.onsuccess = e => { _idb = e.target.result; resolve(_idb); };
+    req.onerror   = () => reject(req.error);
+  });
 }
 
-function setCached(key, data) {
-  try { localStorage.setItem(key, JSON.stringify({ data, ts: Date.now() })); }
-  catch { }
+async function getCached(key, ttl) {
+  try {
+    const db  = await _openIdb();
+    const row = await new Promise((res, rej) => {
+      const req = db.transaction('cache', 'readonly').objectStore('cache').get(key);
+      req.onsuccess = () => res(req.result);
+      req.onerror   = () => rej(req.error);
+    });
+    if (!row || Date.now() - row.ts >= ttl) return null;
+    return row.data;
+  } catch {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+      const { data, ts } = JSON.parse(raw);
+      return Date.now() - ts < ttl ? data : null;
+    } catch { return null; }
+  }
+}
+
+async function setCached(key, data) {
+  try {
+    const db = await _openIdb();
+    await new Promise((res, rej) => {
+      const tx = db.transaction('cache', 'readwrite');
+      tx.objectStore('cache').put({ k: key, data, ts: Date.now() });
+      tx.oncomplete = res;
+      tx.onerror    = () => rej(tx.error);
+    });
+  } catch {
+    try { localStorage.setItem(key, JSON.stringify({ data, ts: Date.now() })); } catch {}
+  }
 }
 
 // ── FBI Crime Data Explorer API ───────────────────────────────────────────────
@@ -4268,7 +4476,7 @@ async function fetchCrimes(cityId, city, period = 0) {
   if (city.noApi) return null;
   if (city.noDateFilter && period > 0) return null;
   const key = `saferoute_crimes_${cityId}_v6_p${period}`;
-  const cached = getCached(key, CACHE_TTL);
+  const cached = await getCached(key, CACHE_TTL);
   if (cached) return cached;
 
   const toDate = new Date(); toDate.setDate(toDate.getDate() - 365 * period);
@@ -4396,7 +4604,7 @@ async function fetchCrimes(cityId, city, period = 0) {
   }
 
   if (!Array.isArray(data) || data.length === 0) throw new Error('No crime data returned');
-  setCached(key, data);
+  await setCached(key, data);
   return data;
 }
 
@@ -4453,7 +4661,7 @@ async function fetchPoliceUkGeo(force, bbox) {
 
 async function fetchGeoJSON(cityId, city) {
   const key = `saferoute_geo_${cityId}_v3`;
-  const cached = getCached(key, GEO_TTL);
+  const cached = await getCached(key, GEO_TTL);
   if (cached) return cached;
   let data;
   if (city.geoURL?.startsWith('police_uk_geo:')) {
@@ -4465,7 +4673,7 @@ async function fetchGeoJSON(cityId, city) {
     data = await res.json();
   }
   if (!data.features?.length) throw new Error('Empty GeoJSON');
-  setCached(key, data);
+  await setCached(key, data);
   return data;
 }
 
@@ -4483,7 +4691,7 @@ function findZoneForPoint(lat, lng, cityZones) {
 async function fetchQoL(cityId, city) {
   const qa  = city.qa311;
   const key = `saferoute_311_${cityId}_v1`;
-  const cached = getCached(key, CACHE_TTL);
+  const cached = await getCached(key, CACHE_TTL);
   if (cached) return cached;
 
   const fromDate = new Date(); fromDate.setDate(fromDate.getDate() - 365);
@@ -4504,14 +4712,14 @@ async function fetchQoL(cityId, city) {
   if (!res.ok) throw new Error(`311 HTTP ${res.status}`);
   const data = await res.json();
   if (!Array.isArray(data) || !data.length) throw new Error('No 311 data returned');
-  setCached(key, data);
+  await setCached(key, data);
   return data;
 }
 
 // ── OSM amenity fetch (Overpass API) ─────────────────────────────────────────
 async function fetchAmenities(cityId, city) {
   const key = `saferoute_osm_${cityId}_v1`;
-  const cached = getCached(key, GEO_TTL);
+  const cached = await getCached(key, GEO_TTL);
   if (cached) return cached;
 
   const [n, w, s, e] = city.bbox;
@@ -4524,7 +4732,7 @@ async function fetchAmenities(cityId, city) {
   if (!res.ok) throw new Error(`Overpass HTTP ${res.status}`);
   const json = await res.json();
   const points = (json.elements || []).map(el => ({ lat: el.lat, lng: el.lon })).filter(p => p.lat && p.lng);
-  setCached(key, points);
+  await setCached(key, points);
   return points;
 }
 
@@ -4754,6 +4962,11 @@ const PLACEHOLDER = `
 function resetPanel() {
   activeZone = null;
   document.getElementById('panel').innerHTML = PLACEHOLDER;
+  if (!routeActive && !tripActive) document.getElementById('time-toggle').style.display = '';
+  document.querySelectorAll('#time-toggle .tt-btn:not(:first-child)').forEach(btn => {
+    btn.disabled = false;
+    btn.title = '';
+  });
 }
 
 function zoneCenterApprox(zone) {
@@ -4884,8 +5097,20 @@ function showZone(zone) {
       ${nearbyHtml(zone)}
     </div>`;
 
-  if (window.innerWidth <= 700) {
-    document.getElementById('sidebar').scrollIntoView({ behavior:'smooth', block:'start' });
+  if (window.innerWidth <= 700) window.setSheetState?.('half');
+
+  const toggle = document.getElementById('time-toggle');
+  if (CITIES[zone.cityId]?.noApi) {
+    toggle.style.display = 'none';
+    if (timeMode !== 'all') setTimeMode('all');
+  } else {
+    toggle.style.display = '';
+    const hasHourly = zone.crimeScoreDay != null;
+    document.querySelectorAll('#time-toggle .tt-btn:not(:first-child)').forEach(btn => {
+      btn.disabled = !hasHourly;
+      btn.title = hasHourly ? '' : 'No hourly data for this city';
+    });
+    if (!hasHourly && timeMode !== 'all') setTimeMode('all');
   }
 }
 
@@ -4941,8 +5166,9 @@ async function loadCityData(cityId) {
   ]);
   if (crimeRes) {
     const scoreMap      = computeScores(crimeRes, city, cityId);
-    const dayMap        = computeScores(crimeRes, city, cityId, h => h >= 6 && h < 21);
-    const nightMap      = computeScores(crimeRes, city, cityId, h => h < 6 || h >= 21);
+    const hasHourlyData = city.dateField !== 'month';
+    const dayMap        = hasHourlyData ? computeScores(crimeRes, city, cityId, h => h >= 6 && h < 21)  : null;
+    const nightMap      = hasHourlyData ? computeScores(crimeRes, city, cityId, h => h < 6 || h >= 21) : null;
     const priorMap      = priorRes ? computeScores(priorRes, city, cityId) : null;
     applyScores(scoreMap, priorMap, cityId, dayMap, nightMap);
     totalIncidents += crimeRes.length;
@@ -4999,7 +5225,7 @@ async function fetchTractGeoJSON(bounds) {
 async function fetchACSForCounty(stateCode, countyCode) {
   const ACS_TTL = 30 * 24 * 60 * 60 * 1000;
   const cacheKey = `saferoute_acs5_${stateCode}_${countyCode}`;
-  const cached = getCached(cacheKey, ACS_TTL);
+  const cached = await getCached(cacheKey, ACS_TTL);
   if (cached) return cached;
   const vars = 'B01003_001E,B19013_001E,B17001_002E,B17001_001E,B23025_005E,B23025_003E,B25002_003E,B25002_001E';
   const res = await fetch(`https://api.census.gov/data/2022/acs/acs5?get=${vars}&for=tract:*&in=state:${stateCode}&in=county:${countyCode}&key=6f40113c1e1bd9bd1784637176039eba443f4e4b`);
@@ -5031,7 +5257,7 @@ async function fetchACSForCounty(stateCode, countyCode) {
       vacancyRate: hu > 0 ? vac / hu : -1,
     };
   });
-  setCached(cacheKey, acsMap);
+  await setCached(cacheKey, acsMap);
   return acsMap;
 }
 
@@ -5170,7 +5396,7 @@ const socrataLoaded = new Set();
 
 async function applySocrataCrimeToTracts(cityKey, config) {
   const cacheKey = `saferoute_socrata_${cityKey}_v1`;
-  let crimes = getCached(cacheKey, 6 * 60 * 60 * 1000);
+  let crimes = await getCached(cacheKey, 6 * 60 * 60 * 1000);
   if (!crimes) {
     try {
       const fromDate = new Date(); fromDate.setDate(fromDate.getDate() - 365);
@@ -5185,7 +5411,7 @@ async function applySocrataCrimeToTracts(cityKey, config) {
       const res = await fetch(url.toString());
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       crimes = await res.json();
-      setCached(cacheKey, crimes);
+      await setCached(cacheKey, crimes);
     } catch(e) { console.warn(`SafeRoute: Socrata ${cityKey} failed:`, e); return; }
   }
   const [n, w, s, e] = config.bbox;
@@ -5473,7 +5699,7 @@ function loadUkCoverage() {
 }
 
 async function _doLoadUkCoverage() {
-  if (map.getZoom() < 10) return;
+  if (map.getZoom() < 12) return;
   const bounds = map.getBounds();
   const center = bounds.getCenter();
   if (!isUkViewport(center.lat, center.lng)) return;
@@ -5640,6 +5866,7 @@ function toggleRouteMode() {
   document.getElementById('route-btn').classList.toggle('active', routeActive);
   document.getElementById('route-panel').classList.toggle('open', routeActive);
   document.getElementById('time-toggle').style.display = routeActive ? 'none' : '';
+  if (routeActive && window.innerWidth <= 700) window.setSheetState?.('half');
   if (!routeActive) {
     routeLayer.clearLayers();
     routeMarkers.clearLayers();
@@ -5662,6 +5889,7 @@ function toggleTripMode() {
   document.getElementById('trip-btn').classList.toggle('active', tripActive);
   document.getElementById('trip-panel').classList.toggle('open', tripActive);
   document.getElementById('time-toggle').style.display = tripActive ? 'none' : '';
+  if (tripActive && window.innerWidth <= 700) window.setSheetState?.('half');
   if (!tripActive) {
     routeLayer.clearLayers();
     routeMarkers.clearLayers();
@@ -6094,6 +6322,84 @@ function applyShareHash() {
 }
 
 applyShareHash();
+if (colorblindMode) applyColorblindMode(true);
+
+// ── Mobile bottom-sheet ───────────────────────────────────────────────────────
+;(function () {
+  let state = 'peek';
+  let dragging = false;
+  let startClientY = 0, startTranslateY = 0;
+  let velY = 0, prevClientY = 0, prevT = 0;
+
+  function el() { return document.getElementById('sidebar'); }
+
+  function currentTranslateY() {
+    const s = getComputedStyle(el()).transform;
+    if (!s || s === 'none') return 0;
+    const m = s.match(/matrix\([^,]+,[^,]+,[^,]+,[^,]+,[^,]+,\s*([^)]+)\)/);
+    return m ? parseFloat(m[1]) : 0;
+  }
+
+  function snapTo(newState, animated) {
+    state = newState;
+    const sidebar = el();
+    sidebar.style.transition = animated !== false
+      ? 'transform .32s cubic-bezier(.4,0,.2,1)' : 'none';
+    if (newState === 'full')      sidebar.style.transform = 'translateY(0)';
+    else if (newState === 'half') sidebar.style.transform = 'translateY(42%)';
+    else                          sidebar.style.transform = 'translateY(calc(100% - 80px))';
+  }
+
+  window.setSheetState = function (s, animated) {
+    if (window.innerWidth <= 700) snapTo(s, animated);
+  };
+
+  function onHandleTouchStart(e) {
+    if (window.innerWidth > 700) return;
+    dragging = true;
+    startClientY = e.touches[0].clientY;
+    startTranslateY = currentTranslateY();
+    velY = 0; prevClientY = startClientY; prevT = Date.now();
+    el().style.transition = 'none';
+  }
+
+  function onTouchMove(e) {
+    if (!dragging || window.innerWidth > 700) return;
+    const cy = e.touches[0].clientY;
+    const now = Date.now();
+    const dt = now - prevT;
+    if (dt > 0) velY = (cy - prevClientY) / dt;
+    prevClientY = cy; prevT = now;
+    const newY = Math.max(0, startTranslateY + (cy - startClientY));
+    el().style.transform = `translateY(${newY}px)`;
+  }
+
+  function onTouchEnd() {
+    if (!dragging || window.innerWidth > 700) return;
+    dragging = false;
+    const dy = prevClientY - startClientY;
+    let next = state;
+    if (velY > 0.6 || dy > 70) {
+      next = state === 'full' ? 'half' : 'peek';
+    } else if (velY < -0.6 || dy < -70) {
+      next = state === 'peek' ? 'half' : 'full';
+    }
+    snapTo(next);
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const handle = document.getElementById('sheet-handle');
+    if (!handle) return;
+    handle.addEventListener('touchstart', onHandleTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('touchend', onTouchEnd);
+    handle.addEventListener('click', function () {
+      if (window.innerWidth > 700) return;
+      if (Math.abs(prevClientY - startClientY) > 10) return;
+      snapTo(state === 'peek' ? 'half' : state === 'half' ? 'full' : 'peek');
+    });
+  });
+})();
 
 // ── PWA: service worker + offline banner ──────────────────────────────────────
 if ('serviceWorker' in navigator) {
