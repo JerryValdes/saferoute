@@ -2123,6 +2123,7 @@ const MID_ULSTER_ZONE_DEFS = {
   'Magherafelt':{ level:'safe', score:4.0, desc:"Prosperous market town in the Sperrins foothills — the commercial hub of mid-Ulster. Close to the Seamus Heaney HomePlace at Bellaghy (a must-visit for lovers of poetry) and the shores of Lough Neagh.", tips:[{icon:'📖',text:'Seamus Heaney HomePlace at nearby Bellaghy — outstanding arts centre dedicated to the Nobel Prize-winning poet; one of the finest literary heritage experiences in Ireland'},{icon:'🌊',text:'Lough Neagh shore is accessible close by — the largest lake in the British Isles; very scenic'},{icon:'⛰️',text:'Springhill House (National Trust, near Moneymore) — a 17th-century plantation house with a beautiful walled garden'},{icon:'✅',text:'Very safe and prosperous market town'}] },
 };
 
+
 // ── City configurations ──────────────────────────────────────────────────────
 const CITIES = {
   'new-orleans': {
@@ -2453,12 +2454,9 @@ const CITIES = {
   'st-louis': {
     label: 'St. Louis, MO', center: [38.6270, -90.1994], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/st-louis.geojson',
-    crimeEndpoint: 'https://services6.arcgis.com/Bd4MACzvEukoZ9mR/arcgis/rest/services/CrimeData/FeatureServer/0/query',
-    apiType: 'arcgis',
-    dateField: 'DateOccur', typeFields: ['Description', 'Offense'],
-    bbox: [38.77, -90.37, 38.52, -90.06], bboxField: null,
-    latField: 'YCoord', lngField: 'XCoord',
-    baseline: 60, dataSource: 'St. Louis PD Open Data', zoneDefs: ST_LOUIS_ZONE_DEFS,
+    noApi: true,
+    bbox: [38.77, -90.37, 38.52, -90.06],
+    dataSource: 'OpenStreetMap (live API unavailable)', zoneDefs: ST_LOUIS_ZONE_DEFS,
   },
   'kansas-city': {
     label: 'Kansas City, MO', center: [39.0997, -94.5786], zoom: 12,
@@ -2590,12 +2588,12 @@ const CITIES = {
   'tampa': {
     label: 'Tampa, FL', center: [27.9506, -82.4572], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/tampa.geojson',
-    crimeEndpoint: 'https://services3.arcgis.com/1lkMJDVCMDlEMxzN/arcgis/rest/services/TPD_Crime_Incidents/FeatureServer/0/query',
+    crimeEndpoint: 'https://services1.arcgis.com/IbNXlmt2RVVRCZ6M/arcgis/rest/services/crimes_public_365days/FeatureServer/0/query',
     apiType: 'arcgis',
-    dateField: 'REPORT_DATE', typeFields: ['OFFENSE_CATEGORY', 'OFFENSE'],
-    bbox: [28.10, -82.65, 27.80, -82.27], bboxField: null,
-    latField: 'LATITUDE', lngField: 'LONGITUDE',
-    baseline: 40, dataSource: 'Tampa PD Open Data', zoneDefs: TAMPA_ZONE_DEFS,
+    noDateFilter: true,
+    dateField: 'reportdate', typeFields: ['nibrsoffense', 'nibrsdesc'],
+    bbox: [28.10, -82.65, 27.80, -82.27],
+    baseline: 40, dataSource: 'Tampa PD (rolling 365 days)', zoneDefs: TAMPA_ZONE_DEFS,
   },
   'fort-lauderdale': {
     label: 'Fort Lauderdale, FL', center: [26.1224, -80.1373], zoom: 13,
@@ -2605,12 +2603,12 @@ const CITIES = {
   'raleigh': {
     label: 'Raleigh, NC', center: [35.7796, -78.6382], zoom: 12,
     geoURL: 'https://raw.githubusercontent.com/blackmad/neighborhoods/master/raleigh.geojson',
-    crimeEndpoint: 'https://services.arcgis.com/VTyQ9soqVukalItT/arcgis/rest/services/Raleigh_Police_Incidents_NIBRS/FeatureServer/0/query',
+    crimeEndpoint: 'https://services.arcgis.com/v400IkDOw1ad7Yad/arcgis/rest/services/Police_Incidents/FeatureServer/0/query',
     apiType: 'arcgis',
     dateField: 'reported_date', typeFields: ['crime_category', 'crime_description'],
-    bbox: [35.95, -78.85, 35.63, -78.45], bboxField: null,
+    bbox: [35.95, -78.85, 35.63, -78.45],
     latField: 'latitude', lngField: 'longitude',
-    baseline: 35, dataSource: 'Raleigh PD Open Data', zoneDefs: RALEIGH_ZONE_DEFS,
+    baseline: 35, dataSource: 'Raleigh PD (ArcGIS)', zoneDefs: RALEIGH_ZONE_DEFS,
   },
   'chapel-hill': {
     label: 'Chapel Hill, NC', center: [35.9132, -79.0558], zoom: 14,
@@ -3348,4 +3346,5 @@ const CITIES = {
     dataSource: 'Isle of Man Constabulary — curated safety data',
     zoneDefs: IOM_ZONE_DEFS,
   },
+
 };
